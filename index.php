@@ -88,25 +88,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form_action'] ?? '') === '
     }
 }
 
-// LTO-like homepage (structure matching provided image)
 $currentPage = basename($_SERVER['PHP_SELF'] ?? 'index.php');
 $publicNavItems = [
     ['label' => 'Home', 'href' => 'index.php', 'active' => $currentPage === 'index.php', 'caret' => false],
     [
-        'label' => 'About LTO',
+        'label' => 'About Us',
         'href' => '#',
         'active' => false,
         'caret' => true,
         'children' => [
-            ['label' => 'News and Updates'],
-            ['label' => 'Mandate and Functions'],
+            ['label' => 'LTO Pila Office'],
             ['label' => 'Employee Services'],
             ['label' => 'Forms and Downloads'],
             ['label' => 'Data Privacy Notice'],
         ],
     ],
-    ['label' => 'Issuances', 'href' => '#', 'active' => false, 'caret' => false],
-    ['label' => 'Transparency Seal', 'href' => '#', 'active' => false, 'caret' => true],
+    ['label' => 'Announcements', 'href' => '#', 'active' => false, 'caret' => false],
+    ['label' => 'Transparency Seal', 'href' => 'transparency-seal.php', 'active' => $currentPage === 'transparency-seal.php', 'caret' => false],
 ];
 $contactLink = ['label' => 'Contact Us', 'href' => '#', 'active' => false, 'caret' => true];
 ?>
@@ -125,7 +123,7 @@ $contactLink = ['label' => 'Contact Us', 'href' => '#', 'active' => false, 'care
 
     <div class="gov-topbar">
         <div class="gov-inner">
-            <div class="gov-left">GOVPH</div>
+            <div class="gov-left">LTO-HRIS</div>
             <nav class="gov-nav">
                 <?php foreach ($publicNavItems as $item): ?>
                     <?php if (!empty($item['children'])): ?>
@@ -490,7 +488,7 @@ $contactLink = ['label' => 'Contact Us', 'href' => '#', 'active' => false, 'care
                     <div class="login-modal-header login-modal-header-plain register-modal-header-plain">
                         <div class="login-modal-header-copy">
                             <div class="login-modal-title-row">
-                                <h2 id="registerModalTitle">Create Account</span></h2>
+                                <h2 id="registerModalTitle">Create <span>Account</span></h2>
                             </div>
                             <p class="login-modal-subtitle">Land Transportation Office<br>Human Resource Information System</p>
                         </div>
@@ -507,8 +505,6 @@ $contactLink = ['label' => 'Contact Us', 'href' => '#', 'active' => false, 'care
                         <?php if ($registerSuccess !== ''): ?>
                             <div class="alert alert-success"><?php echo htmlspecialchars($registerSuccess); ?></div>
                         <?php endif; ?>
-
-                        <div class="login-modal-role-band register-modal-role-band">Create Access Request</div>
 
                         <form class="login-form-modern login-form-modal register-form-modal" method="post" action="index.php">
                         <input type="hidden" name="form_action" value="register_modal">
