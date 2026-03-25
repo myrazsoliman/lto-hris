@@ -128,9 +128,9 @@ body{font-family:Arial,Helvetica,sans-serif;margin:0;color:#111;background:var(-
 .site-header{padding:24px 0 28px;border-bottom:1px solid #eee}
 .header-wrap{max-width:1360px;margin:0 auto;display:flex;align-items:flex-start;justify-content:space-between;gap:clamp(12px,1.5vw,28px);padding-left:0;padding-right:0}
 .brand-group{display:flex;align-items:center;gap:clamp(8px,0.8vw,14px);min-width:0;flex:1 1 auto;padding-left:0}
-.left-logos{display:grid;grid-template-columns:clamp(78px,9vw,var(--gov-left-slot)) auto;align-items:center;column-gap:0;flex-shrink:0;margin-left:clamp(0px,2vw,32px)}
+.left-logos{display:grid;grid-template-columns:clamp(78px,9vw,var(--gov-left-slot)) auto;align-items:center;column-gap:12px;flex-shrink:0;margin-left:clamp(0px,2vw,32px)}
 .left-logos img{height:clamp(58px,7vw,102px)}
-.left-logos img:first-child{justify-self:center}
+.left-logos img:first-child{justify-self:center;height:clamp(72px,8.4vw,118px)}
 .left-logos img:last-child{justify-self:start;margin-left:clamp(-10px,-1vw,-18px)}
 .center-brand{text-align:left;padding-top:0;min-width:0;max-width:min(48vw,760px)}
 .center-brand .govtext{font-size:clamp(11px,1.35vw,18px);color:#2f2f2f;line-height:0.98;font-family:'UnifrakturCook',cursive;font-weight:700;letter-spacing:0;text-transform:none}
@@ -367,6 +367,7 @@ body{font-family:Arial,Helvetica,sans-serif;margin:0;color:#111;background:var(-
 .login-modal .login-input-wrap-modal .login-input-icon svg{display:block;width:20px;height:20px}
 .login-input-shell{position:relative;display:grid;grid-template-columns:20px minmax(0,1fr);align-items:center;column-gap:18px;width:100%;min-height:78px;padding:18px 24px 18px 24px;border-radius:18px;border:1px solid rgba(43,95,165,.22);background:linear-gradient(180deg,#f7fbff,#edf4ff);box-shadow:0 8px 18px rgba(29,56,106,.04);overflow:visible;transition:border-color 180ms ease,box-shadow 180ms ease,transform 180ms ease,background-color 180ms ease}
 .login-input-wrap-modal input{display:block;grid-column:2;width:100%;margin:0;height:auto;min-height:32px;padding:12px 0 2px;border:0;border-radius:0;background:transparent;font-size:18px;line-height:1.35;color:#24344d;box-shadow:none;text-indent:0;appearance:none}
+.login-input-wrap-modal:has(.login-password-toggle) input{padding-right:52px}
 .login-input-wrap-modal input::placeholder{color:transparent}
 .login-floating-label{position:absolute;left:62px;top:50%;transform:translateY(-50%);color:#6c7d93;font-size:18px;font-weight:500;line-height:1;pointer-events:none;transition:top 180ms ease,transform 180ms ease,font-size 180ms ease,color 180ms ease,letter-spacing 180ms ease}
 .login-input-wrap-modal input:focus + .login-floating-label,
