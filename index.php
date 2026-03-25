@@ -385,22 +385,38 @@ $contactLink = ['label' => 'Contact Us', 'href' => '#', 'active' => false, 'care
     <div class="login-modal<?php echo $showLoginModal ? ' is-open' : ''; ?>" id="loginModal" aria-hidden="<?php echo $showLoginModal ? 'false' : 'true'; ?>">
         <div class="login-modal-backdrop" data-close-login-modal></div>
         <div class="login-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="loginModalTitle">
-            <div class="login-card-modern login-card-modal">
-                <div class="login-modal-header">
-                    <div class="login-modal-header-copy">
-                        <h2 id="loginModalTitle">Login</h2>
+            <div class="login-card-modern login-card-modal login-card-modal-split">
+                <div class="login-modal-visual">
+                    <div class="login-modal-visual-overlay"></div>
+                    <div class="login-modal-visual-content">
+                        <img src="assets/img/lto_logo.png" alt="Land Transportation Office seal" class="login-modal-visual-logo">
+                        <h2 class="login-modal-visual-title">LTO - HRIS</h2>
+                        <p class="login-modal-visual-subtitle">Land Transportation Office</p>
+                        <span class="login-modal-visual-kicker">Official Personnel Access Portal</span>
                     </div>
-                    <button class="login-modal-close" type="button" data-close-login-modal aria-label="Close login modal">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
                 </div>
 
-                <div class="login-modal-body">
-                    <?php if ($loginError !== ''): ?>
-                        <div class="alert alert-error"><?php echo htmlspecialchars($loginError); ?></div>
-                    <?php endif; ?>
+                <div class="login-modal-panel">
+                        <div class="login-modal-header login-modal-header-plain">
+                            <div class="login-modal-header-copy">
+                                <div class="login-modal-title-row">
+                                    <h2 id="loginModalTitle">Welcome to <span>LTO HRIS</span></h2>
+                                </div>
+                                <p class="login-modal-subtitle">Land Transportation Office<br>Human Resource Information System</p>
+                            </div>
+                            <button class="login-modal-close" type="button" data-close-login-modal aria-label="Close login modal">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                    </div>
 
-                    <form class="login-form-modern login-form-modal" method="post" action="index.php">
+                    <div class="login-modal-body login-modal-body-plain">
+                        <?php if ($loginError !== ''): ?>
+                            <div class="alert alert-error"><?php echo htmlspecialchars($loginError); ?></div>
+                        <?php endif; ?>
+
+                        <div class="login-modal-role-band">Authorized Personnel</div>
+
+                        <form class="login-form-modern login-form-modal" method="post" action="index.php">
                         <input type="hidden" name="form_action" value="login_modal">
                         <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken); ?>">
 
@@ -441,14 +457,16 @@ $contactLink = ['label' => 'Contact Us', 'href' => '#', 'active' => false, 'care
                             </button>
                         </div>
 
-                        <div class="login-modal-actions-row">
-                            <a href="#" class="login-forgot-link">Forgot password?</a>
-                        </div>
+                            <div class="login-modal-actions-row login-modal-actions-row-split">
+                                <a href="#" class="login-forgot-link">Forgot password?</a>
+                            </div>
 
-                        <button type="submit" class="login-submit-btn login-submit-btn-modal">
-                            <span>Login</span>
-                        </button>
-                    </form>
+                            <button type="submit" class="login-submit-btn login-submit-btn-modal login-submit-btn-modal-split">
+                                <span>Login</span>
+                            </button>
+                        </form>
+
+                    </div>
                 </div>
             </div>
         </div>
