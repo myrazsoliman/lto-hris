@@ -405,25 +405,25 @@ $contactLink = ['label' => 'Contact Us', 'href' => '#', 'active' => false, 'care
                         <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken); ?>">
 
                         <div class="login-input-wrap login-input-wrap-modal">
-                            <span class="login-input-icon" aria-hidden="true">
-                                <svg viewBox="0 0 24 24" fill="none">
-                                    <path d="M12 12c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5Z" fill="currentColor" />
-                                    <path d="M12 14c-4.42 0-8 2.24-8 5v1h16v-1c0-2.76-3.58-5-8-5Z" fill="currentColor" />
-                                </svg>
-                            </span>
                             <div class="login-input-shell">
+                                <span class="login-input-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none">
+                                        <path d="M12 12c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5Z" fill="currentColor" />
+                                        <path d="M12 14c-4.42 0-8 2.24-8 5v1h16v-1c0-2.76-3.58-5-8-5Z" fill="currentColor" />
+                                    </svg>
+                                </span>
                                 <input type="text" id="loginModalUsername" name="username" placeholder=" " value="<?php echo htmlspecialchars($loginUsername); ?>" autocomplete="username" spellcheck="false" maxlength="80" required>
                                 <label class="login-floating-label" for="loginModalUsername">Username</label>
                             </div>
                         </div>
 
                         <div class="login-input-wrap login-input-wrap-modal">
-                            <span class="login-input-icon" aria-hidden="true">
-                                <svg viewBox="0 0 24 24" fill="none">
-                                    <path d="M17 9h-1V7a4 4 0 0 0-8 0v2H7a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2Zm-6 0V7a2 2 0 1 1 4 0v2h-4Z" fill="currentColor" />
-                                </svg>
-                            </span>
                             <div class="login-input-shell">
+                                <span class="login-input-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none">
+                                        <path d="M17 9h-1V7a4 4 0 0 0-8 0v2H7a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2Zm-6 0V7a2 2 0 1 1 4 0v2h-4Z" fill="currentColor" />
+                                    </svg>
+                                </span>
                                 <input type="password" id="loginModalPassword" name="password" placeholder=" " autocomplete="current-password" minlength="12" maxlength="128" required>
                                 <label class="login-floating-label" for="loginModalPassword">Password</label>
                             </div>
@@ -485,26 +485,26 @@ $contactLink = ['label' => 'Contact Us', 'href' => '#', 'active' => false, 'care
                         </div>
 
                         <div class="login-input-wrap login-input-wrap-modal register-input-wrap">
-                            <span class="login-input-icon" aria-hidden="true">
-                                <svg viewBox="0 0 24 24" fill="none">
-                                    <path d="M12 12c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5Z" fill="currentColor" />
-                                    <path d="M12 14c-4.42 0-8 2.24-8 5v1h16v-1c0-2.76-3.58-5-8-5Z" fill="currentColor" />
-                                </svg>
-                            </span>
                             <div class="login-input-shell">
+                                <span class="login-input-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none">
+                                        <path d="M12 12c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5Z" fill="currentColor" />
+                                        <path d="M12 14c-4.42 0-8 2.24-8 5v1h16v-1c0-2.76-3.58-5-8-5Z" fill="currentColor" />
+                                    </svg>
+                                </span>
                                 <input type="text" id="registerModalFullName" name="full_name" placeholder=" " value="<?php echo htmlspecialchars($registerFullName); ?>" autocomplete="name" maxlength="160" required>
                                 <label class="login-floating-label" for="registerModalFullName">Full Name</label>
                             </div>
                         </div>
 
                         <div class="login-input-wrap login-input-wrap-modal register-input-wrap">
-                            <span class="login-input-icon" aria-hidden="true">
-                                <svg viewBox="0 0 24 24" fill="none">
-                                    <path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v11A2.5 2.5 0 0 1 17.5 20h-11A2.5 2.5 0 0 1 4 17.5v-11Z" stroke="currentColor" stroke-width="1.8" />
-                                    <path d="m6 8 6 4 6-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-                                </svg>
-                            </span>
                             <div class="login-input-shell">
+                                <span class="login-input-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none">
+                                        <path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v11A2.5 2.5 0 0 1 17.5 20h-11A2.5 2.5 0 0 1 4 17.5v-11Z" stroke="currentColor" stroke-width="1.8" />
+                                        <path d="m6 8 6 4 6-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                </span>
                                 <input type="email" id="registerModalEmail" name="email" placeholder=" " value="<?php echo htmlspecialchars($registerEmail); ?>" autocomplete="email" maxlength="150" required>
                                 <label class="login-floating-label" for="registerModalEmail">Official Email</label>
                             </div>
@@ -512,25 +512,25 @@ $contactLink = ['label' => 'Contact Us', 'href' => '#', 'active' => false, 'care
 
                         <div class="register-form-grid">
                             <div class="login-input-wrap login-input-wrap-modal register-input-wrap">
-                                <span class="login-input-icon" aria-hidden="true">
-                                    <svg viewBox="0 0 24 24" fill="none">
-                                        <path d="M12 12c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5Z" fill="currentColor" />
-                                        <path d="M12 14c-4.42 0-8 2.24-8 5v1h16v-1c0-2.76-3.58-5-8-5Z" fill="currentColor" />
-                                    </svg>
-                                </span>
                                 <div class="login-input-shell">
+                                    <span class="login-input-icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none">
+                                            <path d="M12 12c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5Z" fill="currentColor" />
+                                            <path d="M12 14c-4.42 0-8 2.24-8 5v1h16v-1c0-2.76-3.58-5-8-5Z" fill="currentColor" />
+                                        </svg>
+                                    </span>
                                     <input type="text" id="registerModalUsername" name="register_username" placeholder=" " value="<?php echo htmlspecialchars($registerUsername); ?>" autocomplete="username" spellcheck="false" minlength="4" maxlength="32" pattern="[A-Za-z0-9._-]{4,32}" required>
                                     <label class="login-floating-label" for="registerModalUsername">Username</label>
                                 </div>
                             </div>
 
                             <div class="login-input-wrap login-input-wrap-modal register-input-wrap">
-                                <span class="login-input-icon" aria-hidden="true">
-                                    <svg viewBox="0 0 24 24" fill="none">
-                                        <path d="M17 9h-1V7a4 4 0 0 0-8 0v2H7a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2Zm-6 0V7a2 2 0 1 1 4 0v2h-4Z" fill="currentColor" />
-                                    </svg>
-                                </span>
                                 <div class="login-input-shell">
+                                    <span class="login-input-icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none">
+                                            <path d="M17 9h-1V7a4 4 0 0 0-8 0v2H7a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2Zm-6 0V7a2 2 0 1 1 4 0v2h-4Z" fill="currentColor" />
+                                        </svg>
+                                    </span>
                                     <input type="password" id="registerModalPassword" name="register_password" placeholder=" " autocomplete="new-password" minlength="12" maxlength="128" required>
                                     <label class="login-floating-label" for="registerModalPassword">Password</label>
                                 </div>
@@ -547,10 +547,6 @@ $contactLink = ['label' => 'Contact Us', 'href' => '#', 'active' => false, 'care
                                     </span>
                                 </button>
                             </div>
-                        </div>
-
-                        <div class="login-modal-actions-row register-modal-actions-row">
-                            <span class="register-modal-note">Account registration requests are subject to verification, evaluation, and approval by the authorized office prior to account activation.</span>
                         </div>
 
                         <button type="submit" class="login-submit-btn login-submit-btn-modal register-submit-btn-modal">

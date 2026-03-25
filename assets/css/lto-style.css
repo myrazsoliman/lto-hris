@@ -362,16 +362,16 @@ body{font-family:Arial,Helvetica,sans-serif;margin:0;color:#111;background:var(-
 .login-card-modal .alert{position:relative;z-index:1;padding:14px 16px;border-radius:14px;border:1px solid transparent;font-size:14px;line-height:1.5}
 .login-card-modal .alert-error{background:#fff1f1;border-color:#efc7c7;color:#8b2e2e}
 .login-card-modal .alert-success{background:#edf8f1;border-color:#cbe8d3;color:#1e6a42}
-.login-input-wrap-modal{position:relative;display:flex;align-items:center}
-.login-modal .login-input-wrap-modal .login-input-icon{position:absolute;left:24px;top:50%;width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;transform:translateY(-50%);color:#2b5fa5;pointer-events:none;z-index:2;background:transparent;box-shadow:none;border:0}
+.login-input-wrap-modal{position:relative;display:block}
+.login-modal .login-input-shell .login-input-icon{position:static;flex:0 0 20px;width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;transform:none;color:#2b5fa5;pointer-events:none;z-index:2;background:transparent;box-shadow:none;border:0}
 .login-modal .login-input-wrap-modal .login-input-icon svg{display:block;width:20px;height:20px}
-.login-input-shell{position:relative;display:flex;align-items:center;width:100%;min-height:78px;padding:18px 56px 18px 62px;border-radius:18px;border:1px solid rgba(43,95,165,.16);background:linear-gradient(180deg,#fff,#f9fbff);box-shadow:0 8px 18px rgba(29,56,106,.04);transition:border-color 180ms ease,box-shadow 180ms ease,transform 180ms ease,background-color 180ms ease}
-.login-input-wrap-modal input{display:block;width:100%;margin-left:0;height:auto;min-height:28px;padding:0;border:0;background:transparent;font-size:18px;line-height:1.35;color:#24344d;box-shadow:none}
+.login-input-shell{position:relative;display:grid;grid-template-columns:20px minmax(0,1fr);align-items:center;column-gap:18px;width:100%;min-height:78px;padding:18px 24px 18px 24px;border-radius:18px;border:1px solid rgba(43,95,165,.22);background:linear-gradient(180deg,#f7fbff,#edf4ff);box-shadow:0 8px 18px rgba(29,56,106,.04);overflow:visible;transition:border-color 180ms ease,box-shadow 180ms ease,transform 180ms ease,background-color 180ms ease}
+.login-input-wrap-modal input{display:block;grid-column:2;width:100%;margin:0;height:auto;min-height:32px;padding:12px 0 2px;border:0;border-radius:0;background:transparent;font-size:18px;line-height:1.35;color:#24344d;box-shadow:none;text-indent:0;appearance:none}
 .login-input-wrap-modal input::placeholder{color:transparent}
 .login-floating-label{position:absolute;left:62px;top:50%;transform:translateY(-50%);color:#6c7d93;font-size:18px;font-weight:500;line-height:1;pointer-events:none;transition:top 180ms ease,transform 180ms ease,font-size 180ms ease,color 180ms ease,letter-spacing 180ms ease}
 .login-input-wrap-modal input:focus + .login-floating-label,
-.login-input-wrap-modal input:not(:placeholder-shown) + .login-floating-label{top:16px;transform:none;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#2b5fa5}
-.login-input-wrap-modal:hover .login-input-shell{border-color:rgba(43,95,165,.28);background:linear-gradient(180deg,#fff,#f5f9ff)}
+.login-input-wrap-modal input:not(:placeholder-shown) + .login-floating-label{top:15px;transform:none;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#2b5fa5}
+.login-input-wrap-modal:hover .login-input-shell{border-color:rgba(43,95,165,.34);background:linear-gradient(180deg,#f2f8ff,#e8f1ff)}
 .login-input-wrap-modal:focus-within .login-input-shell{border-color:#f0a128;box-shadow:0 0 0 4px rgba(240,161,40,.14),0 10px 22px rgba(32,72,154,.08);transform:translateY(-1px)}
 .login-input-wrap-modal input:hover{border-color:#bdd0f6}
 .login-input-wrap-modal input:focus{outline:none;border-color:transparent;box-shadow:none;transform:none}
@@ -396,7 +396,8 @@ body{font-family:Arial,Helvetica,sans-serif;margin:0;color:#111;background:var(-
 .register-modal-body{padding-top:24px}
 .register-form-modal{gap:16px}
 .register-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.register-input-wrap .login-input-shell{min-height:64px}
+.register-input-wrap .login-input-shell{min-height:78px;padding:18px 24px 18px 24px;border-radius:18px}
+.register-input-wrap .login-floating-label{left:62px}
 .register-modal-actions-row{justify-content:flex-start;padding-top:0}
 .register-modal-note{display:inline-flex;align-items:center;padding:8px 12px;border-radius:999px;background:rgba(15,76,129,.08);color:#355275;font-size:12px;font-weight:700;letter-spacing:.02em}
 .register-submit-btn-modal{background:linear-gradient(135deg,#0f4c81,#2b5fa5);box-shadow:0 12px 24px rgba(15,76,129,.18)}
