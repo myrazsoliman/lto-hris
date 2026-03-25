@@ -351,7 +351,7 @@ body{font-family:Arial,Helvetica,sans-serif;margin:0;color:#111;background:var(-
 .login-modal-dialog::-webkit-scrollbar{width:0;height:0}
 .login-modal.is-open .login-modal-dialog{transform:translateY(0) scale(1);opacity:1}
 .login-card-modal{display:block;width:100%;padding:0;border-radius:34px;overflow:hidden;background:linear-gradient(180deg,#ffffff,#f8fbff 70%,#f1f5fb 100%);box-shadow:0 18px 46px rgba(15,35,60,.18);border:1px solid rgba(43,95,165,.16)}
-.login-card-modal-split{position:relative;display:grid;grid-template-columns:.88fr 1.12fr;width:100%;min-height:540px;border-radius:34px;overflow:hidden;background:#fff;box-shadow:0 28px 70px rgba(32,43,78,.18)}
+.login-card-modal-split{position:relative;display:grid;grid-template-columns:.88fr 1.12fr;width:100%;min-height:540px;border-radius:34px;overflow:hidden;background:transparent;border:0;box-shadow:0 28px 70px rgba(32,43,78,.18)}
 .login-card-modal-split::after{display:none}
 .login-card-modal-split::before{display:none}
 .login-modal-visual{position:relative;display:flex;align-items:center;justify-content:center;order:1;padding:28px 30px;background:
@@ -461,16 +461,18 @@ opacity:.9}
 .login-modal-meta-link:hover{text-decoration:underline}
 .login-modal-close{-webkit-appearance:none;appearance:none;position:absolute;top:18px;right:18px;z-index:3;width:42px;height:42px;padding:0;border:0;border-radius:999px;background:rgba(255,255,255,.14);color:#fff;font-size:30px;line-height:1;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:background-color 180ms ease,transform 180ms ease}
 .login-modal-close:hover{background:rgba(240,161,40,.22);transform:rotate(90deg)}
-.register-modal-dialog{width:min(100%,640px)}
-.register-modal-header{background:linear-gradient(135deg,#0f4c81 0%,#2b5fa5 55%,#7aa1d0 100%)}
+.register-modal-dialog{width:min(100%,1080px)}
 .register-card-modal{border-color:rgba(15,76,129,.18)}
-.register-modal-body{padding-top:24px}
+.register-modal-panel > .register-modal-header-plain{width:100%;margin:0}
+.register-modal-panel > .register-modal-body{width:min(calc(100% - 48px),640px);margin:0 auto}
+.register-modal-header{background:linear-gradient(135deg,#0f4c81 0%,#2b5fa5 55%,#7aa1d0 100%)}
+.register-modal-header-plain{background:linear-gradient(135deg,#163f7a 0%,#2b5fa5 55%,#6f95c9 100%)}
+.register-modal-body{padding:14px 48px 30px}
 .register-form-modal{gap:16px}
 .register-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .register-input-wrap .login-input-shell{min-height:78px;padding:18px 24px 18px 24px;border-radius:18px}
 .register-input-wrap .login-floating-label{left:62px}
-.register-modal-actions-row{justify-content:flex-start;padding-top:0}
-.register-modal-note{display:inline-flex;align-items:center;padding:8px 12px;border-radius:999px;background:rgba(15,76,129,.08);color:#355275;font-size:12px;font-weight:700;letter-spacing:.02em}
+.register-modal-role-band{margin:0 0 20px;padding:12px 16px;border:1px solid rgba(178,122,18,.18);border-radius:999px;background:linear-gradient(180deg,#fffaf1,#fff6e6);text-align:center;font-size:12px;font-weight:800;letter-spacing:.28em;text-transform:uppercase;color:#9b6500}
 .register-submit-btn-modal{background:linear-gradient(135deg,#0f4c81,#2b5fa5);box-shadow:0 12px 24px rgba(15,76,129,.18)}
 .register-submit-btn-modal:hover{box-shadow:0 16px 28px rgba(15,76,129,.24)}
 .register-honeypot{position:absolute !important;left:-9999px !important;top:auto !important;width:1px !important;height:1px !important;overflow:hidden !important}

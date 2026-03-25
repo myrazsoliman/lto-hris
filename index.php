@@ -475,26 +475,42 @@ $contactLink = ['label' => 'Contact Us', 'href' => '#', 'active' => false, 'care
     <div class="login-modal register-modal<?php echo $showRegisterModal ? ' is-open' : ''; ?>" id="registerModal" aria-hidden="<?php echo $showRegisterModal ? 'false' : 'true'; ?>">
         <div class="login-modal-backdrop" data-close-register-modal></div>
         <div class="login-modal-dialog register-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="registerModalTitle">
-            <div class="login-card-modern login-card-modal register-card-modal">
-                <div class="login-modal-header register-modal-header">
-                    <div class="login-modal-header-copy">
-                        <h2 id="registerModalTitle">Register</h2>
+            <div class="login-card-modern login-card-modal login-card-modal-split register-card-modal">
+                <div class="login-modal-visual register-modal-visual">
+                    <div class="login-modal-visual-overlay"></div>
+                    <div class="login-modal-visual-content register-modal-visual-content">
+                        <img src="assets/img/lto_logo.png" alt="Land Transportation Office seal" class="login-modal-visual-logo">
+                        <h2 class="login-modal-visual-title">LTO - HRIS</h2>
+                        <p class="login-modal-visual-subtitle">Land Transportation Office</p>
+                        <span class="login-modal-visual-kicker">Official Personnel Access Portal</span>
                     </div>
-                    <button class="login-modal-close" type="button" data-close-register-modal aria-label="Close register modal">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
                 </div>
 
-                <div class="login-modal-body register-modal-body">
-                    <?php if ($registerError !== ''): ?>
-                        <div class="alert alert-error"><?php echo htmlspecialchars($registerError); ?></div>
-                    <?php endif; ?>
+                <div class="login-modal-panel register-modal-panel">
+                    <div class="login-modal-header login-modal-header-plain register-modal-header-plain">
+                        <div class="login-modal-header-copy">
+                            <div class="login-modal-title-row">
+                                <h2 id="registerModalTitle">Create Account</span></h2>
+                            </div>
+                            <p class="login-modal-subtitle">Land Transportation Office<br>Human Resource Information System</p>
+                        </div>
+                        <button class="login-modal-close" type="button" data-close-register-modal aria-label="Close register modal">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
 
-                    <?php if ($registerSuccess !== ''): ?>
-                        <div class="alert alert-success"><?php echo htmlspecialchars($registerSuccess); ?></div>
-                    <?php endif; ?>
+                    <div class="login-modal-body login-modal-body-plain register-modal-body">
+                        <?php if ($registerError !== ''): ?>
+                            <div class="alert alert-error"><?php echo htmlspecialchars($registerError); ?></div>
+                        <?php endif; ?>
 
-                    <form class="login-form-modern login-form-modal register-form-modal" method="post" action="index.php">
+                        <?php if ($registerSuccess !== ''): ?>
+                            <div class="alert alert-success"><?php echo htmlspecialchars($registerSuccess); ?></div>
+                        <?php endif; ?>
+
+                        <div class="login-modal-role-band register-modal-role-band">Create Access Request</div>
+
+                        <form class="login-form-modern login-form-modal register-form-modal" method="post" action="index.php">
                         <input type="hidden" name="form_action" value="register_modal">
                         <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken); ?>">
                         <div class="register-honeypot" aria-hidden="true">
@@ -524,7 +540,7 @@ $contactLink = ['label' => 'Contact Us', 'href' => '#', 'active' => false, 'care
                                     </svg>
                                 </span>
                                 <input type="email" id="registerModalEmail" name="email" placeholder=" " value="<?php echo htmlspecialchars($registerEmail); ?>" autocomplete="email" maxlength="150" required>
-                                <label class="login-floating-label" for="registerModalEmail">Official Email</label>
+                                <label class="login-floating-label" for="registerModalEmail">Email</label>
                             </div>
                         </div>
 
@@ -567,10 +583,11 @@ $contactLink = ['label' => 'Contact Us', 'href' => '#', 'active' => false, 'care
                             </div>
                         </div>
 
-                        <button type="submit" class="login-submit-btn login-submit-btn-modal register-submit-btn-modal">
-                            <span>Register</span>
-                        </button>
-                    </form>
+                            <button type="submit" class="login-submit-btn login-submit-btn-modal login-submit-btn-modal-split register-submit-btn-modal">
+                                <span>Register</span>
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
