@@ -414,7 +414,7 @@ $contactLink = ['label' => 'Contact Us', 'href' => '#', 'active' => false, 'care
                             <div class="alert alert-error"><?php echo htmlspecialchars($loginError); ?></div>
                         <?php endif; ?>
 
-                        <div class="login-modal-role-band">Authorized Personnel</div>
+                        <div class="login-modal-role-band">Authorized Access Only</div>
 
                         <form class="login-form-modern login-form-modal" method="post" action="index.php">
                         <input type="hidden" name="form_action" value="login_modal">
