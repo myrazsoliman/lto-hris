@@ -2,49 +2,69 @@
 require_once 'includes/auth.php';
 
 $loginError = '';
-$loginUsername = '';
-$showLoginModal = isset($_GET['login']);
+$loginEmail = '';
+$showLoginModal = isset($_GET['login']) || isset($_GET['registration_success']);
 $registerError = '';
 $registerSuccess = '';
-$registerFullName = '';
+$registrationSuccess = isset($_GET['registration_success']);
+$registerFirstName = '';
+$registerMiddleName = '';
+$registerLastName = '';
 $registerEmail = '';
-$registerUsername = '';
 $showRegisterModal = isset($_GET['register']);
 $csrfToken = csrf_token();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form_action'] ?? '') === 'login_modal') {
-    $loginUsername = isset($_POST['username']) ? trim($_POST['username']) : '';
+    $loginEmail = isset($_POST['email']) ? trim($_POST['email']) : '';
     $password = isset($_POST['password']) ? (string) $_POST['password'] : '';
 
     if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
         $loginError = 'Your session has expired. Please try again.';
     } elseif (is_rate_limited('login')) {
         $loginError = 'Too many login attempts. Please wait a few minutes before trying again.';
-    } elseif ($loginUsername === '' || $password === '') {
-        $loginError = 'Enter your username and password.';
+    } elseif ($loginEmail === '' || $password === '') {
+        $loginError = 'Enter your email and password.';
     } else {
-        $user = authenticate_user($loginUsername, $password);
+        $user = authenticate_user($loginEmail, $password);
 
         if ($user) {
             clear_failed_attempts('login');
             regenerate_csrf_token();
             login_user($user);
-            header('Location: index.php');
+            
+            // Redirect to appropriate dashboard based on role
+            $roles = $user['roles'] ?? [];
+            if (in_array('superadmin', $roles)) {
+                header('Location: superadmin-dashboard.php');
+            } elseif (in_array('admin', $roles) || in_array('hr_officer', $roles)) {
+                header('Location: admin-dashboard.php');
+            } else {
+                header('Location: employee-dashboard.php');
+            }
             exit;
         }
 
         register_failed_attempt('login');
-        $loginError = 'Invalid credentials or unauthorized account.';
+        
+        // Check if the email exists to provide more specific error messages
+        $existingUser = fetch_user_record($loginEmail);
+        if ($existingUser) {
+            $loginError = 'The password you entered is incorrect. Please try again.';
+        } else {
+            $loginError = 'No account found with this email address. Please check your email or register for a new account.';
+        }
     }
 
     $showLoginModal = true;
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form_action'] ?? '') === 'register_modal') {
-    $registerFullName = isset($_POST['full_name']) ? trim($_POST['full_name']) : '';
+    $registerFirstName = isset($_POST['first_name']) ? trim($_POST['first_name']) : '';
+    $registerMiddleName = isset($_POST['middle_name']) ? trim($_POST['middle_name']) : '';
+    $registerLastName = isset($_POST['last_name']) ? trim($_POST['last_name']) : '';
     $registerEmail = isset($_POST['email']) ? trim($_POST['email']) : '';
-    $registerUsername = isset($_POST['register_username']) ? trim($_POST['register_username']) : '';
     $password = isset($_POST['register_password']) ? (string) $_POST['register_password'] : '';
+    $confirmPassword = isset($_POST['register_confirm_password']) ? (string) $_POST['register_confirm_password'] : '';
     $registerHoneypot = isset($_POST['website']) ? trim($_POST['website']) : '';
 
     if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
@@ -53,27 +73,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form_action'] ?? '') === '
         $registerError = 'Unable to submit registration request.';
     } elseif (is_rate_limited('register')) {
         $registerError = 'Too many registration attempts. Please wait a few minutes before trying again.';
-    } elseif ($registerFullName === '' || $registerEmail === '' || $registerUsername === '' || $password === '') {
-        $registerError = 'Please complete all registration fields.';
+    } elseif ($registerFirstName === '' || $registerLastName === '' || $registerEmail === '' || $password === '' || $confirmPassword === '') {
+        $registerError = 'Please complete all required registration fields.';
     } elseif (!filter_var($registerEmail, FILTER_VALIDATE_EMAIL)) {
         $registerError = 'Please enter a valid email address.';
-    } elseif (!preg_match('/^[A-Za-z0-9._-]{4,32}$/', $registerUsername)) {
-        $registerError = 'Username must be 4 to 32 characters and use only letters, numbers, dots, underscores, or hyphens.';
+    } elseif ($password !== $confirmPassword) {
+        $registerError = 'Password and confirm password do not match.';
     } else {
-        $policyErrors = password_policy_errors($password, $registerUsername, $registerEmail);
+        $policyErrors = password_policy_errors($password, '', $registerEmail);
 
         if ($policyErrors) {
             $registerError = $policyErrors[0];
-        } elseif (fetch_user_record($registerEmail) || account_request_exists($registerEmail, $registerUsername)) {
-            $registerError = 'An account or pending request already exists for this email or username.';
+        } elseif (user_exists($registerEmail)) {
+            $registerError = 'An account with this email already exists.';
         } else {
-            create_account_request($registerFullName, $registerEmail, $registerUsername, $password);
-            clear_failed_attempts('register');
-            regenerate_csrf_token();
-            $registerSuccess = 'Registration request submitted for administrator review.';
-            $registerFullName = '';
-            $registerEmail = '';
-            $registerUsername = '';
+            // Create user directly
+            $userId = create_user_directly($registerFirstName, $registerMiddleName, $registerLastName, $registerEmail, $password);
+            
+            if ($userId) {
+                clear_failed_attempts('register');
+                regenerate_csrf_token();
+                
+                // Redirect to login with success message
+                header('Location: index.php?login=1&registration_success=1');
+                exit;
+            } else {
+                $registerError = 'Registration failed. Please try again.';
+            }
         }
     }
 
@@ -412,9 +438,15 @@ $contactLink = ['label' => 'Contact Us', 'href' => '#', 'active' => false, 'care
                             <div class="alert alert-error"><?php echo htmlspecialchars($loginError); ?></div>
                         <?php endif; ?>
 
+                        <?php if ($registrationSuccess): ?>
+                            <div class="alert alert-success">
+                                Registration successful! You can now login with your email and password.
+                            </div>
+                        <?php endif; ?>
+
                         <div class="login-modal-role-band">Authorized Access Only</div>
 
-                        <form class="login-form-modern login-form-modal" method="post" action="index.php">
+                        <form class="login-form-modern login-form-modal" method="post" action="index.php" novalidate>
                         <input type="hidden" name="form_action" value="login_modal">
                         <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken); ?>">
 
@@ -426,8 +458,8 @@ $contactLink = ['label' => 'Contact Us', 'href' => '#', 'active' => false, 'care
                                         <path d="M12 14c-4.42 0-8 2.24-8 5v1h16v-1c0-2.76-3.58-5-8-5Z" fill="currentColor" />
                                     </svg>
                                 </span>
-                                <input type="text" id="loginModalUsername" name="username" placeholder=" " value="<?php echo htmlspecialchars($loginUsername); ?>" autocomplete="username" spellcheck="false" maxlength="80" required>
-                                <label class="login-floating-label" for="loginModalUsername">Username</label>
+                                <input type="email" id="loginModalEmail" name="email" placeholder=" " value="<?php echo htmlspecialchars($loginEmail ?? ''); ?>" autocomplete="email" spellcheck="false" maxlength="150" required>
+                                <label class="login-floating-label" for="loginModalEmail">Email</label>
                             </div>
                         </div>
 
@@ -438,7 +470,7 @@ $contactLink = ['label' => 'Contact Us', 'href' => '#', 'active' => false, 'care
                                         <path d="M17 9h-1V7a4 4 0 0 0-8 0v2H7a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2Zm-6 0V7a2 2 0 1 1 4 0v2h-4Z" fill="currentColor" />
                                     </svg>
                                 </span>
-                                <input type="password" id="loginModalPassword" name="password" placeholder=" " autocomplete="current-password" minlength="12" maxlength="128" required>
+                                <input type="password" id="loginModalPassword" name="password" placeholder=" " autocomplete="current-password" maxlength="128" required>
                                 <label class="login-floating-label" for="loginModalPassword">Password</label>
                             </div>
                             <button type="button" class="login-password-toggle" id="loginPasswordToggle" aria-label="Show password" aria-pressed="false">
@@ -522,8 +554,34 @@ $contactLink = ['label' => 'Contact Us', 'href' => '#', 'active' => false, 'care
                                         <path d="M12 14c-4.42 0-8 2.24-8 5v1h16v-1c0-2.76-3.58-5-8-5Z" fill="currentColor" />
                                     </svg>
                                 </span>
-                                <input type="text" id="registerModalFullName" name="full_name" placeholder=" " value="<?php echo htmlspecialchars($registerFullName); ?>" autocomplete="name" maxlength="160" required>
-                                <label class="login-floating-label" for="registerModalFullName">Full Name</label>
+                                <input type="text" id="registerModalFirstName" name="first_name" placeholder=" " value="<?php echo htmlspecialchars($registerFirstName ?? ''); ?>" autocomplete="given-name" maxlength="80" required>
+                                <label class="login-floating-label" for="registerModalFirstName">First Name</label>
+                            </div>
+                        </div>
+
+                        <div class="login-input-wrap login-input-wrap-modal register-input-wrap">
+                            <div class="login-input-shell">
+                                <span class="login-input-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none">
+                                        <path d="M12 12c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5Z" fill="currentColor" />
+                                        <path d="M12 14c-4.42 0-8 2.24-8 5v1h16v-1c0-2.76-3.58-5-8-5Z" fill="currentColor" />
+                                    </svg>
+                                </span>
+                                <input type="text" id="registerModalMiddleName" name="middle_name" placeholder=" " value="<?php echo htmlspecialchars($registerMiddleName ?? ''); ?>" autocomplete="additional-name" maxlength="80">
+                                <label class="login-floating-label" for="registerModalMiddleName">Middle Name</label>
+                            </div>
+                        </div>
+
+                        <div class="login-input-wrap login-input-wrap-modal register-input-wrap">
+                            <div class="login-input-shell">
+                                <span class="login-input-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none">
+                                        <path d="M12 12c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5Z" fill="currentColor" />
+                                        <path d="M12 14c-4.42 0-8 2.24-8 5v1h16v-1c0-2.76-3.58-5-8-5Z" fill="currentColor" />
+                                    </svg>
+                                </span>
+                                <input type="text" id="registerModalLastName" name="last_name" placeholder=" " value="<?php echo htmlspecialchars($registerLastName ?? ''); ?>" autocomplete="family-name" maxlength="80" required>
+                                <label class="login-floating-label" for="registerModalLastName">Last Name</label>
                             </div>
                         </div>
 
@@ -540,43 +598,79 @@ $contactLink = ['label' => 'Contact Us', 'href' => '#', 'active' => false, 'care
                             </div>
                         </div>
 
-                        <div class="register-form-grid">
-                            <div class="login-input-wrap login-input-wrap-modal register-input-wrap">
-                                <div class="login-input-shell">
-                                    <span class="login-input-icon" aria-hidden="true">
-                                        <svg viewBox="0 0 24 24" fill="none">
-                                            <path d="M12 12c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5Z" fill="currentColor" />
-                                            <path d="M12 14c-4.42 0-8 2.24-8 5v1h16v-1c0-2.76-3.58-5-8-5Z" fill="currentColor" />
-                                        </svg>
-                                    </span>
-                                    <input type="text" id="registerModalUsername" name="register_username" placeholder=" " value="<?php echo htmlspecialchars($registerUsername); ?>" autocomplete="username" spellcheck="false" minlength="4" maxlength="32" pattern="[A-Za-z0-9._-]{4,32}" required>
-                                    <label class="login-floating-label" for="registerModalUsername">Username</label>
-                                </div>
-                            </div>
 
-                            <div class="login-input-wrap login-input-wrap-modal register-input-wrap">
-                                <div class="login-input-shell">
-                                    <span class="login-input-icon" aria-hidden="true">
-                                        <svg viewBox="0 0 24 24" fill="none">
-                                            <path d="M17 9h-1V7a4 4 0 0 0-8 0v2H7a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2Zm-6 0V7a2 2 0 1 1 4 0v2h-4Z" fill="currentColor" />
-                                        </svg>
-                                    </span>
-                                    <input type="password" id="registerModalPassword" name="register_password" placeholder=" " autocomplete="new-password" minlength="12" maxlength="128" required>
-                                    <label class="login-floating-label" for="registerModalPassword">Password</label>
-                                </div>
-                                <button type="button" class="login-password-toggle" id="registerPasswordToggle" aria-label="Show password" aria-pressed="false">
-                                    <span class="login-password-icon login-password-icon-show" aria-hidden="true">
-                                        <svg viewBox="0 0 24 24" fill="none">
-                                            <path d="M12 5C6.5 5 2.1 8.6 1 12c1.1 3.4 5.5 7 11 7s9.9-3.6 11-7c-1.1-3.4-5.5-7-11-7Zm0 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8Z" fill="currentColor" />
-                                        </svg>
-                                    </span>
-                                    <span class="login-password-icon login-password-icon-hide" aria-hidden="true">
-                                        <svg viewBox="0 0 24 24" fill="none">
-                                            <path d="M3 4.3 19.7 21l1.4-1.4L4.4 2.9 3 4.3Zm9 3.7c5.5 0 9.9 3.6 11 7-.4 1.3-1.4 2.7-2.7 4l-1.4-1.4c.8-.8 1.4-1.7 1.8-2.6-1.1-2.4-4.4-5-8.7-5-.9 0-1.7.1-2.5.3L8 8.9c1.2-.6 2.6-.9 4-.9Zm0 3a4 4 0 0 1 4 4c0 .7-.2 1.4-.5 2l-5.5-5.5c.6-.3 1.3-.5 2-.5Zm-9 4c.9 2.7 4.1 5.6 8.5 6.1l-1.9-1.9c-2.8-.6-4.9-2.4-5.9-4.2.4-.9 1.1-1.8 2-2.6L4.2 11C3.6 11.6 3.2 12.3 3 13Z" fill="currentColor" />
-                                        </svg>
-                                    </span>
-                                </button>
+                        <div class="login-input-wrap login-input-wrap-modal register-input-wrap">
+                            <div class="login-input-shell">
+                                <span class="login-input-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none">
+                                        <path d="M17 9h-1V7a4 4 0 0 0-8 0v2H7a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2Zm-6 0V7a2 2 0 1 1 4 0v2h-4Z" fill="currentColor" />
+                                    </svg>
+                                </span>
+                                <input type="password" id="registerModalPassword" name="register_password" placeholder=" " autocomplete="new-password" minlength="8" maxlength="128" required>
+                                <label class="login-floating-label" for="registerModalPassword">Password</label>
                             </div>
+                            <button type="button" class="login-password-toggle" id="registerPasswordToggle" aria-label="Show password" aria-pressed="false">
+                                <span class="login-password-icon login-password-icon-show" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none">
+                                        <path d="M12 5C6.5 5 2.1 8.6 1 12c1.1 3.4 5.5 7 11 7s9.9-3.6 11-7c-1.1-3.4-5.5-7-11-7Zm0 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8Z" fill="currentColor" />
+                                    </svg>
+                                </span>
+                                <span class="login-password-icon login-password-icon-hide" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none">
+                                        <path d="M3 4.3 19.7 21l1.4-1.4L4.4 2.9 3 4.3Zm9 3.7c5.5 0 9.9 3.6 11 7-.4 1.3-1.4 2.7-2.7 4l-1.4-1.4c.8-.8 1.4-1.7 1.8-2.6-1.1-2.4-4.4-5-8.7-5-.9 0-1.7.1-2.5.3L8 8.9c1.2-.6 2.6-.9 4-.9Zm0 3a4 4 0 0 1 4 4c0 .7-.2 1.4-.5 2l-5.5-5.5c.6-.3 1.3-.5 2-.5Zm-9 4c.9 2.7 4.1 5.6 8.5 6.1l-1.9-1.9c-2.8-.6-4.9-2.4-5.9-4.2.4-.9 1.1-1.8 2-2.6L4.2 11C3.6 11.6 3.2 12.3 3 13Z" fill="currentColor" />
+                                    </svg>
+                                </span>
+                            </button>
+                        </div>
+
+                        <div class="password-validation-indicator" id="passwordValidationIndicator">
+                            <div class="password-validation-title">Password must contain:</div>
+                            <div class="password-validation-list">
+                                <div class="password-validation-item" data-validation="lowercase">
+                                    <span class="validation-icon validation-icon-invalid">✕</span>
+                                    <span class="validation-icon validation-icon-valid">✓</span>
+                                    <span class="validation-text">A lowercase letter</span>
+                                </div>
+                                <div class="password-validation-item" data-validation="uppercase">
+                                    <span class="validation-icon validation-icon-invalid">✕</span>
+                                    <span class="validation-icon validation-icon-valid">✓</span>
+                                    <span class="validation-text">A capital (uppercase) letter</span>
+                                </div>
+                                <div class="password-validation-item" data-validation="number">
+                                    <span class="validation-icon validation-icon-invalid">✕</span>
+                                    <span class="validation-icon validation-icon-valid">✓</span>
+                                    <span class="validation-text">A number</span>
+                                </div>
+                                <div class="password-validation-item" data-validation="length">
+                                    <span class="validation-icon validation-icon-invalid">✕</span>
+                                    <span class="validation-icon validation-icon-valid">✓</span>
+                                    <span class="validation-text">Minimum 8 characters</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="login-input-wrap login-input-wrap-modal register-input-wrap">
+                            <div class="login-input-shell">
+                                <span class="login-input-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none">
+                                        <path d="M17 9h-1V7a4 4 0 0 0-8 0v2H7a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2Zm-6 0V7a2 2 0 1 1 4 0v2h-4Z" fill="currentColor" />
+                                    </svg>
+                                </span>
+                                <input type="password" id="registerModalConfirmPassword" name="register_confirm_password" placeholder=" " autocomplete="new-password" minlength="8" maxlength="128" required>
+                                <label class="login-floating-label" for="registerModalConfirmPassword">Confirm Password</label>
+                            </div>
+                            <button type="button" class="login-password-toggle" id="registerConfirmPasswordToggle" aria-label="Show password" aria-pressed="false">
+                                <span class="login-password-icon login-password-icon-show" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none">
+                                        <path d="M12 5C6.5 5 2.1 8.6 1 12c1.1 3.4 5.5 7 11 7s9.9-3.6 11-7c-1.1-3.4-5.5-7-11-7Zm0 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8Z" fill="currentColor" />
+                                    </svg>
+                                </span>
+                                <span class="login-password-icon login-password-icon-hide" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none">
+                                        <path d="M3 4.3 19.7 21l1.4-1.4L4.4 2.9 3 4.3Zm9 3.7c5.5 0 9.9 3.6 11 7-.4 1.3-1.4 2.7-2.7 4l-1.4-1.4c.8-.8 1.4-1.7 1.8-2.6-1.1-2.4-4.4-5-8.7-5-.9 0-1.7.1-2.5.3L8 8.9c1.2-.6 2.6-.9 4-.9Zm0 3a4 4 0 0 1 4 4c0 .7-.2 1.4-.5 2l-5.5-5.5c.6-.3 1.3-.5 2-.5Zm-9 4c.9 2.7 4.1 5.6 8.5 6.1l-1.9-1.9c-2.8-.6-4.9-2.4-5.9-4.2.4-.9 1.1-1.8 2-2.6L4.2 11C3.6 11.6 3.2 12.3 3 13Z" fill="currentColor" />
+                                    </svg>
+                                </span>
+                            </button>
                         </div>
 
                             <button type="submit" class="login-submit-btn login-submit-btn-modal login-submit-btn-modal-split register-submit-btn-modal">
@@ -724,6 +818,13 @@ $contactLink = ['label' => 'Contact Us', 'href' => '#', 'active' => false, 'care
                     closeSelector: '[data-close-register-modal]',
                     passwordFieldId: '#registerModalPassword',
                     passwordToggleId: '#registerPasswordToggle'
+                },
+                {
+                    modal: document.getElementById('registerModal'),
+                    triggerSelector: '.js-register-trigger',
+                    closeSelector: '[data-close-register-modal]',
+                    passwordFieldId: '#registerModalConfirmPassword',
+                    passwordToggleId: '#registerConfirmPasswordToggle'
                 }
             ].filter((config) => config.modal);
 
@@ -972,6 +1073,109 @@ $contactLink = ['label' => 'Contact Us', 'href' => '#', 'active' => false, 'care
 
             update();
             start();
+        }());
+
+        (function() {
+            // Password Validation Functionality
+            const passwordField = document.getElementById('registerModalPassword');
+            const validationIndicator = document.getElementById('passwordValidationIndicator');
+            
+            if (!passwordField || !validationIndicator) return;
+
+            function validatePassword(password) {
+                const validations = {
+                    lowercase: /[a-z]/.test(password),
+                    uppercase: /[A-Z]/.test(password),
+                    number: /\d/.test(password),
+                    length: password.length >= 8
+                };
+
+                return validations;
+            }
+
+            function updateValidationIndicator(validations) {
+                Object.keys(validations).forEach(key => {
+                    const item = validationIndicator.querySelector(`[data-validation="${key}"]`);
+                    if (item) {
+                        if (validations[key]) {
+                            item.classList.add('is-valid');
+                        } else {
+                            item.classList.remove('is-valid');
+                        }
+                    }
+                });
+            }
+
+            function checkPasswordStrength() {
+                const password = passwordField.value;
+                const validations = validatePassword(password);
+                updateValidationIndicator(validations);
+            }
+
+            // Add event listeners
+            passwordField.addEventListener('input', checkPasswordStrength);
+            passwordField.addEventListener('focus', checkPasswordStrength);
+            
+            // Initial check
+            checkPasswordStrength();
+        }());
+
+        (function() {
+            // Login Form Custom Validation
+            const loginForm = document.querySelector('form[action="index.php"][novalidate]');
+            
+            if (!loginForm) return;
+
+            loginForm.addEventListener('submit', function(e) {
+                const emailField = document.getElementById('loginModalEmail');
+                const passwordField = document.getElementById('loginModalPassword');
+                
+                // Clear any previous custom validation messages
+                const existingAlert = loginForm.querySelector('.alert-error');
+                if (existingAlert) {
+                    existingAlert.remove();
+                }
+
+                // Custom validation
+                let isValid = true;
+                let errorMessage = '';
+
+                if (!emailField.value.trim()) {
+                    errorMessage = 'Please enter your email address.';
+                    isValid = false;
+                } else if (!emailField.validity.valid) {
+                    errorMessage = 'Please enter a valid email address.';
+                    isValid = false;
+                } else if (!passwordField.value.trim()) {
+                    errorMessage = 'Please enter your password.';
+                    isValid = false;
+                } else if (passwordField.value.length < 8) {
+                    errorMessage = 'Password must be at least 8 characters long.';
+                    isValid = false;
+                }
+
+                if (!isValid) {
+                    e.preventDefault();
+                    
+                    // Create and show professional error message
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = 'alert alert-error';
+                    errorDiv.textContent = errorMessage;
+                    
+                    // Insert error message at the top of the form
+                    const formBody = loginForm.querySelector('.login-modal-body');
+                    if (formBody) {
+                        formBody.insertBefore(errorDiv, formBody.firstChild);
+                    }
+                    
+                    // Focus on the first invalid field
+                    if (!emailField.value.trim() || !emailField.validity.valid) {
+                        emailField.focus();
+                    } else {
+                        passwordField.focus();
+                    }
+                }
+            });
         }());
     </script>
 

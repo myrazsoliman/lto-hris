@@ -88,6 +88,20 @@ CREATE TABLE IF NOT EXISTS `saln_submissions` (
   FOREIGN KEY (`employee_id`) REFERENCES employees(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- Form Templates (manage dynamic form templates for SALN and CSC)
+CREATE TABLE IF NOT EXISTS `form_templates` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `form_type` ENUM('saln', 'csc') NOT NULL,
+  `template_name` VARCHAR(255) NOT NULL,
+  `file_path` VARCHAR(255) NOT NULL,
+  `version` VARCHAR(50) NOT NULL,
+  `is_active` BOOLEAN DEFAULT TRUE,
+  `uploaded_by` INT NOT NULL,
+  `uploaded_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (`uploaded_by`) REFERENCES users(id) ON DELETE CASCADE,
+  INDEX `idx_form_type_active` (`form_type`, `is_active`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 -- Simple audit table
 CREATE TABLE IF NOT EXISTS `audit_logs` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
@@ -99,5 +113,7 @@ CREATE TABLE IF NOT EXISTS `audit_logs` (
 
 -- Seed basic roles
 INSERT IGNORE INTO `roles` (`name`, `description`) VALUES
+('superadmin', 'Super administrator with full system access'),
 ('admin', 'System administrator'),
-('hr_officer', 'HR officer with personnel management permissions');
+('hr_officer', 'HR officer with personnel management permissions'),
+('employee', 'Regular employee with self-service access');

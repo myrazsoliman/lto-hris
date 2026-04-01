@@ -2,6 +2,13 @@
 require 'includes/header.php';
 require_login();
 
+// Redirect superadmin to account management page
+$user = current_user();
+if (has_role('superadmin')) {
+    header('Location: account.php');
+    exit;
+}
+
 $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 $employee = null;
 if ($id) {
@@ -10,25 +17,45 @@ if ($id) {
     $employee = $stmt->fetch();
 }
 
+$error = '';
+$success = '';
+
+// Handle success messages from redirect
+if (isset($_GET['success']) && $_GET['success'] === 'updated') {
+    $success = 'Employee information updated successfully!';
+} elseif (isset($_GET['success']) && $_GET['success'] === 'created') {
+    $success = 'Employee created successfully!';
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Only HR or admin may create or update employee records
     require_roles(['admin', 'hr_officer']);
-    $employee_number = $_POST['employee_number'] ?? null;
-    $first_name = $_POST['first_name'] ?? null;
-    $last_name = $_POST['last_name'] ?? null;
-    $department = $_POST['department'] ?? null;
-    $position = $_POST['position'] ?? null;
-    $status = $_POST['status'] ?? 'Active';
-
-    if ($id) {
-        db()->prepare('UPDATE employees SET employee_number = ?, first_name = ?, last_name = ?, department = ?, position = ?, status = ? WHERE id = ?')
-            ->execute([$employee_number, $first_name, $last_name, $department, $position, $status, $id]);
+    
+    // Verify CSRF token
+    if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
+        $error = 'Security token expired. Please try again.';
     } else {
-        db()->prepare('INSERT INTO employees (employee_number, first_name, last_name, department, position, status) VALUES (?, ?, ?, ?, ?, ?)')
-            ->execute([$employee_number, $first_name, $last_name, $department, $position, $status]);
+        $employee_number = $_POST['employee_number'] ?? null;
+        $first_name = $_POST['first_name'] ?? null;
+        $last_name = $_POST['last_name'] ?? null;
+        $department = $_POST['department'] ?? null;
+        $position = $_POST['position'] ?? null;
+        $status = $_POST['status'] ?? 'Active';
+
+        if ($id) {
+            db()->prepare('UPDATE employees SET employee_number = ?, first_name = ?, last_name = ?, department = ?, position = ?, status = ? WHERE id = ?')
+                ->execute([$employee_number, $first_name, $last_name, $department, $position, $status, $id]);
+            $successParam = 'updated';
+        } else {
+            db()->prepare('INSERT INTO employees (employee_number, first_name, last_name, department, position, status) VALUES (?, ?, ?, ?, ?, ?)')
+                ->execute([$employee_number, $first_name, $last_name, $department, $position, $status]);
+            $successParam = 'created';
+        }
+        
+        // Redirect to prevent form resubmission
+        header('Location: employees.php?success=' . $successParam);
+        exit;
     }
-    header('Location: employees.php');
-    exit;
 }
 ?>
 
@@ -36,6 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="card">
         <h2>Employee Profile</h2>
         <form class="form" method="post">
+            <input type="hidden" name="csrf_token" value="<?= csrf_token() ?>">
             <label>Employee Number
                 <input type="text" name="employee_number" value="<?= htmlspecialchars($employee['employee_number'] ?? '') ?>">
             </label>

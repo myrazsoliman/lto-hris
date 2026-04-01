@@ -83,7 +83,7 @@ function is_rate_limited($bucket)
     return $state['locked_until'] > time();
 }
 
-function register_failed_attempt($bucket, $lockSeconds = 300, $maxAttempts = 5)
+function register_failed_attempt($bucket, $lockSeconds = 180, $maxAttempts = 8)
 {
     $state = session_attempt_bucket($bucket);
     $state['count']++;
@@ -120,12 +120,6 @@ function fetch_user_record($identifier)
 
     $params = [$identifier];
     $sql = 'SELECT id, email, password, first_name, last_name, created_at FROM users WHERE LOWER(email) = ?';
-
-    if (auth_table_has_column('users', 'username')) {
-        $sql = 'SELECT id, email, username, password, first_name, last_name, created_at FROM users
-                WHERE LOWER(email) = ? OR LOWER(username) = ?';
-        $params[] = $identifier;
-    }
 
     $stmt = db()->prepare($sql . ' LIMIT 1');
     $stmt->execute($params);
@@ -167,8 +161,8 @@ function login_user($user)
         $user = [
             'id' => null,
             'email' => null,
-            'username' => (string) $user,
             'first_name' => (string) $user,
+            'middle_name' => '',
             'last_name' => '',
             'roles' => ['hr_officer'],
         ];
@@ -178,13 +172,12 @@ function login_user($user)
 
     $displayName = trim(($user['first_name'] ?? '') . ' ' . ($user['last_name'] ?? ''));
     if ($displayName === '') {
-        $displayName = $user['username'] ?? $user['email'] ?? 'User';
+        $displayName = $user['email'] ?? 'User';
     }
 
     $_SESSION['user'] = [
         'id' => $user['id'] ?? null,
         'email' => $user['email'] ?? null,
-        'username' => $user['username'] ?? $user['email'] ?? null,
         'display_name' => $displayName,
         'roles' => $user['roles'] ?? [],
     ];
@@ -250,31 +243,27 @@ function password_policy_errors($password, $identifier = '', $email = '')
     $password = (string) $password;
     $errors = [];
 
-    if (strlen($password) < 12) {
-        $errors[] = 'Password must be at least 12 characters.';
-    }
-    if (!preg_match('/[A-Z]/', $password)) {
-        $errors[] = 'Password must include at least one uppercase letter.';
+    if (strlen($password) < 8) {
+        $errors[] = 'Password must be at least 8 characters.';
     }
     if (!preg_match('/[a-z]/', $password)) {
         $errors[] = 'Password must include at least one lowercase letter.';
     }
+    if (!preg_match('/[A-Z]/', $password)) {
+        $errors[] = 'Password must include at least one uppercase letter.';
+    }
     if (!preg_match('/\d/', $password)) {
         $errors[] = 'Password must include at least one number.';
-    }
-    if (!preg_match('/[^A-Za-z0-9]/', $password)) {
-        $errors[] = 'Password must include at least one special character.';
     }
 
     $lowerPassword = strtolower($password);
     $samples = array_filter([
-        strtolower((string) $identifier),
         strtolower((string) $email),
     ]);
 
     foreach ($samples as $sample) {
         if ($sample !== '' && strpos($lowerPassword, $sample) !== false) {
-            $errors[] = 'Password must not contain your username or email.';
+            $errors[] = 'Password must not contain your email.';
             break;
         }
     }
@@ -289,7 +278,7 @@ function ensure_account_requests_table()
             id INT AUTO_INCREMENT PRIMARY KEY,
             full_name VARCHAR(160) NOT NULL,
             email VARCHAR(150) NOT NULL UNIQUE,
-            requested_username VARCHAR(80) NOT NULL UNIQUE,
+            requested_username VARCHAR(80) NULL,
             password_hash VARCHAR(255) NOT NULL,
             status VARCHAR(40) NOT NULL DEFAULT "pending_review",
             submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -297,23 +286,22 @@ function ensure_account_requests_table()
     );
 }
 
-function account_request_exists($email, $username)
+function account_request_exists($email, $username = '')
 {
     ensure_account_requests_table();
 
     $stmt = db()->prepare(
         'SELECT COUNT(*) FROM account_requests
-         WHERE LOWER(email) = ? OR LOWER(requested_username) = ?'
+         WHERE LOWER(email) = ?'
     );
     $stmt->execute([
         normalize_identifier($email),
-        normalize_identifier($username),
     ]);
 
     return (int) $stmt->fetchColumn() > 0;
 }
 
-function create_account_request($fullName, $email, $username, $password)
+function create_account_request($fullName, $email, $username = '', $password)
 {
     ensure_account_requests_table();
 
@@ -325,7 +313,57 @@ function create_account_request($fullName, $email, $username, $password)
     $stmt->execute([
         trim($fullName),
         normalize_identifier($email),
-        trim($username),
+        $username ?: null,
         password_hash($password, PASSWORD_DEFAULT),
     ]);
+}
+
+function ensure_employee_role_exists()
+{
+    $stmt = db()->prepare('SELECT id FROM roles WHERE name = ? LIMIT 1');
+    $stmt->execute(['employee']);
+    $role = $stmt->fetch();
+    
+    if (!$role) {
+        // Insert employee role if it doesn't exist
+        $insertStmt = db()->prepare('INSERT INTO roles (name, description) VALUES (?, ?)');
+        $insertStmt->execute(['employee', 'Regular employee with self-service access']);
+        return db()->lastInsertId();
+    }
+    
+    return $role['id'];
+}
+
+function create_user_directly($firstName, $middleName, $lastName, $email, $password)
+{
+    $stmt = db()->prepare(
+        'INSERT INTO users (first_name, last_name, email, password, created_at)
+         VALUES (?, ?, ?, ?, NOW())'
+    );
+
+    $stmt->execute([
+        trim($firstName),
+        trim($lastName),
+        normalize_identifier($email),
+        password_hash($password, PASSWORD_DEFAULT),
+    ]);
+
+    $userId = db()->lastInsertId();
+    
+    // Ensure employee role exists and assign it to new user
+    $employeeRoleId = ensure_employee_role_exists();
+    $userRoleStmt = db()->prepare('INSERT INTO user_roles (user_id, role_id) VALUES (?, ?)');
+    $userRoleStmt->execute([$userId, $employeeRoleId]);
+    
+    return $userId;
+}
+
+function user_exists($email)
+{
+    $stmt = db()->prepare(
+        'SELECT COUNT(*) FROM users WHERE LOWER(email) = ?'
+    );
+    $stmt->execute([normalize_identifier($email)]);
+    
+    return (int) $stmt->fetchColumn() > 0;
 }
