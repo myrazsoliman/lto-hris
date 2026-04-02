@@ -1,5 +1,5 @@
 <?php
-require 'includes/header.php';
+require_once __DIR__ . '/includes/auth.php';
 require_login();
 
 // Redirect superadmin to account management page
@@ -57,6 +57,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 }
+
+$pageTitle = 'My Profile';
+$activePage = 'profile.php';
+require 'includes/header.php';
 ?>
 
 <main class="container small">

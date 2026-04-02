@@ -4,6 +4,7 @@ $activePage = 'form-templates.php';
 require_once 'includes/auth.php';
 require_roles(['superadmin']);
 require_once 'includes/db.php';
+ensure_form_templates_table();
 
 $error = '';
 $success = '';
