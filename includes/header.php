@@ -93,7 +93,7 @@ $navIconMap = [
                     <form class="topbar-search" role="search" action="search.php" method="get" autocomplete="off">
                         <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
                         <label class="sr-only" for="topbarSearch">Search</label>
-                        <input id="topbarSearch" name="q" type="text" inputmode="search" placeholder="Search pages or notifications..." aria-label="Search" autocapitalize="off" spellcheck="false">
+                        <input id="topbarSearch" name="q" type="text" inputmode="search" placeholder="Search..." aria-label="Search" autocapitalize="off" spellcheck="false">
                         <div class="topbar-search-dropdown" id="topbarSearchDropdown" hidden>
                             <div class="topbar-search-dropdown-head">
                                 <strong>Search results</strong>
