@@ -120,9 +120,6 @@ $navIconMap = [
                             <a href="notification-center.php" class="notification-footer-link">See all notifications</a>
                         </div>
                         </div>
-                        <button type="button" class="topbar-mini-icon" aria-label="Messages">
-                            <i class="far fa-envelope" aria-hidden="true"></i>
-                        </button>
                         <div class="profile-menu">
                             <button type="button" class="profile-summary" aria-label="Open profile menu">
                                 <span class="profile-avatar" aria-hidden="true"><?php echo htmlspecialchars($profileInitial); ?></span>

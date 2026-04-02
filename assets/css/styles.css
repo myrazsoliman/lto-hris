@@ -371,6 +371,10 @@ a {
 }
 .notification-list--page {
     max-height: none;
+    border: 1px solid rgba(228, 235, 243, 0.95);
+    border-radius: 18px;
+    overflow: hidden;
+    background: linear-gradient(180deg, #ffffff, rgba(248, 251, 255, 0.9));
 }
 .notification-item,
 .notification-empty {
@@ -667,6 +671,40 @@ a {
 
 .section-head h3 {
     font-size: 22px;
+}
+
+.section-head-desc {
+    margin-top: 6px;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.section-head-meta {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.section-count {
+    display: inline-flex;
+    align-items: center;
+    height: 32px;
+    padding: 0 12px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: linear-gradient(180deg, #ffffff, var(--surface-soft));
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+}
+
+.section-divider {
+    height: 1px;
+    width: 100%;
+    background: linear-gradient(90deg, transparent, rgba(228, 235, 243, 1), transparent);
+    margin: 8px 0 18px;
 }
 
 .tag {

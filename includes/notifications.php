@@ -36,13 +36,60 @@ function ensure_demo_notification_for_user($userId)
         return;
     }
 
-    create_notification(
-        $userId,
-        'system',
-        'Welcome to LTO HRIS',
-        'You will see system updates, approvals, and HR reminders here.',
-        'notification-center.php'
+    $seedItems = [
+        [
+            'type' => 'system',
+            'title' => 'Welcome to LTO HRIS',
+            'body' => 'You will see system updates, approvals, and HR reminders here.',
+            'link' => 'notification-center.php',
+            'minutes_ago' => 8,
+        ],
+        [
+            'type' => 'account',
+            'title' => 'Complete your profile',
+            'body' => 'Update your contact details and review your account security settings.',
+            'link' => 'account.php',
+            'minutes_ago' => 55,
+        ],
+        [
+            'type' => 'leave_request',
+            'title' => 'Leave requests are now available',
+            'body' => 'You can file leave and track approvals from your dashboard.',
+            'link' => 'leave-request.php',
+            'minutes_ago' => 60 * 5,
+        ],
+        [
+            'type' => 'document_upload',
+            'title' => 'Upload employee documents',
+            'body' => 'Keep your requirements and supporting files organized in one place.',
+            'link' => 'documents.php',
+            'minutes_ago' => 60 * 26,
+        ],
+        [
+            'type' => 'security',
+            'title' => 'Security reminder',
+            'body' => 'Use a strong password and enable 2FA if you have admin access.',
+            'link' => 'help.php',
+            'minutes_ago' => 60 * 48,
+        ],
+    ];
+
+    $insert = db()->prepare(
+        'INSERT INTO notifications (user_id, type, title, body, link, is_read, created_at)
+         VALUES (?, ?, ?, ?, ?, 0, ?)'
     );
+
+    foreach ($seedItems as $seed) {
+        $createdAt = date('Y-m-d H:i:s', time() - ((int) $seed['minutes_ago'] * 60));
+        $insert->execute([
+            $userId,
+            (string) $seed['type'],
+            substr((string) $seed['title'], 0, 180),
+            (string) $seed['body'],
+            substr((string) $seed['link'], 0, 255),
+            $createdAt,
+        ]);
+    }
 }
 
 function create_notification($userId, $type, $title, $body = '', $link = '')

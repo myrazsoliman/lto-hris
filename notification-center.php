@@ -16,8 +16,14 @@ mark_notifications_read((int) ($user['id'] ?? 0));
         <div>
             <span class="tag">Updates</span>
             <h3>All Notifications</h3>
+            <p class="section-head-desc">System updates, approvals, and HR reminders.</p>
+        </div>
+        <div class="section-head-meta">
+            <span class="section-count"><?php echo (int) count($items); ?> total</span>
         </div>
     </div>
+
+    <div class="section-divider" role="presentation"></div>
 
     <div class="notification-list notification-list--page">
         <?php if (empty($items)): ?>
@@ -40,4 +46,3 @@ mark_notifications_read((int) ($user['id'] ?? 0));
 </section>
 
 <?php require_once 'includes/footer.php'; ?>
-
