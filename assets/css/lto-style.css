@@ -461,18 +461,62 @@ opacity:.9}
 .login-modal-meta-link:hover{text-decoration:underline}
 .login-modal-close{-webkit-appearance:none;appearance:none;position:absolute;top:18px;right:18px;z-index:3;width:42px;height:42px;padding:0;border:0;border-radius:999px;background:rgba(255,255,255,.14);color:#fff;font-size:30px;line-height:1;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:background-color 180ms ease,transform 180ms ease}
 .login-modal-close:hover{background:rgba(240,161,40,.22);transform:rotate(90deg)}
-.register-modal-dialog{width:min(100%,1080px)}
+.register-modal-dialog{width:min(100%,1180px);max-height:calc(100vh - 32px);overflow:visible}
 .register-modal-header{background:linear-gradient(135deg,#0f4c81 0%,#2b5fa5 55%,#7aa1d0 100%)}
 .register-card-modal{border-color:rgba(15,76,129,.18)}
+.register-card-modal.login-card-modal-split{grid-template-columns:.8fr 1.2fr;min-height:auto}
+.register-modal-visual .login-modal-visual-content{width:min(100%,280px);min-height:300px;padding:8px 8px 0}
+.register-modal-visual .login-modal-visual-logo{width:210px;height:210px}
+.register-modal-visual .login-modal-visual-title{margin:14px 0 6px;font-size:46px}
+.register-modal-visual .login-modal-visual-subtitle{font-size:12px}
+.register-modal-visual .login-modal-visual-kicker{margin-top:14px;padding:8px 14px}
 .register-modal-panel > .register-modal-header-plain{width:100%;margin:0}
-.register-modal-panel > .register-modal-body{width:min(calc(100% - 48px),640px);margin:0 auto}
+.register-modal-panel > .register-modal-body{width:min(calc(100% - 40px),720px);margin:0 auto}
 .register-modal-header-plain{background:linear-gradient(135deg,#163f7a 0%,#2b5fa5 55%,#6f95c9 100%)}
-.register-modal-body{padding:14px 48px 30px}
-.register-form-modal{gap:16px}
+.register-modal-header-plain{padding:26px 24px 14px}
+.register-modal-header-plain h2{font-size:24px}
+.register-modal-header-plain .login-modal-subtitle{margin-top:10px;font-size:12px;line-height:1.35}
+.register-modal-body{padding:12px 40px 20px}
+.register-form-modal{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 12px;align-items:start}
 .register-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.register-input-wrap .login-input-shell{min-height:78px;padding:18px 24px 18px 24px;border-radius:18px}
+.register-form-modal > .register-honeypot,
+.register-form-modal > .password-validation-indicator,
+.register-form-modal > .register-submit-btn-modal{grid-column:1/-1}
+.register-form-modal > .alert{grid-column:1/-1}
+.register-form-modal > .register-input-wrap:has(#registerModalPassword){order:5}
+.register-form-modal > .register-input-wrap:has(#registerModalConfirmPassword){order:6}
+.register-form-modal > .password-validation-indicator{order:7}
+.register-form-modal > .register-submit-btn-modal{order:8}
+.register-input-wrap .login-input-shell{min-height:62px;padding:14px 18px;border-radius:16px}
+.register-input-wrap input{min-height:24px;padding:13px 0 0;font-size:14px}
 .register-input-wrap .login-floating-label{left:60px}
+.register-input-wrap .login-floating-label{font-size:15px}
+.register-input-wrap input:focus + .login-floating-label,
+.register-input-wrap input:not(:placeholder-shown) + .login-floating-label{top:10px;font-size:10px}
 .register-modal-role-band{margin:0 0 20px;padding:12px 16px;border:1px solid rgba(178,122,18,.18);border-radius:999px;background:linear-gradient(180deg,#fffaf1,#fff6e6);text-align:center;font-size:12px;font-weight:800;letter-spacing:.28em;text-transform:uppercase;color:#9b6500}
+.register-form-modal .login-password-toggle{width:28px;height:28px;right:12px}
+.register-submit-btn-modal{min-height:44px;margin-top:2px}
+.register-form-modal .password-validation-indicator{margin-top:6px;padding:14px 0 0;background:transparent;border:0;box-shadow:none}
+.register-form-modal .password-strength-progress{position:relative;width:100%;height:6px;margin-bottom:16px;border-radius:999px;background:#d7dde5;overflow:hidden}
+.register-form-modal .password-strength-progress-bar{display:block;width:0;height:100%;border-radius:999px;background:linear-gradient(90deg,#d92d20,#f59e0b);transition:width 220ms ease,background 220ms ease}
+.register-form-modal .password-strength-progress-bar[data-strength="strong"]{background:linear-gradient(90deg,#2e8b57,#6fbe7b)}
+.register-form-modal .password-strength-alert{display:flex;align-items:center;gap:10px;margin-bottom:14px;font-size:13px;font-weight:700;line-height:1.35;color:#b42318}
+.register-form-modal .password-strength-alert.is-hidden{display:none}
+.register-form-modal .password-strength-alert::before{content:"";flex:0 0 10px;width:10px;height:10px;border-radius:999px;background:currentColor}
+.register-form-modal .password-strength-alert[data-strength="empty"],
+.register-form-modal .password-strength-alert[data-strength="weak"]{color:#b42318}
+.register-form-modal .password-strength-alert[data-strength="strong"]{color:#2e8b57}
+.register-form-modal .password-validation-title{margin-bottom:12px;font-size:14px;font-weight:700;color:#2b3748;letter-spacing:0;text-transform:none}
+.register-form-modal .password-validation-list{display:grid;grid-template-columns:1fr;gap:9px}
+.register-form-modal .password-validation-item{display:flex;align-items:flex-start;gap:10px;margin:0;padding:0;font-size:12px}
+.register-form-modal .validation-icon{width:18px;height:18px;font-size:10px;background:transparent;border:2px solid currentColor;box-shadow:none}
+.register-form-modal .validation-icon-invalid{color:#b8c0cb}
+.register-form-modal .validation-icon-valid{display:none;color:#6fbe7b}
+.register-form-modal .validation-text{padding-top:0;font-size:13px;line-height:1.45;color:#7ebf73;font-weight:700}
+.register-form-modal .password-validation-item:not(.is-valid) .validation-text{color:#95a0ae;font-weight:600}
+.register-form-modal .password-validation-item.is-valid .validation-icon-invalid{display:none}
+.register-form-modal .password-validation-item.is-valid .validation-icon-valid{display:flex}
+.register-form-modal .password-validation-item.is-valid .validation-text{color:#6fbe7b;font-weight:700}
 .register-submit-btn-modal{background:linear-gradient(135deg,#0f4c81,#2b5fa5);box-shadow:0 12px 24px rgba(15,76,129,.18)}
 .register-submit-btn-modal:hover{box-shadow:0 16px 28px rgba(15,76,129,.24)}
 .register-honeypot{position:absolute !important;left:-9999px !important;top:auto !important;width:1px !important;height:1px !important;overflow:hidden !important}
@@ -502,6 +546,8 @@ opacity:.9}
   .login-modal-visual-title{font-size:54px}
   .login-modal-header-plain,
   .login-modal-body-plain{padding-left:28px;padding-right:28px}
+  .register-form-modal{grid-template-columns:1fr}
+  .register-form-modal .password-validation-list{grid-template-columns:1fr}
 }
 
 @media(max-width:1180px){
