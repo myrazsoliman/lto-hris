@@ -599,92 +599,29 @@ $contactLink = ['label' => 'Contact Us', 'href' => '#', 'active' => false, 'care
                         </div>
 
 
-                        <div class="login-input-wrap login-input-wrap-modal register-input-wrap">
-                            <div class="login-input-shell">
-                                <span class="login-input-icon" aria-hidden="true">
-                                    <svg viewBox="0 0 24 24" fill="none">
-                                        <path d="M17 9h-1V7a4 4 0 0 0-8 0v2H7a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2Zm-6 0V7a2 2 0 1 1 4 0v2h-4Z" fill="currentColor" />
-                                    </svg>
-                                </span>
-                                <input type="password" id="registerModalPassword" name="register_password" placeholder=" " autocomplete="new-password" minlength="10" maxlength="128" required>
-                                <label class="login-floating-label" for="registerModalPassword">Password</label>
+                            <div class="login-input-wrap login-input-wrap-modal register-input-wrap">
+                                <div class="login-input-shell">
+                                    <span class="login-input-icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none">
+                                            <path d="M17 9h-1V7a4 4 0 0 0-8 0v2H7a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2Zm-6 0V7a2 2 0 1 1 4 0v2h-4Z" fill="currentColor" />
+                                        </svg>
+                                    </span>
+                                    <input type="password" id="registerModalPassword" name="register_password" placeholder=" " autocomplete="new-password" minlength="12" maxlength="128" required>
+                                    <label class="login-floating-label" for="registerModalPassword">Password</label>
+                                </div>
+                                <button type="button" class="login-password-toggle" id="registerPasswordToggle" aria-label="Show password" aria-pressed="false">
+                                    <span class="login-password-icon login-password-icon-show" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none">
+                                            <path d="M12 5C6.5 5 2.1 8.6 1 12c1.1 3.4 5.5 7 11 7s9.9-3.6 11-7c-1.1-3.4-5.5-7-11-7Zm0 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8Z" fill="currentColor" />
+                                        </svg>
+                                    </span>
+                                    <span class="login-password-icon login-password-icon-hide" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none">
+                                            <path d="M3 4.3 19.7 21l1.4-1.4L4.4 2.9 3 4.3Zm9 3.7c5.5 0 9.9 3.6 11 7-.4 1.3-1.4 2.7-2.7 4l-1.4-1.4c.8-.8 1.4-1.7 1.8-2.6-1.1-2.4-4.4-5-8.7-5-.9 0-1.7.1-2.5.3L8 8.9c1.2-.6 2.6-.9 4-.9Zm0 3a4 4 0 0 1 4 4c0 .7-.2 1.4-.5 2l-5.5-5.5c.6-.3 1.3-.5 2-.5Zm-9 4c.9 2.7 4.1 5.6 8.5 6.1l-1.9-1.9c-2.8-.6-4.9-2.4-5.9-4.2.4-.9 1.1-1.8 2-2.6L4.2 11C3.6 11.6 3.2 12.3 3 13Z" fill="currentColor" />
+                                        </svg>
+                                    </span>
+                                </button>
                             </div>
-                            <button type="button" class="login-password-toggle" id="registerPasswordToggle" aria-label="Show password" aria-pressed="false">
-                                <span class="login-password-icon login-password-icon-show" aria-hidden="true">
-                                    <svg viewBox="0 0 24 24" fill="none">
-                                        <path d="M12 5C6.5 5 2.1 8.6 1 12c1.1 3.4 5.5 7 11 7s9.9-3.6 11-7c-1.1-3.4-5.5-7-11-7Zm0 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8Z" fill="currentColor" />
-                                    </svg>
-                                </span>
-                                <span class="login-password-icon login-password-icon-hide" aria-hidden="true">
-                                    <svg viewBox="0 0 24 24" fill="none">
-                                        <path d="M3 4.3 19.7 21l1.4-1.4L4.4 2.9 3 4.3Zm9 3.7c5.5 0 9.9 3.6 11 7-.4 1.3-1.4 2.7-2.7 4l-1.4-1.4c.8-.8 1.4-1.7 1.8-2.6-1.1-2.4-4.4-5-8.7-5-.9 0-1.7.1-2.5.3L8 8.9c1.2-.6 2.6-.9 4-.9Zm0 3a4 4 0 0 1 4 4c0 .7-.2 1.4-.5 2l-5.5-5.5c.6-.3 1.3-.5 2-.5Zm-9 4c.9 2.7 4.1 5.6 8.5 6.1l-1.9-1.9c-2.8-.6-4.9-2.4-5.9-4.2.4-.9 1.1-1.8 2-2.6L4.2 11C3.6 11.6 3.2 12.3 3 13Z" fill="currentColor" />
-                                    </svg>
-                                </span>
-                            </button>
-                        </div>
-
-                        <div class="password-validation-indicator" id="passwordValidationIndicator">
-                            <div class="password-strength-progress" aria-hidden="true">
-                                <span class="password-strength-progress-bar" id="passwordStrengthProgressBar"></span>
-                            </div>
-                            <div class="password-strength-alert is-hidden" id="passwordStrengthAlert" data-strength="empty">Password strength: weak.</div>
-                            <div class="password-validation-title">Your password must contain:</div>
-                            <div class="password-validation-list">
-                                <div class="password-validation-item" data-validation="length">
-                                    <span class="validation-icon validation-icon-invalid">✕</span>
-                                    <span class="validation-icon validation-icon-valid">✓</span>
-                                    <span class="validation-text">At least 10 characters</span>
-                                </div>
-                                <div class="password-validation-item" data-validation="categories">
-                                    <span class="validation-icon validation-icon-invalid">✕</span>
-                                    <span class="validation-icon validation-icon-valid">✓</span>
-                                    <span class="validation-text">At least 3 of the following:</span>
-                                </div>
-                                <div class="password-validation-item" data-validation="lowercase">
-                                    <span class="validation-icon validation-icon-invalid">✕</span>
-                                    <span class="validation-icon validation-icon-valid">✓</span>
-                                    <span class="validation-text">Lower case letters (a-z)</span>
-                                </div>
-                                <div class="password-validation-item" data-validation="uppercase">
-                                    <span class="validation-icon validation-icon-invalid">✕</span>
-                                    <span class="validation-icon validation-icon-valid">✓</span>
-                                    <span class="validation-text">Upper case letters (A-Z)</span>
-                                </div>
-                                <div class="password-validation-item" data-validation="number">
-                                    <span class="validation-icon validation-icon-invalid">✕</span>
-                                    <span class="validation-icon validation-icon-valid">✓</span>
-                                    <span class="validation-text">Numbers (0-9)</span>
-                                </div>
-                                <div class="password-validation-item" data-validation="special">
-                                    <span class="validation-icon validation-icon-invalid">✕</span>
-                                    <span class="validation-icon validation-icon-valid">✓</span>
-                                    <span class="validation-text">Special characters (e.g. !@#$%^&amp;*)</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="login-input-wrap login-input-wrap-modal register-input-wrap">
-                            <div class="login-input-shell">
-                                <span class="login-input-icon" aria-hidden="true">
-                                    <svg viewBox="0 0 24 24" fill="none">
-                                        <path d="M17 9h-1V7a4 4 0 0 0-8 0v2H7a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2Zm-6 0V7a2 2 0 1 1 4 0v2h-4Z" fill="currentColor" />
-                                    </svg>
-                                </span>
-                                <input type="password" id="registerModalConfirmPassword" name="register_confirm_password" placeholder=" " autocomplete="new-password" minlength="10" maxlength="128" required>
-                                <label class="login-floating-label" for="registerModalConfirmPassword">Confirm Password</label>
-                            </div>
-                            <button type="button" class="login-password-toggle" id="registerConfirmPasswordToggle" aria-label="Show password" aria-pressed="false">
-                                <span class="login-password-icon login-password-icon-show" aria-hidden="true">
-                                    <svg viewBox="0 0 24 24" fill="none">
-                                        <path d="M12 5C6.5 5 2.1 8.6 1 12c1.1 3.4 5.5 7 11 7s9.9-3.6 11-7c-1.1-3.4-5.5-7-11-7Zm0 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8Z" fill="currentColor" />
-                                    </svg>
-                                </span>
-                                <span class="login-password-icon login-password-icon-hide" aria-hidden="true">
-                                    <svg viewBox="0 0 24 24" fill="none">
-                                        <path d="M3 4.3 19.7 21l1.4-1.4L4.4 2.9 3 4.3Zm9 3.7c5.5 0 9.9 3.6 11 7-.4 1.3-1.4 2.7-2.7 4l-1.4-1.4c.8-.8 1.4-1.7 1.8-2.6-1.1-2.4-4.4-5-8.7-5-.9 0-1.7.1-2.5.3L8 8.9c1.2-.6 2.6-.9 4-.9Zm0 3a4 4 0 0 1 4 4c0 .7-.2 1.4-.5 2l-5.5-5.5c.6-.3 1.3-.5 2-.5Zm-9 4c.9 2.7 4.1 5.6 8.5 6.1l-1.9-1.9c-2.8-.6-4.9-2.4-5.9-4.2.4-.9 1.1-1.8 2-2.6L4.2 11C3.6 11.6 3.2 12.3 3 13Z" fill="currentColor" />
-                                    </svg>
-                                </span>
-                            </button>
                         </div>
 
                             <button type="submit" class="login-submit-btn login-submit-btn-modal login-submit-btn-modal-split register-submit-btn-modal">
@@ -1087,208 +1024,6 @@ $contactLink = ['label' => 'Contact Us', 'href' => '#', 'active' => false, 'care
 
             update();
             start();
-        }());
-
-        (function() {
-            // Password Validation Functionality
-            const passwordField = document.getElementById('registerModalPassword');
-            const validationIndicator = document.getElementById('passwordValidationIndicator');
-            const strengthAlert = document.getElementById('passwordStrengthAlert');
-            const progressBar = document.getElementById('passwordStrengthProgressBar');
-            const confirmPasswordField = document.getElementById('registerModalConfirmPassword');
-            const registerForm = passwordField ? passwordField.closest('form') : null;
-            
-            if (!passwordField || !validationIndicator || !strengthAlert || !progressBar) return;
-
-            function validatePassword(password) {
-                const categoryCount = [
-                    /[a-z]/.test(password),
-                    /[A-Z]/.test(password),
-                    /\d/.test(password),
-                    /[^a-zA-Z\d]/.test(password)
-                ].filter(Boolean).length;
-
-                const validations = {
-                    lowercase: /[a-z]/.test(password),
-                    uppercase: /[A-Z]/.test(password),
-                    number: /\d/.test(password),
-                    special: /[^a-zA-Z\d]/.test(password),
-                    length: password.length >= 10,
-                    categories: categoryCount >= 3,
-                    categoryCount
-                };
-
-                validations.score = ['length', 'uppercase', 'lowercase', 'number', 'special']
-                    .filter((key) => validations[key]).length;
-
-                return validations;
-            }
-
-            function getPasswordStrength(password, validations) {
-                if (!password) {
-                    return {
-                        level: 'empty',
-                        message: 'Password strength: weak.'
-                    };
-                }
-
-                if (validations.length && validations.categories) {
-                    return {
-                        level: 'strong',
-                        message: 'Password strength: strong.'
-                    };
-                }
-
-                return {
-                    level: 'weak',
-                    message: 'Password strength: weak.'
-                };
-            }
-
-            function updateValidationIndicator(validations) {
-                Object.keys(validations).forEach(key => {
-                    const item = validationIndicator.querySelector(`[data-validation="${key}"]`);
-                    if (item) {
-                        if (validations[key]) {
-                            item.classList.add('is-valid');
-                        } else {
-                            item.classList.remove('is-valid');
-                        }
-                    }
-                });
-            }
-
-            function updateStrengthAlert(strength) {
-                strengthAlert.dataset.strength = strength.level;
-                strengthAlert.textContent = strength.message;
-                strengthAlert.classList.toggle('is-hidden', strength.level === 'empty');
-            }
-
-            function updateProgressBar(validations) {
-                const progress = (validations.score / 5) * 100;
-                progressBar.style.width = `${progress}%`;
-                progressBar.dataset.strength = validations.length && validations.categories ? 'strong' : 'weak';
-            }
-
-            function checkPasswordStrength() {
-                const password = passwordField.value;
-                const validations = validatePassword(password);
-                updateValidationIndicator(validations);
-                updateProgressBar(validations);
-
-                if (!password) {
-                    passwordField.setCustomValidity('');
-                } else if (!validations.length || !validations.categories) {
-                    passwordField.setCustomValidity('Use at least 10 characters and meet at least 3 of these: lowercase, uppercase, number, special character.');
-                } else {
-                    passwordField.setCustomValidity('');
-                }
-
-                if (confirmPasswordField) {
-                    if (confirmPasswordField.value && confirmPasswordField.value !== password) {
-                        confirmPasswordField.setCustomValidity('Passwords do not match.');
-                        updateStrengthAlert({
-                            level: 'weak',
-                            message: 'Passwords do not match.'
-                        });
-                    } else {
-                        confirmPasswordField.setCustomValidity('');
-                        updateStrengthAlert(getPasswordStrength(password, validations));
-                    }
-                } else {
-                    updateStrengthAlert(getPasswordStrength(password, validations));
-                }
-            }
-
-            function validateConfirmPassword() {
-                if (!confirmPasswordField) return;
-
-                if (confirmPasswordField.value && confirmPasswordField.value !== passwordField.value) {
-                    confirmPasswordField.setCustomValidity('Passwords do not match.');
-                    updateStrengthAlert({
-                        level: 'weak',
-                        message: 'Passwords do not match.'
-                    });
-                } else {
-                    confirmPasswordField.setCustomValidity('');
-                    checkPasswordStrength();
-                }
-            }
-
-            // Add event listeners
-            passwordField.addEventListener('input', checkPasswordStrength);
-            passwordField.addEventListener('focus', checkPasswordStrength);
-            if (confirmPasswordField) {
-                confirmPasswordField.addEventListener('input', validateConfirmPassword);
-                confirmPasswordField.addEventListener('focus', validateConfirmPassword);
-            }
-            if (registerForm) {
-                registerForm.addEventListener('submit', () => {
-                    checkPasswordStrength();
-                    validateConfirmPassword();
-                });
-            }
-            
-            // Initial check
-            checkPasswordStrength();
-        }());
-
-        (function() {
-            // Login Form Custom Validation
-            const loginForm = document.querySelector('form[action="index.php"][novalidate]');
-            
-            if (!loginForm) return;
-
-            loginForm.addEventListener('submit', function(e) {
-                const emailField = document.getElementById('loginModalEmail');
-                const passwordField = document.getElementById('loginModalPassword');
-                
-                // Clear any previous custom validation messages
-                const existingAlert = loginForm.querySelector('.alert-error');
-                if (existingAlert) {
-                    existingAlert.remove();
-                }
-
-                // Custom validation
-                let isValid = true;
-                let errorMessage = '';
-
-                if (!emailField.value.trim()) {
-                    errorMessage = 'Please enter your email address.';
-                    isValid = false;
-                } else if (!emailField.validity.valid) {
-                    errorMessage = 'Please enter a valid email address.';
-                    isValid = false;
-                } else if (!passwordField.value.trim()) {
-                    errorMessage = 'Please enter your password.';
-                    isValid = false;
-                } else if (passwordField.value.length < 8) {
-                    errorMessage = 'Password must be at least 8 characters long.';
-                    isValid = false;
-                }
-
-                if (!isValid) {
-                    e.preventDefault();
-                    
-                    // Create and show professional error message
-                    const errorDiv = document.createElement('div');
-                    errorDiv.className = 'alert alert-error';
-                    errorDiv.textContent = errorMessage;
-                    
-                    // Insert error message at the top of the form
-                    const formBody = loginForm.querySelector('.login-modal-body');
-                    if (formBody) {
-                        formBody.insertBefore(errorDiv, formBody.firstChild);
-                    }
-                    
-                    // Focus on the first invalid field
-                    if (!emailField.value.trim() || !emailField.validity.valid) {
-                        emailField.focus();
-                    } else {
-                        passwordField.focus();
-                    }
-                }
-            });
         }());
     </script>
 

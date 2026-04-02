@@ -242,7 +242,6 @@ function password_policy_errors($password, $identifier = '', $email = '')
 {
     $password = (string) $password;
     $errors = [];
-
     $categories = 0;
 
     if (strlen($password) < 10) {
