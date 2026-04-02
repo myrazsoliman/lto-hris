@@ -599,28 +599,91 @@ $contactLink = ['label' => 'Contact Us', 'href' => '#', 'active' => false, 'care
                         </div>
 
 
-                            <div class="login-input-wrap login-input-wrap-modal register-input-wrap">
-                                <div class="login-input-shell">
-                                    <span class="login-input-icon" aria-hidden="true">
-                                        <svg viewBox="0 0 24 24" fill="none">
-                                            <path d="M17 9h-1V7a4 4 0 0 0-8 0v2H7a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2Zm-6 0V7a2 2 0 1 1 4 0v2h-4Z" fill="currentColor" />
-                                        </svg>
-                                    </span>
-                                    <input type="password" id="registerModalPassword" name="register_password" placeholder=" " autocomplete="new-password" minlength="12" maxlength="128" required>
-                                    <label class="login-floating-label" for="registerModalPassword">Password</label>
+                        <div class="login-input-wrap login-input-wrap-modal register-input-wrap">
+                            <div class="login-input-shell">
+                                <span class="login-input-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none">
+                                        <path d="M17 9h-1V7a4 4 0 0 0-8 0v2H7a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2Zm-6 0V7a2 2 0 1 1 4 0v2h-4Z" fill="currentColor" />
+                                    </svg>
+                                </span>
+                                <input type="password" id="registerModalPassword" name="register_password" placeholder=" " autocomplete="new-password" minlength="10" maxlength="128" required>
+                                <label class="login-floating-label" for="registerModalPassword">Password</label>
+                            </div>
+                            <button type="button" class="login-password-toggle" id="registerPasswordToggle" aria-label="Show password" aria-pressed="false">
+                                <span class="login-password-icon login-password-icon-show" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none">
+                                        <path d="M12 5C6.5 5 2.1 8.6 1 12c1.1 3.4 5.5 7 11 7s9.9-3.6 11-7c-1.1-3.4-5.5-7-11-7Zm0 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8Z" fill="currentColor" />
+                                    </svg>
+                                </span>
+                                <span class="login-password-icon login-password-icon-hide" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none">
+                                        <path d="M3 4.3 19.7 21l1.4-1.4L4.4 2.9 3 4.3Zm9 3.7c5.5 0 9.9 3.6 11 7-.4 1.3-1.4 2.7-2.7 4l-1.4-1.4c.8-.8 1.4-1.7 1.8-2.6-1.1-2.4-4.4-5-8.7-5-.9 0-1.7.1-2.5.3L8 8.9c1.2-.6 2.6-.9 4-.9Zm0 3a4 4 0 0 1 4 4c0 .7-.2 1.4-.5 2l-5.5-5.5c.6-.3 1.3-.5 2-.5Zm-9 4c.9 2.7 4.1 5.6 8.5 6.1l-1.9-1.9c-2.8-.6-4.9-2.4-5.9-4.2.4-.9 1.1-1.8 2-2.6L4.2 11C3.6 11.6 3.2 12.3 3 13Z" fill="currentColor" />
+                                    </svg>
+                                </span>
+                            </button>
+                        </div>
+
+                        <div class="login-input-wrap login-input-wrap-modal register-input-wrap">
+                            <div class="login-input-shell">
+                                <span class="login-input-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none">
+                                        <path d="M17 9h-1V7a4 4 0 0 0-8 0v2H7a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2Zm-6 0V7a2 2 0 1 1 4 0v2h-4Z" fill="currentColor" />
+                                    </svg>
+                                </span>
+                                <input type="password" id="registerModalConfirmPassword" name="register_confirm_password" placeholder=" " autocomplete="new-password" minlength="10" maxlength="128" required>
+                                <label class="login-floating-label" for="registerModalConfirmPassword">Confirm Password</label>
+                            </div>
+                            <button type="button" class="login-password-toggle" id="registerConfirmPasswordToggle" aria-label="Show password" aria-pressed="false">
+                                <span class="login-password-icon login-password-icon-show" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none">
+                                        <path d="M12 5C6.5 5 2.1 8.6 1 12c1.1 3.4 5.5 7 11 7s9.9-3.6 11-7c-1.1-3.4-5.5-7-11-7Zm0 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8Z" fill="currentColor" />
+                                    </svg>
+                                </span>
+                                <span class="login-password-icon login-password-icon-hide" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none">
+                                        <path d="M3 4.3 19.7 21l1.4-1.4L4.4 2.9 3 4.3Zm9 3.7c5.5 0 9.9 3.6 11 7-.4 1.3-1.4 2.7-2.7 4l-1.4-1.4c.8-.8 1.4-1.7 1.8-2.6-1.1-2.4-4.4-5-8.7-5-.9 0-1.7.1-2.5.3L8 8.9c1.2-.6 2.6-.9 4-.9Zm0 3a4 4 0 0 1 4 4c0 .7-.2 1.4-.5 2l-5.5-5.5c.6-.3 1.3-.5 2-.5Zm-9 4c.9 2.7 4.1 5.6 8.5 6.1l-1.9-1.9c-2.8-.6-4.9-2.4-5.9-4.2.4-.9 1.1-1.8 2-2.6L4.2 11C3.6 11.6 3.2 12.3 3 13Z" fill="currentColor" />
+                                    </svg>
+                                </span>
+                            </button>
+                        </div>
+
+                        <div class="password-validation-indicator" id="passwordValidationIndicator">
+                            <div class="password-strength-progress" aria-hidden="true">
+                                <span class="password-strength-progress-bar" id="passwordStrengthProgressBar"></span>
+                            </div>
+                            <div class="password-strength-alert is-hidden" id="passwordStrengthAlert" data-strength="empty">Password strength: weak.</div>
+                            <div class="password-validation-title">Your password must contain:</div>
+                            <div class="password-validation-list">
+                                <div class="password-validation-item" data-validation="length">
+                                    <span class="validation-icon validation-icon-invalid">✕</span>
+                                    <span class="validation-icon validation-icon-valid">✓</span>
+                                    <span class="validation-text">At least 10 characters</span>
                                 </div>
-                                <button type="button" class="login-password-toggle" id="registerPasswordToggle" aria-label="Show password" aria-pressed="false">
-                                    <span class="login-password-icon login-password-icon-show" aria-hidden="true">
-                                        <svg viewBox="0 0 24 24" fill="none">
-                                            <path d="M12 5C6.5 5 2.1 8.6 1 12c1.1 3.4 5.5 7 11 7s9.9-3.6 11-7c-1.1-3.4-5.5-7-11-7Zm0 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8Z" fill="currentColor" />
-                                        </svg>
-                                    </span>
-                                    <span class="login-password-icon login-password-icon-hide" aria-hidden="true">
-                                        <svg viewBox="0 0 24 24" fill="none">
-                                            <path d="M3 4.3 19.7 21l1.4-1.4L4.4 2.9 3 4.3Zm9 3.7c5.5 0 9.9 3.6 11 7-.4 1.3-1.4 2.7-2.7 4l-1.4-1.4c.8-.8 1.4-1.7 1.8-2.6-1.1-2.4-4.4-5-8.7-5-.9 0-1.7.1-2.5.3L8 8.9c1.2-.6 2.6-.9 4-.9Zm0 3a4 4 0 0 1 4 4c0 .7-.2 1.4-.5 2l-5.5-5.5c.6-.3 1.3-.5 2-.5Zm-9 4c.9 2.7 4.1 5.6 8.5 6.1l-1.9-1.9c-2.8-.6-4.9-2.4-5.9-4.2.4-.9 1.1-1.8 2-2.6L4.2 11C3.6 11.6 3.2 12.3 3 13Z" fill="currentColor" />
-                                        </svg>
-                                    </span>
-                                </button>
+                                <div class="password-validation-item" data-validation="categories">
+                                    <span class="validation-icon validation-icon-invalid">✕</span>
+                                    <span class="validation-icon validation-icon-valid">✓</span>
+                                    <span class="validation-text">At least 3 of the following:</span>
+                                </div>
+                                <div class="password-validation-item" data-validation="lowercase">
+                                    <span class="validation-icon validation-icon-invalid">✕</span>
+                                    <span class="validation-icon validation-icon-valid">✓</span>
+                                    <span class="validation-text">Lower case letters (a-z)</span>
+                                </div>
+                                <div class="password-validation-item" data-validation="uppercase">
+                                    <span class="validation-icon validation-icon-invalid">✕</span>
+                                    <span class="validation-icon validation-icon-valid">✓</span>
+                                    <span class="validation-text">Upper case letters (A-Z)</span>
+                                </div>
+                                <div class="password-validation-item" data-validation="number">
+                                    <span class="validation-icon validation-icon-invalid">✕</span>
+                                    <span class="validation-icon validation-icon-valid">✓</span>
+                                    <span class="validation-text">Numbers (0-9)</span>
+                                </div>
+                                <div class="password-validation-item" data-validation="special">
+                                    <span class="validation-icon validation-icon-invalid">✕</span>
+                                    <span class="validation-icon validation-icon-valid">✓</span>
+                                    <span class="validation-text">Special characters (e.g. !@#$%^&amp;*)</span>
+                                </div>
                             </div>
                         </div>
 
@@ -1025,8 +1088,6 @@ $contactLink = ['label' => 'Contact Us', 'href' => '#', 'active' => false, 'care
             update();
             start();
         }());
-<<<<<<< ours
-=======
 
         (function() {
             // Password Validation Functionality
@@ -1113,10 +1174,9 @@ $contactLink = ['label' => 'Contact Us', 'href' => '#', 'active' => false, 'care
                 const password = passwordField.value;
                 const validations = validatePassword(password);
                 updateValidationIndicator(validations);
-                updateStrengthAlert(getPasswordStrength(password, validations));
                 updateProgressBar(validations);
 
-                 if (!password) {
+                if (!password) {
                     passwordField.setCustomValidity('');
                 } else if (!validations.length || !validations.categories) {
                     passwordField.setCustomValidity('Use at least 10 characters and meet at least 3 of these: lowercase, uppercase, number, special character.');
@@ -1127,9 +1187,16 @@ $contactLink = ['label' => 'Contact Us', 'href' => '#', 'active' => false, 'care
                 if (confirmPasswordField) {
                     if (confirmPasswordField.value && confirmPasswordField.value !== password) {
                         confirmPasswordField.setCustomValidity('Passwords do not match.');
+                        updateStrengthAlert({
+                            level: 'weak',
+                            message: 'Passwords do not match.'
+                        });
                     } else {
                         confirmPasswordField.setCustomValidity('');
+                        updateStrengthAlert(getPasswordStrength(password, validations));
                     }
+                } else {
+                    updateStrengthAlert(getPasswordStrength(password, validations));
                 }
             }
 
@@ -1138,8 +1205,13 @@ $contactLink = ['label' => 'Contact Us', 'href' => '#', 'active' => false, 'care
 
                 if (confirmPasswordField.value && confirmPasswordField.value !== passwordField.value) {
                     confirmPasswordField.setCustomValidity('Passwords do not match.');
+                    updateStrengthAlert({
+                        level: 'weak',
+                        message: 'Passwords do not match.'
+                    });
                 } else {
                     confirmPasswordField.setCustomValidity('');
+                    checkPasswordStrength();
                 }
             }
 
@@ -1218,7 +1290,6 @@ $contactLink = ['label' => 'Contact Us', 'href' => '#', 'active' => false, 'care
                 }
             });
         }());
->>>>>>> theirs
     </script>
 
 </body>
