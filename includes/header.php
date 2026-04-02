@@ -15,7 +15,11 @@ $userRoles = $user ? $user['roles'] : [];
 $navItems = get_nav_items($userRoles);
 $profileName = $user['display_name'] ?? 'User';
 $profileInitial = strtoupper(substr(trim((string) $profileName), 0, 1)) ?: 'U';
-$notificationCount = $user ? get_unread_notification_count((int) ($user['id'] ?? 0)) : 0;
+$userIdForNotifications = (int) ($user['id'] ?? 0);
+if ($user) {
+    ensure_demo_notification_for_user($userIdForNotifications);
+}
+$notificationCount = $user ? get_unread_notification_count($userIdForNotifications) : 0;
 
 $navIconMap = [
     'Dashboard' => 'fa-solid fa-house',

@@ -19,6 +19,32 @@ function ensure_notifications_table()
     );
 }
 
+function ensure_demo_notification_for_user($userId)
+{
+    $userId = (int) $userId;
+    if ($userId <= 0) {
+        return;
+    }
+
+    ensure_notifications_table();
+
+    $stmt = db()->prepare('SELECT COUNT(*) FROM notifications WHERE user_id = ?');
+    $stmt->execute([$userId]);
+    $hasAny = ((int) $stmt->fetchColumn()) > 0;
+
+    if ($hasAny) {
+        return;
+    }
+
+    create_notification(
+        $userId,
+        'system',
+        'Welcome to LTO HRIS',
+        'You will see system updates, approvals, and HR reminders here.',
+        'notification-center.php'
+    );
+}
+
 function create_notification($userId, $type, $title, $body = '', $link = '')
 {
     ensure_notifications_table();
@@ -124,4 +150,3 @@ function notification_type_icon($type)
 
     return $map[$type] ?? 'fa-regular fa-bell';
 }
-
