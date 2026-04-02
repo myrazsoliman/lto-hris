@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 $pageTitle = 'Personal Data Sheet (CSC Form No. 212)';
 $activePage = 'pds.php';
 require_once 'includes/auth.php';
@@ -12,300 +12,66 @@ $currentYear = date('Y');
 // Check if PDS exists for current year
 $pdsExists = false; // This would be checked from database
 ?>
-
-<style>
-.pds-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    background: white;
-    border: 1px solid #ddd;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-}
-
-.pds-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    padding: 20px;
-    text-align: center;
-}
-
-.pds-header h1 {
-    margin: 0;
-    font-size: 24px;
-    font-weight: bold;
-}
-
-.pds-header p {
-    margin: 5px 0 0 0;
-    font-size: 14px;
-    opacity: 0.9;
-}
-
-.pds-nav {
-    display: flex;
-    background: #f8f9fa;
-    border-bottom: 2px solid #dee2e6;
-}
-
-.pds-nav-item {
-    flex: 1;
-    padding: 15px;
-    text-align: center;
-    cursor: pointer;
-    border-right: 1px solid #dee2e6;
-    transition: all 0.3s ease;
-    font-weight: 500;
-}
-
-.pds-nav-item:last-child {
-    border-right: none;
-}
-
-.pds-nav-item.active {
-    background: white;
-    color: #667eea;
-    border-bottom: 3px solid #667eea;
-}
-
-.pds-nav-item:hover:not(.active) {
-    background: #e9ecef;
-}
-
-.pds-page {
-    display: none;
-    padding: 30px;
-    min-height: 600px;
-}
-
-.pds-page.active {
-    display: block;
-}
-
-.form-section {
-    margin-bottom: 30px;
-    padding: 20px;
-    background: #f8f9fa;
-    border-radius: 8px;
-    border: 1px solid #e9ecef;
-}
-
-.form-section h4 {
-    color: #495057;
-    margin: 0 0 20px 0;
-    padding-bottom: 10px;
-    border-bottom: 2px solid #667eea;
-    font-size: 16px;
-    font-weight: 600;
-}
-
-.form-row {
-    display: flex;
-    gap: 20px;
-    margin-bottom: 15px;
-    flex-wrap: wrap;
-}
-
-.form-group {
-    flex: 1;
-    min-width: 200px;
-}
-
-.form-group.full-width {
-    flex: 100%;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: 500;
-    color: #495057;
-    font-size: 14px;
-}
-
-.form-group input,
-.form-group select,
-.form-group textarea {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ced4da;
-    border-radius: 4px;
-    font-size: 14px;
-    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-}
-
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
-    border-color: #667eea;
-    outline: 0;
-    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
-}
-
-.form-group textarea {
-    resize: vertical;
-    min-height: 80px;
-}
-
-.form-group .required::after {
-    content: " *";
-    color: #dc3545;
-}
-
-.btn-pds {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border: none;
-    padding: 12px 30px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: 500;
-    transition: all 0.3s ease;
-    margin: 5px;
-}
-
-.btn-pds:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-}
-
-.btn-pds-secondary {
-    background: #6c757d;
-    color: white;
-    border: none;
-    padding: 12px 30px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: 500;
-    transition: all 0.3s ease;
-    margin: 5px;
-}
-
-.btn-pds-secondary:hover {
-    background: #5a6268;
-}
-
-.pds-actions {
-    text-align: center;
-    padding: 20px;
-    background: #f8f9fa;
-    border-top: 1px solid #dee2e6;
-}
-
-.dynamic-list {
-    margin: 15px 0;
-}
-
-.dynamic-item {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    margin-bottom: 10px;
-    padding: 10px;
-    background: white;
-    border: 1px solid #e9ecef;
-    border-radius: 4px;
-}
-
-.dynamic-item input {
-    flex: 1;
-}
-
-.btn-remove {
-    background: #dc3545;
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 12px;
-}
-
-.btn-add {
-    background: #28a745;
-    color: white;
-    border: none;
-    padding: 8px 15px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-    margin-top: 10px;
-}
-
-.question-group {
-    margin: 20px 0;
-    padding: 15px;
-    background: white;
-    border-radius: 6px;
-    border: 1px solid #e9ecef;
-}
-
-.question-group label {
-    font-weight: 600;
-    color: #495057;
-    margin-bottom: 10px;
-    display: block;
-}
-
-.radio-group {
-    display: flex;
-    gap: 20px;
-    margin: 10px 0;
-}
-
-.radio-option {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-
-.signature-area {
-    text-align: center;
-    margin: 30px 0;
-    padding: 20px;
-    background: white;
-    border: 2px dashed #ced4da;
-    border-radius: 8px;
-}
-
-.signature-area h5 {
-    color: #495057;
-    margin-bottom: 15px;
-}
-
-@media (max-width: 768px) {
-    .form-row {
-        flex-direction: column;
-        gap: 10px;
-    }
-    
-    .pds-nav {
-        flex-direction: column;
-    }
-    
-    .pds-nav-item {
-        border-right: none;
-        border-bottom: 1px solid #dee2e6;
-    }
-}
-</style>
-
-<div class="pds-container">
+<section class="card pds-container">
     <div class="pds-header">
-        <h1>PERSONAL DATA SHEET</h1>
-        <p>CSC Form No. 212, Revised 2017</p>
-        <p>Please accomplish this form in four (4) copies. Do not leave blanks, write "N/A" if not applicable.</p>
+        <div class="pds-header-badge">PDS</div>
+        <div>
+            <h1>PERSONAL DATA SHEET</h1>
+            <p>CS Form No. 212 (Revised 2017) • <?php echo (int) $currentYear; ?></p>
+            <p class="pds-header-note">Print legibly. Tick appropriate boxes and indicate N/A if not applicable. Do not abbreviate.</p>
+            <div class="pds-header-meta" aria-label="PDS metadata">
+                <span class="pds-meta-pill"><i class="fa-solid fa-calendar" aria-hidden="true"></i> Filing year: <?php echo (int) $currentYear; ?></span>
+                <span class="pds-meta-pill"><i class="fa-solid fa-id-card" aria-hidden="true"></i> Employee ID: <?php echo (int) $employeeId; ?></span>
+                <span class="pds-meta-pill"><i class="fa-solid fa-asterisk" aria-hidden="true"></i> Required fields marked *</span>
+            </div>
+        </div>
+    </div>
+    <div class="pds-warning-bar">
+        <strong>WARNING:</strong>
+        <span>Any misrepresentation made in the Personal Data Sheet and the Work Experience Sheet shall cause the filing of administrative/criminal case/s against the person concerned.</span>
+    </div>
+    <div class="pds-document-note">
+        <div class="pds-document-note-title">Official form guide</div>
+        <p>Read the attached guide to filling out the Personal Data Sheet before accomplishing the form. This page mirrors the CSC Form 212 structure so the employee can complete it as a fill-out document.</p>
+    </div>
+    <div class="pds-form-intro">
+        <div class="form-group">
+            <label>1. CS ID NO. <span class="pds-csc-note">(Do not fill up. For CSC use only)</span></label>
+            <input type="text" name="cs_id_no_display" form="pdsForm" readonly placeholder="Reserved for CSC use only">
+        </div>
+        <div class="pds-photo-box" aria-label="Passport photo placeholder">
+            <div class="pds-photo-box-title">Photo</div>
+            <p>Insert 4.5 cm x 3.5 cm passport-size photograph with name tag if required by your office process.</p>
+        </div>
     </div>
 
-    <div class="pds-nav">
-        <div class="pds-nav-item active" onclick="showPage(1)">Page 1: Personal & Family Background</div>
-        <div class="pds-nav-item" onclick="showPage(2)">Page 2: Education & Eligibility</div>
-        <div class="pds-nav-item" onclick="showPage(3)">Page 3: Work Experience & Training</div>
-        <div class="pds-nav-item" onclick="showPage(4)">Page 4: Legal & References</div>
+    <div class="pds-nav" role="tablist" aria-label="PDS pages">
+        <button type="button" class="pds-nav-item active" data-page="1" id="pdsTab1" aria-controls="page1" aria-selected="true">
+            <span class="pds-step-num" aria-hidden="true">1</span>
+            <span class="pds-step-text"><strong>Page 1</strong><span>Personal &amp; Family</span></span>
+        </button>
+        <button type="button" class="pds-nav-item" data-page="2" id="pdsTab2" aria-controls="page2" aria-selected="false">
+            <span class="pds-step-num" aria-hidden="true">2</span>
+            <span class="pds-step-text"><strong>Page 2</strong><span>Education &amp; Eligibility</span></span>
+        </button>
+        <button type="button" class="pds-nav-item" data-page="3" id="pdsTab3" aria-controls="page3" aria-selected="false">
+            <span class="pds-step-num" aria-hidden="true">3</span>
+            <span class="pds-step-text"><strong>Page 3</strong><span>Work &amp; Training</span></span>
+        </button>
+        <button type="button" class="pds-nav-item" data-page="4" id="pdsTab4" aria-controls="page4" aria-selected="false">
+            <span class="pds-step-num" aria-hidden="true">4</span>
+            <span class="pds-step-text"><strong>Page 4</strong><span>Legal &amp; References</span></span>
+        </button>
+        <div class="pds-progress" aria-hidden="true"><div id="pdsProgressBar"></div></div>
     </div>
 
     <form id="pdsForm" method="POST" action="pds_process.php">
         <input type="hidden" name="employee_id" value="<?php echo $employeeId; ?>">
         <input type="hidden" name="year" value="<?php echo $currentYear; ?>">
+        <div id="pdsAlert" class="pds-alert" role="alert" hidden>
+            <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+            <div>Please complete the required fields on this page before continuing.</div>
+        </div>
         
         <!-- PAGE 1: Personal & Family Background -->
         <div id="page1" class="pds-page active">
@@ -313,7 +79,7 @@ $pdsExists = false; // This would be checked from database
                 <h4>I. PERSONAL INFORMATION</h4>
                 <div class="form-row">
                     <div class="form-group">
-                        <label class="required">Surname</label>
+                        <label class="required">2. Surname</label>
                         <input type="text" name="surname" required>
                     </div>
                     <div class="form-group">
@@ -325,25 +91,25 @@ $pdsExists = false; // This would be checked from database
                         <input type="text" name="middle_name">
                     </div>
                     <div class="form-group">
-                        <label>Name Extension (Jr., Sr., III)</label>
+                        <label>Name Extension (JR., SR., III)</label>
                         <input type="text" name="name_extension">
                     </div>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label class="required">Date of Birth (mm/dd/yyyy)</label>
+                        <label class="required">3. Date of Birth (mm/dd/yyyy)</label>
                         <input type="date" name="date_of_birth" required>
                     </div>
                     <div class="form-group full-width">
-                        <label class="required">Place of Birth</label>
+                        <label class="required">4. Place of Birth</label>
                         <input type="text" name="place_of_birth" required>
                     </div>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label class="required">Sex</label>
+                        <label class="required">5. Sex</label>
                         <select name="sex" required>
                             <option value="">Select...</option>
                             <option value="Male">Male</option>
@@ -351,7 +117,7 @@ $pdsExists = false; // This would be checked from database
                         </select>
                     </div>
                     <div class="form-group">
-                        <label class="required">Civil Status</label>
+                        <label class="required">6. Civil Status</label>
                         <select name="civil_status" required>
                             <option value="">Select...</option>
                             <option value="Single">Single</option>
@@ -363,22 +129,22 @@ $pdsExists = false; // This would be checked from database
                         </select>
                     </div>
                     <div class="form-group">
-                        <label class="required">Citizenship</label>
+                        <label class="required">16. Citizenship</label>
                         <input type="text" name="citizenship" required>
                     </div>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Height (meters)</label>
+                        <label>8. Height (m)</label>
                         <input type="number" step="0.01" name="height_m" placeholder="1.65">
                     </div>
                     <div class="form-group">
-                        <label>Weight (kilograms)</label>
+                        <label>9. Weight (kg)</label>
                         <input type="number" step="0.1" name="weight_kg" placeholder="65.5">
                     </div>
                     <div class="form-group">
-                        <label>Blood Type</label>
+                        <label>18. Blood Type</label>
                         <select name="blood_type">
                             <option value="">Select...</option>
                             <option value="A+">A+</option>
@@ -395,34 +161,34 @@ $pdsExists = false; // This would be checked from database
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label>GSIS ID No.</label>
+                        <label>7. GSIS ID No.</label>
                         <input type="text" name="gsis_id">
                     </div>
                     <div class="form-group">
-                        <label>PAG-IBIG ID No.</label>
+                        <label>10. PAG-IBIG ID No.</label>
                         <input type="text" name="pagibig_id">
                     </div>
                     <div class="form-group">
-                        <label>PHILHEALTH ID No.</label>
+                        <label>11. PHILHEALTH No.</label>
                         <input type="text" name="philhealth_id">
                     </div>
                     <div class="form-group">
-                        <label>SSS ID No.</label>
+                        <label>12. SSS No.</label>
                         <input type="text" name="sss_id">
                     </div>
                     <div class="form-group">
-                        <label>TIN No.</label>
+                        <label>13. TIN No.</label>
                         <input type="text" name="tin_id">
                     </div>
                     <div class="form-group">
-                        <label>Agency Employee No.</label>
+                        <label>14. Agency Employee No.</label>
                         <input type="text" name="agency_employee_no">
                     </div>
                 </div>
             </div>
 
             <div class="form-section">
-                <h4>RESIDENTIAL ADDRESS</h4>
+                <h4>17. RESIDENTIAL ADDRESS</h4>
                 <div class="form-group full-width">
                     <label class="required">Address</label>
                     <textarea name="residential_address" rows="2" required></textarea>
@@ -440,7 +206,7 @@ $pdsExists = false; // This would be checked from database
             </div>
 
             <div class="form-section">
-                <h4>PERMANENT ADDRESS</h4>
+                <h4>19. PERMANENT ADDRESS</h4>
                 <div class="form-group full-width">
                     <label class="required">Address</label>
                     <textarea name="permanent_address" rows="2" required></textarea>
@@ -458,14 +224,14 @@ $pdsExists = false; // This would be checked from database
             </div>
 
             <div class="form-section">
-                <h4>CONTACT INFORMATION</h4>
+                <h4>20-21. CONTACT INFORMATION</h4>
                 <div class="form-row">
                     <div class="form-group">
-                        <label class="required">Email Address</label>
+                        <label class="required">21. E-mail Address (if any)</label>
                         <input type="email" name="email_address" required>
                     </div>
                     <div class="form-group">
-                        <label class="required">Mobile Number</label>
+                        <label class="required">20. Mobile No.</label>
                         <input type="text" name="mobile_number" required>
                     </div>
                 </div>
@@ -552,10 +318,10 @@ $pdsExists = false; // This would be checked from database
                     <div class="dynamic-item">
                         <input type="text" placeholder="Child's Full Name" name="children_name[]">
                         <input type="date" placeholder="Date of Birth" name="children_birthdate[]">
-                        <button type="button" class="btn-remove" onclick="removeDynamicItem(this)">Remove</button>
+                        <button type="button" class="btn btn-outline btn-small pds-remove" onclick="removeDynamicItem(this)">Remove</button>
                     </div>
                 </div>
-                <button type="button" class="btn-add" onclick="addChild()">Add Child</button>
+                <button type="button" class="btn btn-outline btn-small pds-add" onclick="addChild()">Add Child</button>
             </div>
         </div>
 
@@ -580,10 +346,10 @@ $pdsExists = false; // This would be checked from database
                         <input type="text" placeholder="Highest Level/Units Earned" name="highest_level[]">
                         <input type="number" placeholder="Year Graduated" name="year_graduated[]">
                         <input type="text" placeholder="Scholarship/Academic Honors" name="scholarship_honors[]">
-                        <button type="button" class="btn-remove" onclick="removeDynamicItem(this)">Remove</button>
+                        <button type="button" class="btn btn-outline btn-small pds-remove" onclick="removeDynamicItem(this)">Remove</button>
                     </div>
                 </div>
-                <button type="button" class="btn-add" onclick="addEducation()">Add Education</button>
+                <button type="button" class="btn btn-outline btn-small pds-add" onclick="addEducation()">Add Education</button>
             </div>
 
             <div class="form-section">
@@ -603,10 +369,10 @@ $pdsExists = false; // This would be checked from database
                         <input type="text" placeholder="Place of Exam/Conferment" name="exam_place[]">
                         <input type="text" placeholder="License Number" name="license_number[]">
                         <input type="date" placeholder="Date of Release" name="license_release_date[]">
-                        <button type="button" class="btn-remove" onclick="removeDynamicItem(this)">Remove</button>
+                        <button type="button" class="btn btn-outline btn-small pds-remove" onclick="removeDynamicItem(this)">Remove</button>
                     </div>
                 </div>
-                <button type="button" class="btn-add" onclick="addEligibility()">Add Eligibility</button>
+                <button type="button" class="btn btn-outline btn-small pds-add" onclick="addEligibility()">Add Eligibility</button>
             </div>
         </div>
 
@@ -637,10 +403,10 @@ $pdsExists = false; // This would be checked from database
                             <option value="Yes">Yes</option>
                             <option value="No">No</option>
                         </select>
-                        <button type="button" class="btn-remove" onclick="removeDynamicItem(this)">Remove</button>
+                        <button type="button" class="btn btn-outline btn-small pds-remove" onclick="removeDynamicItem(this)">Remove</button>
                     </div>
                 </div>
-                <button type="button" class="btn-add" onclick="addWorkExperience()">Add Work Experience</button>
+                <button type="button" class="btn btn-outline btn-small pds-add" onclick="addWorkExperience()">Add Work Experience</button>
             </div>
 
             <div class="form-section">
@@ -652,10 +418,10 @@ $pdsExists = false; // This would be checked from database
                         <input type="date" placeholder="To" name="voluntary_to[]" required>
                         <input type="number" placeholder="Number of Hours" name="voluntary_hours[]">
                         <input type="text" placeholder="Position/Nature of Work" name="voluntary_position[]" required>
-                        <button type="button" class="btn-remove" onclick="removeDynamicItem(this)">Remove</button>
+                        <button type="button" class="btn btn-outline btn-small pds-remove" onclick="removeDynamicItem(this)">Remove</button>
                     </div>
                 </div>
-                <button type="button" class="btn-add" onclick="addVoluntaryWork()">Add Voluntary Work</button>
+                <button type="button" class="btn btn-outline btn-small pds-add" onclick="addVoluntaryWork()">Add Voluntary Work</button>
             </div>
 
             <div class="form-section">
@@ -674,10 +440,10 @@ $pdsExists = false; // This would be checked from database
                             <option value="Others">Others</option>
                         </select>
                         <input type="text" placeholder="Sponsored By" name="training_sponsored[]" required>
-                        <button type="button" class="btn-remove" onclick="removeDynamicItem(this)">Remove</button>
+                        <button type="button" class="btn btn-outline btn-small pds-remove" onclick="removeDynamicItem(this)">Remove</button>
                     </div>
                 </div>
-                <button type="button" class="btn-add" onclick="addTraining()">Add Training</button>
+                <button type="button" class="btn btn-outline btn-small pds-add" onclick="addTraining()">Add Training</button>
             </div>
 
             <div class="form-section">
@@ -902,19 +668,45 @@ $pdsExists = false; // This would be checked from database
         </div>
 
         <div class="pds-actions">
-            <button type="button" class="btn-pds-secondary" onclick="previousPage()" id="prevBtn" style="display: none;">Previous</button>
-            <button type="button" class="btn-pds" onclick="nextPage()" id="nextBtn">Next</button>
-            <button type="button" class="btn-pds" onclick="saveDraft()" id="saveBtn">Save as Draft</button>
-            <button type="submit" class="btn-pds" id="submitBtn" style="display: none;">Submit PDS</button>
+            <div class="pds-actions-left">
+                <div class="pds-step-indicator" id="pdsStepIndicator" aria-live="polite">Step 1 of 4</div>
+            </div>
+            <div class="pds-actions-right">
+                <button type="button" class="btn btn-outline" onclick="previousPage()" id="prevBtn" style="display: none;">Previous</button>
+                <button type="button" class="btn btn-primary" onclick="nextPage()" id="nextBtn">Next</button>
+                <button type="button" class="btn btn-outline" onclick="saveDraft()" id="saveBtn">Save as Draft</button>
+                <button type="submit" class="btn btn-primary" id="submitBtn" style="display: none;">Submit PDS</button>
+            </div>
         </div>
     </form>
-</div>
+</section>
 
 <script>
 let currentPage = 1;
 const totalPages = 4;
 
+function setAlertVisible(isVisible) {
+    const alertEl = document.getElementById('pdsAlert');
+    if (!alertEl) return;
+    alertEl.hidden = !isVisible;
+}
+
+function updateProgress() {
+    const progressBar = document.getElementById('pdsProgressBar');
+    if (progressBar) {
+        const pct = Math.max(0, Math.min(100, Math.round((currentPage / totalPages) * 100)));
+        progressBar.style.width = pct + '%';
+    }
+
+    const indicator = document.getElementById('pdsStepIndicator');
+    if (indicator) {
+        indicator.textContent = `Step ${currentPage} of ${totalPages}`;
+    }
+}
+
 function showPage(pageNum) {
+    setAlertVisible(false);
+
     // Hide all pages
     document.querySelectorAll('.pds-page').forEach(page => {
         page.classList.remove('active');
@@ -929,10 +721,15 @@ function showPage(pageNum) {
     document.getElementById('page' + pageNum).classList.add('active');
     
     // Activate corresponding nav item
-    document.querySelectorAll('.pds-nav-item')[pageNum - 1].classList.add('active');
+    document.querySelectorAll('.pds-nav-item').forEach((item, idx) => {
+        const active = (idx === (pageNum - 1));
+        item.classList.toggle('active', active);
+        item.setAttribute('aria-selected', active ? 'true' : 'false');
+    });
     
     currentPage = pageNum;
     updateButtons();
+    updateProgress();
 }
 
 function nextPage() {
@@ -963,22 +760,26 @@ function updateButtons() {
         nextBtn.style.display = 'inline-block';
         submitBtn.style.display = 'none';
     }
+
+    updateProgress();
 }
 
 function validateCurrentPage() {
-    // Basic validation - check required fields on current page
     const currentPageElement = document.getElementById('page' + currentPage);
-    const requiredFields = currentPageElement.querySelectorAll('[required]');
-    
-    for (let field of requiredFields) {
-        if (!field.value.trim()) {
-            alert('Please fill in all required fields on this page.');
-            field.focus();
-            return false;
-        }
+    const invalidField = currentPageElement ? currentPageElement.querySelector(':invalid') : null;
+    if (!invalidField) {
+        setAlertVisible(false);
+        return true;
     }
-    
-    return true;
+
+    setAlertVisible(true);
+    invalidField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    if (typeof invalidField.reportValidity === 'function') {
+        invalidField.reportValidity();
+    } else {
+        invalidField.focus();
+    }
+    return false;
 }
 
 function saveDraft() {
@@ -998,6 +799,16 @@ function saveDraft() {
     }, 1000);
 }
 
+// Bind step navigation
+document.querySelectorAll('.pds-nav-item[data-page]').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const pageNum = Number(btn.getAttribute('data-page') || '0');
+        if (!pageNum || pageNum === currentPage) return;
+        if (pageNum > currentPage && !validateCurrentPage()) return;
+        showPage(pageNum);
+    });
+});
+
 // Dynamic list functions
 function removeDynamicItem(button) {
     if (confirm('Remove this item?')) {
@@ -1012,7 +823,7 @@ function addChild() {
     newItem.innerHTML = `
         <input type="text" placeholder="Child's Full Name" name="children_name[]">
         <input type="date" placeholder="Date of Birth" name="children_birthdate[]">
-        <button type="button" class="btn-remove" onclick="removeDynamicItem(this)">Remove</button>
+        <button type="button" class="btn btn-outline btn-small pds-remove" onclick="removeDynamicItem(this)">Remove</button>
     `;
     container.appendChild(newItem);
 }
@@ -1037,7 +848,7 @@ function addEducation() {
         <input type="text" placeholder="Highest Level/Units Earned" name="highest_level[]">
         <input type="number" placeholder="Year Graduated" name="year_graduated[]">
         <input type="text" placeholder="Scholarship/Academic Honors" name="scholarship_honors[]">
-        <button type="button" class="btn-remove" onclick="removeDynamicItem(this)">Remove</button>
+        <button type="button" class="btn btn-outline btn-small pds-remove" onclick="removeDynamicItem(this)">Remove</button>
     `;
     container.appendChild(newItem);
 }
@@ -1060,7 +871,7 @@ function addEligibility() {
         <input type="text" placeholder="Place of Exam/Conferment" name="exam_place[]">
         <input type="text" placeholder="License Number" name="license_number[]">
         <input type="date" placeholder="Date of Release" name="license_release_date[]">
-        <button type="button" class="btn-remove" onclick="removeDynamicItem(this)">Remove</button>
+        <button type="button" class="btn btn-outline btn-small pds-remove" onclick="removeDynamicItem(this)">Remove</button>
     `;
     container.appendChild(newItem);
 }
@@ -1091,7 +902,7 @@ function addWorkExperience() {
             <option value="Yes">Yes</option>
             <option value="No">No</option>
         </select>
-        <button type="button" class="btn-remove" onclick="removeDynamicItem(this)">Remove</button>
+        <button type="button" class="btn btn-outline btn-small pds-remove" onclick="removeDynamicItem(this)">Remove</button>
     `;
     container.appendChild(newItem);
 }
@@ -1106,7 +917,7 @@ function addVoluntaryWork() {
         <input type="date" placeholder="To" name="voluntary_to[]" required>
         <input type="number" placeholder="Number of Hours" name="voluntary_hours[]">
         <input type="text" placeholder="Position/Nature of Work" name="voluntary_position[]" required>
-        <button type="button" class="btn-remove" onclick="removeDynamicItem(this)">Remove</button>
+        <button type="button" class="btn btn-outline btn-small pds-remove" onclick="removeDynamicItem(this)">Remove</button>
     `;
     container.appendChild(newItem);
 }
@@ -1128,7 +939,7 @@ function addTraining() {
             <option value="Others">Others</option>
         </select>
         <input type="text" placeholder="Sponsored By" name="training_sponsored[]" required>
-        <button type="button" class="btn-remove" onclick="removeDynamicItem(this)">Remove</button>
+        <button type="button" class="btn btn-outline btn-small pds-remove" onclick="removeDynamicItem(this)">Remove</button>
     `;
     container.appendChild(newItem);
 }
@@ -1138,3 +949,4 @@ updateButtons();
 </script>
 
 <?php require_once 'includes/footer.php'; ?>
+
