@@ -1,8 +1,25 @@
 <?php
 require_once __DIR__ . '/db.php';
+require_once __DIR__ . '/config.php';
 
 if (!defined('AUTH_BYPASS_LOGIN')) {
     define('AUTH_BYPASS_LOGIN', false);
+}
+
+if (!defined('AUTH_DEV_MODE')) {
+    $host = $_SERVER['HTTP_HOST'] ?? '';
+    $addr = $_SERVER['SERVER_ADDR'] ?? '';
+    $dev = $host === 'localhost' || str_starts_with($host, '127.0.0.1')
+        || $addr === '127.0.0.1' || $addr === '::1';
+    define('AUTH_DEV_MODE', $dev);
+}
+
+if (!defined('AUTH_2FA_ENABLED')) {
+    define('AUTH_2FA_ENABLED', true);
+}
+
+if (!defined('TRUSTED_DEVICE_COOKIE')) {
+    define('TRUSTED_DEVICE_COOKIE', 'lto_hris_trusted_device');
 }
 
 if (session_status() === PHP_SESSION_NONE) {
@@ -61,10 +78,478 @@ function ensure_auth_schema()
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4'
     );
 
+    ensure_auth_activity_table();
+    ensure_email_change_requests_table();
+    ensure_trusted_devices_table();
     ensure_base_roles_exist();
 }
 
-ensure_auth_schema();
+function client_ip()
+{
+    return $_SERVER['REMOTE_ADDR'] ?? '';
+}
+
+function ensure_auth_activity_table()
+{
+    db()->exec(
+        'CREATE TABLE IF NOT EXISTS auth_activity (
+            id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+            user_id INT UNSIGNED NULL,
+            identifier VARCHAR(160) NULL,
+            event VARCHAR(60) NOT NULL,
+            ip_address VARCHAR(45) NULL,
+            user_agent VARCHAR(255) NULL,
+            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            INDEX idx_user_event_time (user_id, event, created_at)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4'
+    );
+}
+
+function log_auth_event($event, $userId = null, $identifier = null)
+{
+    try {
+        ensure_auth_activity_table();
+        $stmt = db()->prepare(
+            'INSERT INTO auth_activity (user_id, identifier, event, ip_address, user_agent)
+             VALUES (?, ?, ?, ?, ?)'
+        );
+        $stmt->execute([
+            $userId ? (int) $userId : null,
+            $identifier ? (string) $identifier : null,
+            (string) $event,
+            client_ip(),
+            substr((string) ($_SERVER['HTTP_USER_AGENT'] ?? ''), 0, 255),
+        ]);
+    } catch (Throwable $e) {
+        // Avoid breaking auth flow when logging fails.
+    }
+}
+
+function ensure_email_change_requests_table()
+{
+    db()->exec(
+        'CREATE TABLE IF NOT EXISTS email_change_requests (
+            id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+            user_id INT UNSIGNED NOT NULL,
+            new_email VARCHAR(150) NOT NULL,
+            token_hash CHAR(64) NOT NULL,
+            expires_at DATETIME NOT NULL,
+            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE KEY uniq_token (token_hash),
+            INDEX idx_user_expires (user_id, expires_at)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4'
+    );
+}
+
+function ensure_trusted_devices_table()
+{
+    db()->exec(
+        'CREATE TABLE IF NOT EXISTS trusted_devices (
+            id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+            user_id INT UNSIGNED NOT NULL,
+            token_hash CHAR(64) NOT NULL,
+            label VARCHAR(120) NULL,
+            ip_address VARCHAR(45) NULL,
+            user_agent VARCHAR(255) NULL,
+            last_used_at DATETIME NULL,
+            expires_at DATETIME NOT NULL,
+            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE KEY uniq_user_token (user_id, token_hash),
+            INDEX idx_user_expires (user_id, expires_at)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4'
+    );
+}
+
+function trusted_device_cookie_value()
+{
+    $v = $_COOKIE[TRUSTED_DEVICE_COOKIE] ?? '';
+    return is_string($v) ? trim($v) : '';
+}
+
+function is_trusted_device($userId)
+{
+    if (AUTH_BYPASS_LOGIN) {
+        return true;
+    }
+
+    $token = trusted_device_cookie_value();
+    if ($token === '' || strlen($token) < 32) {
+        return false;
+    }
+
+    try {
+        ensure_trusted_devices_table();
+        $hash = hash('sha256', $token);
+        $stmt = db()->prepare(
+            'SELECT id, expires_at
+             FROM trusted_devices
+             WHERE user_id = ? AND token_hash = ?
+             LIMIT 1'
+        );
+        $stmt->execute([(int) $userId, $hash]);
+        $row = $stmt->fetch();
+        if (!$row) {
+            return false;
+        }
+
+        $now = new DateTimeImmutable('now');
+        $expires = new DateTimeImmutable($row['expires_at']);
+        if ($expires < $now) {
+            db()->prepare('DELETE FROM trusted_devices WHERE id = ?')->execute([(int) $row['id']]);
+            return false;
+        }
+
+        db()->prepare('UPDATE trusted_devices SET last_used_at = NOW(), ip_address = ? WHERE id = ?')
+            ->execute([client_ip(), (int) $row['id']]);
+
+        return true;
+    } catch (Throwable $e) {
+        return false;
+    }
+}
+
+function remember_trusted_device($userId, $label = '')
+{
+    ensure_trusted_devices_table();
+
+    $token = bin2hex(random_bytes(32));
+    $hash = hash('sha256', $token);
+    $expiresAt = (new DateTimeImmutable('+30 days'))->format('Y-m-d H:i:s');
+
+    $stmt = db()->prepare(
+        'INSERT IGNORE INTO trusted_devices (user_id, token_hash, label, ip_address, user_agent, last_used_at, expires_at)
+         VALUES (?, ?, ?, ?, ?, NOW(), ?)'
+    );
+    $stmt->execute([
+        (int) $userId,
+        $hash,
+        $label !== '' ? substr($label, 0, 120) : null,
+        client_ip(),
+        substr((string) ($_SERVER['HTTP_USER_AGENT'] ?? ''), 0, 255),
+        $expiresAt,
+    ]);
+
+    $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+        || (isset($_SERVER['SERVER_PORT']) && (int) $_SERVER['SERVER_PORT'] === 443);
+
+    setcookie(TRUSTED_DEVICE_COOKIE, $token, [
+        'expires' => time() + (30 * 24 * 60 * 60),
+        'path' => '/',
+        'secure' => $isHttps,
+        'httponly' => true,
+        'samesite' => 'Lax',
+    ]);
+
+    return true;
+}
+
+function clear_trusted_device_cookie()
+{
+    $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+        || (isset($_SERVER['SERVER_PORT']) && (int) $_SERVER['SERVER_PORT'] === 443);
+
+    setcookie(TRUSTED_DEVICE_COOKIE, '', [
+        'expires' => time() - 3600,
+        'path' => '/',
+        'secure' => $isHttps,
+        'httponly' => true,
+        'samesite' => 'Lax',
+    ]);
+}
+
+function send_email_message($to, $subject, $message)
+{
+    $to = (string) $to;
+    $subject = (string) $subject;
+    $message = (string) $message;
+
+    $headers = "MIME-Version: 1.0\r\n";
+    $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
+    if (SMTP_FROM_EMAIL !== '') {
+        $fromName = SMTP_FROM_NAME !== '' ? SMTP_FROM_NAME : 'LTO HRIS';
+        $headers .= 'From: ' . $fromName . ' <' . SMTP_FROM_EMAIL . ">\r\n";
+    }
+
+    $sent = false;
+
+    if (SMTP_HOST !== '') {
+        $sent = smtp_send_mail($to, $subject, $message);
+    }
+
+    try {
+        if (!$sent) {
+            $sent = @mail($to, $subject, $message, $headers);
+        }
+    } catch (Throwable $e) {
+        $sent = false;
+    }
+
+    if (!$sent) {
+        error_log('[LTO HRIS] Email not sent (check SMTP). To=' . $to . ' Subject=' . $subject);
+    }
+
+    return $sent;
+}
+
+function format_user_agent($ua)
+{
+    $ua = (string) $ua;
+    if ($ua === '') {
+        return 'Unknown device';
+    }
+
+    $os = 'Unknown OS';
+    if (stripos($ua, 'Windows NT') !== false) $os = 'Windows';
+    elseif (stripos($ua, 'Android') !== false) $os = 'Android';
+    elseif (stripos($ua, 'iPhone') !== false || stripos($ua, 'iPad') !== false) $os = 'iOS';
+    elseif (stripos($ua, 'Mac OS X') !== false) $os = 'macOS';
+    elseif (stripos($ua, 'Linux') !== false) $os = 'Linux';
+
+    $browser = 'Browser';
+    if (stripos($ua, 'Edg/') !== false) $browser = 'Edge';
+    elseif (stripos($ua, 'Chrome/') !== false && stripos($ua, 'Chromium') === false) $browser = 'Chrome';
+    elseif (stripos($ua, 'Firefox/') !== false) $browser = 'Firefox';
+    elseif (stripos($ua, 'Safari/') !== false && stripos($ua, 'Chrome/') === false) $browser = 'Safari';
+
+    return $browser . ' on ' . $os;
+}
+
+function smtp_send_mail($to, $subject, $body)
+{
+    $host = SMTP_HOST;
+    $port = SMTP_PORT ?: 587;
+    $secure = strtolower((string) SMTP_SECURE);
+    $user = SMTP_USER;
+    $pass = SMTP_PASS;
+    $from = SMTP_FROM_EMAIL !== '' ? SMTP_FROM_EMAIL : ($user !== '' ? $user : 'noreply@localhost');
+    $fromName = SMTP_FROM_NAME !== '' ? SMTP_FROM_NAME : 'LTO HRIS';
+
+    $target = ($secure === 'ssl') ? ('ssl://' . $host) : $host;
+    $fp = @fsockopen($target, $port, $errno, $errstr, 10);
+    if (!$fp) {
+        return false;
+    }
+
+    $read = function() use ($fp) {
+        $data = '';
+        while (!feof($fp)) {
+            $line = fgets($fp, 515);
+            if ($line === false) break;
+            $data .= $line;
+            if (strlen($line) >= 4 && $line[3] === ' ') break;
+        }
+        return $data;
+    };
+
+    $send = function($cmd) use ($fp) {
+        fwrite($fp, $cmd . "\r\n");
+    };
+
+    $expectOk = function($resp) {
+        $code = (int) substr($resp, 0, 3);
+        return $code >= 200 && $code < 400;
+    };
+
+    $greet = $read();
+    if (!$expectOk($greet)) {
+        fclose($fp);
+        return false;
+    }
+
+    $send('EHLO lto-hris');
+    $ehlo = $read();
+    if (!$expectOk($ehlo)) {
+        $send('HELO lto-hris');
+        $helo = $read();
+        if (!$expectOk($helo)) {
+            fclose($fp);
+            return false;
+        }
+    }
+
+    if ($secure === 'tls' && stripos($ehlo, 'STARTTLS') !== false) {
+        $send('STARTTLS');
+        $resp = $read();
+        if ($expectOk($resp)) {
+            @stream_socket_enable_crypto($fp, true, STREAM_CRYPTO_METHOD_TLS_CLIENT);
+            $send('EHLO lto-hris');
+            $ehlo = $read();
+        }
+    }
+
+    if ($user !== '') {
+        $send('AUTH LOGIN');
+        $resp = $read();
+        if (substr($resp, 0, 3) !== '334') {
+            fclose($fp);
+            return false;
+        }
+        $send(base64_encode($user));
+        $resp = $read();
+        if (substr($resp, 0, 3) !== '334') {
+            fclose($fp);
+            return false;
+        }
+        $send(base64_encode($pass));
+        $resp = $read();
+        if (!$expectOk($resp)) {
+            fclose($fp);
+            return false;
+        }
+    }
+
+    $send('MAIL FROM:<' . $from . '>');
+    if (!$expectOk($read())) {
+        fclose($fp);
+        return false;
+    }
+
+    $send('RCPT TO:<' . $to . '>');
+    if (!$expectOk($read())) {
+        fclose($fp);
+        return false;
+    }
+
+    $send('DATA');
+    $resp = $read();
+    if (substr($resp, 0, 3) !== '354') {
+        fclose($fp);
+        return false;
+    }
+
+    $headers = [];
+    $headers[] = 'From: ' . $fromName . ' <' . $from . '>';
+    $headers[] = 'To: <' . $to . '>';
+    $headers[] = 'Subject: ' . $subject;
+    $headers[] = 'MIME-Version: 1.0';
+    $headers[] = 'Content-Type: text/plain; charset=UTF-8';
+
+    $data = implode("\r\n", $headers) . "\r\n\r\n" . str_replace("\n.", "\n..", (string) $body) . "\r\n.";
+    $send($data);
+
+    if (!$expectOk($read())) {
+        fclose($fp);
+        return false;
+    }
+
+    $send('QUIT');
+    fclose($fp);
+    return true;
+}
+
+function create_email_change_request($userId, $newEmail)
+{
+    ensure_email_change_requests_table();
+
+    $token = bin2hex(random_bytes(32));
+    $tokenHash = hash('sha256', $token);
+    $expiresAt = (new DateTimeImmutable('+1 day'))->format('Y-m-d H:i:s');
+
+    db()->prepare('DELETE FROM email_change_requests WHERE user_id = ?')->execute([(int) $userId]);
+
+    $stmt = db()->prepare(
+        'INSERT INTO email_change_requests (user_id, new_email, token_hash, expires_at)
+         VALUES (?, ?, ?, ?)'
+    );
+    $stmt->execute([(int) $userId, normalize_identifier($newEmail), $tokenHash, $expiresAt]);
+
+    return $token;
+}
+
+function verify_email_change_request($userId, $token)
+{
+    ensure_email_change_requests_table();
+
+    $tokenHash = hash('sha256', (string) $token);
+    $stmt = db()->prepare(
+        'SELECT id, new_email, expires_at
+         FROM email_change_requests
+         WHERE user_id = ? AND token_hash = ?
+         LIMIT 1'
+    );
+    $stmt->execute([(int) $userId, $tokenHash]);
+    $row = $stmt->fetch();
+
+    if (!$row) {
+        return [false, 'Invalid or expired verification link.'];
+    }
+
+    $now = new DateTimeImmutable('now');
+    $expires = new DateTimeImmutable($row['expires_at']);
+    if ($expires < $now) {
+        db()->prepare('DELETE FROM email_change_requests WHERE id = ?')->execute([(int) $row['id']]);
+        return [false, 'Verification link has expired.'];
+    }
+
+    $newEmail = (string) $row['new_email'];
+    if (user_exists($newEmail)) {
+        return [false, 'This email address is already in use.'];
+    }
+
+    $update = db()->prepare('UPDATE users SET email = ? WHERE id = ?');
+    $update->execute([normalize_identifier($newEmail), (int) $userId]);
+
+    db()->prepare('DELETE FROM email_change_requests WHERE id = ?')->execute([(int) $row['id']]);
+
+    return [true, $newEmail];
+}
+
+function requires_2fa($roles)
+{
+    if (!AUTH_2FA_ENABLED) {
+        return false;
+    }
+
+    $roles = (array) $roles;
+    return in_array('superadmin', $roles, true) || in_array('admin', $roles, true);
+}
+
+function start_2fa_challenge($user)
+{
+    $code = (string) random_int(100000, 999999);
+    $_SESSION['pending_2fa'] = [
+        'user' => [
+            'id' => $user['id'] ?? null,
+            'email' => $user['email'] ?? null,
+            'first_name' => $user['first_name'] ?? '',
+            'last_name' => $user['last_name'] ?? '',
+            'roles' => $user['roles'] ?? [],
+        ],
+        'code_hash' => password_hash($code, PASSWORD_DEFAULT),
+        'expires_at' => time() + 300,
+    ];
+
+    if (AUTH_DEV_MODE) {
+        $_SESSION['flash_2fa_code'] = $code;
+    }
+
+    $email = $user['email'] ?? '';
+    $subject = 'Your LTO HRIS verification code';
+    $message = "Your one-time verification code is: {$code}\n\nThis code expires in 5 minutes.";
+    send_email_message($email, $subject, $message);
+
+    log_auth_event('2fa_sent', $user['id'] ?? null, $email);
+}
+
+function verify_2fa_code($code)
+{
+    $pending = $_SESSION['pending_2fa'] ?? null;
+    if (!$pending || !is_array($pending)) {
+        return [false, 'No verification is pending.'];
+    }
+
+    if (($pending['expires_at'] ?? 0) < time()) {
+        unset($_SESSION['pending_2fa']);
+        return [false, 'Verification code expired. Please login again.'];
+    }
+
+    $hash = $pending['code_hash'] ?? '';
+    if (!is_string($hash) || !password_verify((string) $code, $hash)) {
+        return [false, 'Invalid verification code.'];
+    }
+
+    return [true, $pending['user'] ?? null];
+}
 
 function ensure_base_roles_exist()
 {
@@ -88,6 +573,8 @@ function ensure_base_roles_exist()
         $stmt->execute($role);
     }
 }
+
+ensure_auth_schema();
 
 function csrf_token()
 {
@@ -284,12 +771,20 @@ function login_user($user)
         'display_name' => $displayName,
         'roles' => $user['roles'] ?? [],
     ];
+
+    log_auth_event('login_success', $_SESSION['user']['id'] ?? null, $_SESSION['user']['email'] ?? null);
 }
 
 function logout_user()
 {
+    $u = current_user();
+    $uid = $u['id'] ?? null;
+    $identifier = $u['email'] ?? null;
+    log_auth_event('logout', $uid, $identifier);
+
     unset($_SESSION['user']);
     unset($_SESSION['auth_limits']);
+    unset($_SESSION['pending_2fa']);
 
     if (ini_get('session.use_cookies')) {
         $params = session_get_cookie_params();

@@ -13,6 +13,65 @@ $registerLastName = '';
 $registerEmail = '';
 $showRegisterModal = isset($_GET['register']);
 $csrfToken = csrf_token();
+$show2faModal = isset($_GET['2fa']) || isset($_SESSION['pending_2fa']);
+$twoFaError = '';
+$twoFaSuccess = '';
+
+if (isset($_GET['cancel_2fa'])) {
+    unset($_SESSION['pending_2fa']);
+    unset($_SESSION['flash_2fa_code']);
+    header('Location: index.php');
+    exit;
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form_action'] ?? '') === 'verify_2fa') {
+    if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
+        $twoFaError = 'Your session has expired. Please try again.';
+    } else {
+        $code = trim((string) ($_POST['otp_code'] ?? ''));
+        [$ok, $pendingUser] = verify_2fa_code($code);
+        if ($ok && is_array($pendingUser)) {
+            unset($_SESSION['pending_2fa']);
+            unset($_SESSION['flash_2fa_code']);
+            regenerate_csrf_token();
+
+            $remember = ($_POST['remember_device'] ?? '') === '1';
+            if ($remember) {
+                remember_trusted_device($pendingUser['id'] ?? 0, 'Trusted device');
+            }
+            login_user($pendingUser);
+
+            $roles = $pendingUser['roles'] ?? [];
+            if (in_array('superadmin', $roles)) {
+                header('Location: superadmin-dashboard.php');
+            } elseif (in_array('admin', $roles) || in_array('hr_officer', $roles)) {
+                header('Location: admin-dashboard.php');
+            } else {
+                header('Location: employee-dashboard.php');
+            }
+            exit;
+        }
+
+        $twoFaError = (string) ($pendingUser ?: 'Invalid verification code.');
+    }
+
+    $show2faModal = true;
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form_action'] ?? '') === 'resend_2fa') {
+    if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
+        $twoFaError = 'Your session has expired. Please try again.';
+    } else {
+        $pending = $_SESSION['pending_2fa']['user'] ?? null;
+        if (is_array($pending)) {
+            start_2fa_challenge($pending);
+            $twoFaSuccess = 'A new verification code was sent.';
+        } else {
+            $twoFaError = 'No verification is pending.';
+        }
+    }
+    $show2faModal = true;
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form_action'] ?? '') === 'login_modal') {
     $loginEmail = isset($_POST['email']) ? trim($_POST['email']) : '';
@@ -30,10 +89,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form_action'] ?? '') === '
         if ($user) {
             clear_failed_attempts('login');
             regenerate_csrf_token();
-            login_user($user);
-            
-            // Redirect to appropriate dashboard based on role
+
             $roles = $user['roles'] ?? [];
+            if (requires_2fa($roles)) {
+                if (is_trusted_device($user['id'] ?? 0)) {
+                    login_user($user);
+                    log_auth_event('2fa_skipped_trusted_device', $user['id'] ?? null, $user['email'] ?? null);
+
+                    if (in_array('superadmin', $roles)) {
+                        header('Location: superadmin-dashboard.php');
+                    } elseif (in_array('admin', $roles) || in_array('hr_officer', $roles)) {
+                        header('Location: admin-dashboard.php');
+                    } else {
+                        header('Location: employee-dashboard.php');
+                    }
+                    exit;
+                }
+                start_2fa_challenge($user);
+                header('Location: index.php?2fa=1');
+                exit;
+            }
+
+            login_user($user);
+
+            // Redirect to appropriate dashboard based on role
             if (in_array('superadmin', $roles)) {
                 header('Location: superadmin-dashboard.php');
             } elseif (in_array('admin', $roles) || in_array('hr_officer', $roles)) {
@@ -45,6 +124,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form_action'] ?? '') === '
         }
 
         register_failed_attempt('login');
+        log_auth_event('login_failed', null, $loginEmail);
         
         // Check if the email exists to provide more specific error messages
         $existingUser = fetch_user_record($loginEmail);
@@ -147,7 +227,7 @@ $contactLink = ['label' => 'Contact Us', 'href' => '#', 'active' => false, 'care
     <link rel="stylesheet" href="assets/css/lto-style.css">
 </head>
 
-<body class="landing-page">
+<body class="landing-page<?php echo $show2faModal ? ' login-modal-open' : ''; ?>">
 
     <div class="gov-topbar">
         <div class="gov-inner">
@@ -501,6 +581,75 @@ $contactLink = ['label' => 'Contact Us', 'href' => '#', 'active' => false, 'care
                             </button>
                         </form>
 
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="login-modal<?php echo $show2faModal ? ' is-open' : ''; ?>" id="twoFaModal" aria-hidden="<?php echo $show2faModal ? 'false' : 'true'; ?>">
+        <a class="login-modal-backdrop" href="index.php?cancel_2fa=1" aria-label="Cancel verification"></a>
+        <div class="login-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="twoFaModalTitle">
+            <div class="login-card-modern login-card-modal login-card-modal-split" style="max-width: 520px;">
+                <div class="login-modal-panel" style="width: 100%;">
+                    <div class="login-modal-header login-modal-header-plain">
+                        <div class="login-modal-header-copy">
+                            <div class="login-modal-title-row">
+                                <h2 id="twoFaModalTitle">Verification <span>Code</span></h2>
+                            </div>
+                            <p class="login-modal-subtitle">We sent a one-time code to your email.</p>
+                        </div>
+                        <a class="login-modal-close" href="index.php?cancel_2fa=1" aria-label="Cancel verification">
+                            <span aria-hidden="true">&times;</span>
+                        </a>
+                    </div>
+
+                    <div class="login-modal-body login-modal-body-plain">
+                        <?php if ($twoFaError !== ''): ?>
+                            <div class="alert alert-error"><?php echo htmlspecialchars($twoFaError); ?></div>
+                        <?php endif; ?>
+
+                        <?php if ($twoFaSuccess !== ''): ?>
+                            <div class="alert alert-success"><?php echo htmlspecialchars($twoFaSuccess); ?></div>
+                        <?php endif; ?>
+
+                        <?php if (AUTH_DEV_MODE && isset($_SESSION['flash_2fa_code'])): ?>
+                            <div class="alert alert-success">
+                                Dev code: <?php echo htmlspecialchars((string) $_SESSION['flash_2fa_code']); ?>
+                            </div>
+                        <?php endif; ?>
+
+                        <form class="login-form-modern login-form-modal" method="post" action="index.php?2fa=1">
+                            <input type="hidden" name="form_action" value="verify_2fa">
+                            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken); ?>">
+
+                            <div class="login-input-wrap login-input-wrap-modal">
+                                <div class="login-input-shell">
+                                    <span class="login-input-icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none">
+                                            <path d="M12 2a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2h-1V7a5 5 0 0 0-5-5Zm3 8H9V7a3 3 0 1 1 6 0v3Z" fill="currentColor"/>
+                                        </svg>
+                                    </span>
+                                    <label class="sr-only" for="otpCode">Verification code</label>
+                                    <input id="otpCode" name="otp_code" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" placeholder="Enter 6-digit code" required>
+                                </div>
+                            </div>
+
+                            <label style="display:flex; align-items:center; gap:10px; margin: 6px 2px 4px; color: var(--muted); font-size: 13px;">
+                                <input type="checkbox" name="remember_device" value="1" style="width:16px; height:16px;">
+                                Remember this device for 30 days
+                            </label>
+
+                            <button type="submit" class="login-submit-btn login-submit-btn-modal login-submit-btn-modal-split">
+                                <span>Verify</span>
+                            </button>
+                        </form>
+
+                        <form method="post" action="index.php?2fa=1" style="margin-top: 12px;">
+                            <input type="hidden" name="form_action" value="resend_2fa">
+                            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken); ?>">
+                            <button type="submit" class="login-link-btn" style="width: 100%;">Resend code</button>
+                        </form>
                     </div>
                 </div>
             </div>

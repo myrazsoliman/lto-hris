@@ -5,6 +5,7 @@ require_once 'includes/auth.php';
 require_roles(['employee', 'hr_officer', 'admin', 'superadmin']);
 require_once 'includes/data.php';
 require_once 'includes/upload.php';
+require_once 'includes/notifications.php';
 
 $currentUser = current_user();
 $userName = $currentUser['display_name'] ?? 'Employee';
@@ -33,9 +34,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             
             if ($success) {
                 // Here you would typically save the document info to database
-                // For now, we'll just show success message
                 $uploadMessage = "Document '{$docName}' uploaded successfully!";
                 $uploadStatus = 'success';
+                create_notification(
+                    (int) ($currentUser['id'] ?? 0),
+                    'document_upload',
+                    'Document uploaded',
+                    $docName . ' was uploaded successfully.',
+                    'documents.php'
+                );
+                create_notification_for_roles(
+                    ['admin', 'hr_officer', 'superadmin'],
+                    'document_upload',
+                    $userName . ' uploaded a document',
+                    $docName . ' was uploaded and may need review.',
+                    'documents.php'
+                );
                 
                 // Clear the form data
                 $_POST = [];

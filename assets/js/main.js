@@ -8,29 +8,138 @@ document.addEventListener('DOMContentLoaded',function(){
   }
 
   // Notifications and user menu
-  var notifBtn = document.getElementById('notifBtn');
-  var userBtn = document.getElementById('userBtn');
-  var userDropdown = document.getElementById('userDropdown');
-  if(userBtn && userDropdown){
-    userBtn.addEventListener('click', function(e){
-      var expanded = userBtn.getAttribute('aria-expanded') === 'true';
-      userBtn.setAttribute('aria-expanded', !expanded);
-      userDropdown.hidden = expanded;
-    });
-    // close on outside click
-    document.addEventListener('click', function(e){
-      if(!userBtn.contains(e.target) && !userDropdown.contains(e.target)){
-        userDropdown.hidden = true;
-        userBtn.setAttribute('aria-expanded', 'false');
+  function initNotifications(){
+    var notifBtn = document.getElementById('notifBtn');
+    var notifMenu = document.getElementById('notificationMenu');
+    var notifDropdown = document.getElementById('notificationDropdown');
+    var notifCount = document.getElementById('notifCount');
+    var notifList = document.getElementById('notificationList');
+    var notifSummary = document.getElementById('notificationSummary');
+    var markReadBtn = document.getElementById('markNotificationsRead');
+    if(!notifBtn || !notifMenu || !notifDropdown || !notifList || !notifSummary) return;
+
+    var open = false;
+    var lastIds = '';
+
+    function formatTime(value){
+      var date = new Date(value.replace(' ', 'T'));
+      if(Number.isNaN(date.getTime())) return '';
+      return date.toLocaleString([], {
+        month: 'short',
+        day: '2-digit',
+        hour: 'numeric',
+        minute: '2-digit'
+      });
+    }
+
+    function setOpen(next){
+      open = !!next;
+      notifBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      notifDropdown.hidden = !open;
+    }
+
+    function render(items, unreadCount){
+      if(notifCount){
+        notifCount.textContent = unreadCount > 99 ? '99+' : String(unreadCount);
+        notifCount.classList.toggle('is-hidden', unreadCount <= 0);
+      }
+
+      notifSummary.textContent = unreadCount > 0
+        ? 'You have ' + unreadCount + ' new notifications.'
+        : 'No new notifications.';
+
+      if(!items.length){
+        notifList.innerHTML = '<div class="notification-empty">No notifications available.</div>';
+        return;
+      }
+
+      notifList.innerHTML = items.map(function(item){
+        var body = item.body ? '<div class="notification-item-text">' + escapeHtml(item.body) + '</div>' : '';
+        var href = item.link ? item.link : '#';
+        var unreadClass = item.is_read ? '' : ' is-unread';
+        return '' +
+          '<a class="notification-item' + unreadClass + '" href="' + escapeAttr(href) + '" data-notification-id="' + item.id + '">' +
+            '<span class="notification-item-icon"><i class="' + escapeAttr(item.icon) + '" aria-hidden="true"></i></span>' +
+            '<span class="notification-item-body">' +
+              '<div class="notification-item-title">' + escapeHtml(item.title) + '</div>' +
+              body +
+              '<div class="notification-item-time">' + escapeHtml(formatTime(item.created_at)) + '</div>' +
+            '</span>' +
+          '</a>';
+      }).join('');
+    }
+
+    function escapeHtml(value){
+      return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function escapeAttr(value){
+      return escapeHtml(value);
+    }
+
+    function fetchNotifications(){
+      fetch('notifications.php?action=list', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(function(resp){ return resp.ok ? resp.json() : null; })
+        .then(function(data){
+          if(!data || !data.ok) return;
+          render(data.items || [], data.unread_count || 0);
+          var ids = (data.items || []).map(function(item){ return item.id; }).join(',');
+          if(lastIds && ids !== lastIds && !open){
+            notifBtn.classList.add('is-updated');
+            window.setTimeout(function(){ notifBtn.classList.remove('is-updated'); }, 1600);
+          }
+          lastIds = ids;
+        })
+        .catch(function(){});
+    }
+
+    function markAllRead(){
+      fetch('notifications.php?action=mark_read', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({ ids: [] })
+      }).then(function(){
+        fetchNotifications();
+      }).catch(function(){});
+    }
+
+    notifBtn.addEventListener('click', function(e){
+      e.preventDefault();
+      setOpen(!open);
+      if(open){
+        fetchNotifications();
       }
     });
-  }
-  if(notifBtn){
-    notifBtn.addEventListener('click', function(){
-      // simple placeholder: clear badge
-      var b = document.getElementById('notifCount'); if(b){ b.style.display='none'; }
-      notifBtn.setAttribute('aria-expanded', 'false');
+
+    document.addEventListener('click', function(e){
+      if(!notifMenu.contains(e.target)){
+        setOpen(false);
+      }
     });
+
+    notifList.addEventListener('click', function(e){
+      var item = e.target.closest('[data-notification-id]');
+      if(!item) return;
+      markAllRead();
+    });
+
+    if(markReadBtn){
+      markReadBtn.addEventListener('click', function(e){
+        e.preventDefault();
+        markAllRead();
+      });
+    }
+
+    fetchNotifications();
+    window.setInterval(fetchNotifications, 10000);
   }
 
   // Spotlight effect for cards
@@ -104,6 +213,92 @@ document.addEventListener('DOMContentLoaded',function(){
     });
 
     apply();
+  }
+
+  // Password UI helpers (toggle, caps-lock, strength, confirm)
+  function initPasswordUx(){
+    // confirm before submitting sensitive forms
+    document.querySelectorAll('form[data-confirm]').forEach(function(form){
+      form.addEventListener('submit', function(e){
+        var msg = form.getAttribute('data-confirm') || 'Continue?';
+        if(!window.confirm(msg)){
+          e.preventDefault();
+        }
+      });
+    });
+
+    // toggle show/hide
+    document.querySelectorAll('[data-password-toggle]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var targetId = btn.getAttribute('data-password-toggle');
+        var input = document.getElementById(targetId);
+        if(!input) return;
+        var show = input.type === 'password';
+        input.type = show ? 'text' : 'password';
+        btn.setAttribute('aria-pressed', show ? 'true' : 'false');
+        btn.textContent = show ? 'Hide' : 'Show';
+        input.focus();
+      });
+    });
+
+    // caps lock indicator
+    document.querySelectorAll('input[type="password"][data-caps-indicator]').forEach(function(input){
+      var indicatorId = input.getAttribute('data-caps-indicator');
+      var indicator = indicatorId ? document.getElementById(indicatorId) : null;
+      if(!indicator) return;
+
+      function updateCaps(e){
+        var on = false;
+        try {
+          on = !!(e && e.getModifierState && e.getModifierState('CapsLock'));
+        } catch(err) {}
+        indicator.hidden = !on;
+      }
+
+      input.addEventListener('keyup', updateCaps);
+      input.addEventListener('keydown', updateCaps);
+      input.addEventListener('blur', function(){ indicator.hidden = true; });
+    });
+
+    // strength meter
+    var strengthInput = document.querySelector('input[data-strength-meter]');
+    if(strengthInput){
+      var meterId = strengthInput.getAttribute('data-strength-meter');
+      var meter = meterId ? document.getElementById(meterId) : null;
+      var fill = meter ? meter.querySelector('.strength-fill') : null;
+      var label = meter ? meter.querySelector('.strength-label') : null;
+
+      function scorePassword(pw){
+        pw = pw || '';
+        var length = pw.length;
+        var hasLower = /[a-z]/.test(pw);
+        var hasUpper = /[A-Z]/.test(pw);
+        var hasNum = /\d/.test(pw);
+        var hasSym = /[^a-zA-Z\d]/.test(pw);
+        var categories = [hasLower, hasUpper, hasNum, hasSym].filter(Boolean).length;
+
+        var score = 0;
+        if(length >= 10) score++;
+        if(length >= 14) score++;
+        if(categories >= 2) score++;
+        if(categories >= 3) score++;
+        return Math.min(4, score);
+      }
+
+      function applyStrength(){
+        if(!meter || !fill || !label) return;
+        var s = scorePassword(strengthInput.value);
+        meter.classList.remove('is-0','is-1','is-2','is-3','is-4');
+        meter.classList.add('is-' + s);
+        var pct = (s / 4) * 100;
+        fill.style.width = pct + '%';
+        var text = ['Very weak','Weak','Fair','Good','Strong'][s] || 'Weak';
+        label.textContent = text;
+      }
+
+      strengthInput.addEventListener('input', applyStrength);
+      applyStrength();
+    }
   }
 
   // Tabs switcher
@@ -241,6 +436,8 @@ document.addEventListener('DOMContentLoaded',function(){
   initCarousel();
   initBannerCarousel();
   initHeaderSearch();
+  initPasswordUx();
+  initNotifications();
 });
 
 // Simple carousel initializer for announcements

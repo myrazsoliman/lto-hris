@@ -7,12 +7,15 @@ if (!isset($activePage)) {
 }
 require_once __DIR__ . '/data.php';
 require_once __DIR__ . '/auth.php';
+require_once __DIR__ . '/notifications.php';
 
 // Get role-based navigation items
 $user = current_user();
 $userRoles = $user ? $user['roles'] : [];
 $navItems = get_nav_items($userRoles);
 $profileName = $user['display_name'] ?? 'User';
+$profileInitial = strtoupper(substr(trim((string) $profileName), 0, 1)) ?: 'U';
+$notificationCount = $user ? get_unread_notification_count((int) ($user['id'] ?? 0)) : 0;
 
 $navIconMap = [
     'Dashboard' => 'fa-solid fa-house',
@@ -92,15 +95,33 @@ $navIconMap = [
                 </div>
                 <div class="topbar-actions">
                     <?php if (is_logged_in()): ?>
-                        <button type="button" class="topbar-mini-icon" aria-label="Notifications">
+                        <div class="notification-menu" id="notificationMenu">
+                        <button type="button" class="topbar-mini-icon topbar-mini-icon--notif" id="notifBtn" aria-label="Notifications" aria-expanded="false" aria-controls="notificationDropdown">
                             <i class="far fa-bell" aria-hidden="true"></i>
+                            <span class="notification-badge<?php echo $notificationCount > 0 ? '' : ' is-hidden'; ?>" id="notifCount"><?php echo (int) min($notificationCount, 99); ?></span>
                         </button>
+                        <div class="notification-dropdown" id="notificationDropdown" hidden>
+                            <div class="notification-dropdown-head">
+                                <div>
+                                    <strong>Notifications</strong>
+                                    <p id="notificationSummary">
+                                        <?php echo $notificationCount > 0 ? 'You have ' . (int) $notificationCount . ' new notifications.' : 'No new notifications.'; ?>
+                                    </p>
+                                </div>
+                                <button type="button" class="notification-mark-read" id="markNotificationsRead">Mark all as read</button>
+                            </div>
+                            <div class="notification-list" id="notificationList">
+                                <div class="notification-empty">Loading notifications...</div>
+                            </div>
+                            <a href="notification-center.php" class="notification-footer-link">See all notifications</a>
+                        </div>
+                        </div>
                         <button type="button" class="topbar-mini-icon" aria-label="Messages">
                             <i class="far fa-envelope" aria-hidden="true"></i>
                         </button>
                         <div class="profile-menu">
                             <button type="button" class="profile-summary" aria-label="Open profile menu">
-                                <span class="profile-avatar" aria-hidden="true">P</span>
+                                <span class="profile-avatar" aria-hidden="true"><?php echo htmlspecialchars($profileInitial); ?></span>
                                 <i class="fas fa-chevron-down" aria-hidden="true"></i>
                             </button>
                             <div class="profile-dropdown">

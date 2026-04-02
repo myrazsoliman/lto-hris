@@ -4,6 +4,7 @@ $activePage = 'leave-request.php';
 require_once 'includes/auth.php';
 require_roles(['employee', 'hr_officer', 'admin', 'superadmin']);
 require_once 'includes/data.php';
+require_once 'includes/notifications.php';
 
 $currentUser = current_user();
 $userName = $currentUser['display_name'] ?? 'Employee';
@@ -33,7 +34,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = 'Start date cannot be after end date.';
         } else {
             // Here you would typically save to database
-            // For now, we'll just redirect to show success
+            create_notification(
+                (int) ($currentUser['id'] ?? 0),
+                'leave_request',
+                'Leave request submitted',
+                'Your leave request for ' . ucwords((string) $leave_type) . ' leave is pending review.',
+                'leave-request.php'
+            );
+            create_notification_for_roles(
+                ['admin', 'hr_officer', 'superadmin'],
+                'leave_request',
+                $userName . ' submitted a leave request',
+                'Review the new leave request from ' . $userName . '.',
+                'leave-request.php'
+            );
             
             // Redirect to prevent form resubmission
             header('Location: leave-request.php?success=submitted');
