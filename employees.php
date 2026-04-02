@@ -1,6 +1,8 @@
 <?php
 $pageTitle = 'Employee Records';
 $activePage = 'employees.php';
+require_once 'includes/auth.php';
+require_roles(['admin', 'hr_officer', 'superadmin']);
 require_once 'includes/header.php';
 ?>
 

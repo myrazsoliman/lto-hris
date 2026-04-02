@@ -2,19 +2,15 @@
 $pageTitle = 'My SALN';
 $activePage = 'saln.php';
 require_once 'includes/auth.php';
-require_once 'includes/header.php';
-require_once 'includes/template-helper.php';
-require_once 'includes/data.php';
-
-// Only allow logged-in employees to access their SALN
-if (!is_logged_in()) {
-    header('Location: index.php?login=1&message=Please login to access your SALN');
-    exit;
-}
+require_login();
 
 // Get current user information
 $currentUser = current_user();
 $employee_id = $currentUser['id'] ?? null;
+
+require_once 'includes/header.php';
+require_once 'includes/template-helper.php';
+require_once 'includes/data.php';
 
 // Get employee data for auto-fill
 $employee_data = [];

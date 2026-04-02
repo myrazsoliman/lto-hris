@@ -1,6 +1,8 @@
 <?php
 $pageTitle = 'Dashboard';
 $activePage = 'index.php';
+require_once 'includes/auth.php';
+require_login();
 require_once 'includes/header.php';
 ?>
 

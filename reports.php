@@ -1,7 +1,10 @@
 <?php
 $pageTitle = 'Reports and Compliance';
 $activePage = 'reports.php';
+require_once 'includes/auth.php';
+require_roles(['admin', 'hr_officer', 'superadmin']);
 require_once 'includes/header.php';
+$reports = $reports ?? [];
 ?>
 
 <section class="card">

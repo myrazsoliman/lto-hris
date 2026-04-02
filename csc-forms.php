@@ -2,6 +2,7 @@
 $pageTitle = 'CSC Forms Module';
 $activePage = 'csc-forms.php';
 require_once 'includes/auth.php';
+require_roles(['employee', 'hr_officer', 'admin', 'superadmin']);
 require_once 'includes/header.php';
 require_once 'includes/template-helper.php';
 require_once 'includes/data.php';

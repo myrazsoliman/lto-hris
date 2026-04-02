@@ -2,7 +2,7 @@
 require_once __DIR__ . '/db.php';
 
 if (!defined('AUTH_BYPASS_LOGIN')) {
-    define('AUTH_BYPASS_LOGIN', true);
+    define('AUTH_BYPASS_LOGIN', false);
 }
 
 if (session_status() === PHP_SESSION_NONE) {
@@ -22,6 +22,47 @@ if (session_status() === PHP_SESSION_NONE) {
     ini_set('session.use_strict_mode', '1');
     session_start();
 }
+
+function ensure_auth_schema()
+{
+    static $initialized = false;
+    if ($initialized) {
+        return;
+    }
+    $initialized = true;
+
+    db()->exec(
+        'CREATE TABLE IF NOT EXISTS users (
+            id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+            first_name VARCHAR(80) NOT NULL,
+            middle_name VARCHAR(80) NULL,
+            last_name VARCHAR(80) NOT NULL,
+            email VARCHAR(150) NOT NULL UNIQUE,
+            password VARCHAR(255) NOT NULL,
+            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4'
+    );
+
+    db()->exec(
+        'CREATE TABLE IF NOT EXISTS roles (
+            id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+            name VARCHAR(60) NOT NULL UNIQUE,
+            description VARCHAR(255) NULL
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4'
+    );
+
+    db()->exec(
+        'CREATE TABLE IF NOT EXISTS user_roles (
+            id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+            user_id INT UNSIGNED NOT NULL,
+            role_id INT UNSIGNED NOT NULL,
+            UNIQUE KEY uniq_user_role (user_id, role_id),
+            INDEX idx_role (role_id)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4'
+    );
+}
+
+ensure_auth_schema();
 
 function csrf_token()
 {
@@ -230,7 +271,7 @@ function require_login()
     }
 
     if (!is_logged_in()) {
-        header('Location: /login.php');
+        header('Location: index.php?login=1');
         exit;
     }
 }
@@ -256,6 +297,11 @@ function require_roles($roles)
 {
     if (AUTH_BYPASS_LOGIN) {
         return;
+    }
+
+    if (!is_logged_in()) {
+        header('Location: index.php?login=1');
+        exit;
     }
 
     if (!has_role($roles)) {
@@ -307,6 +353,7 @@ function password_policy_errors($password, $identifier = '', $email = '')
 
 function ensure_account_requests_table()
 {
+    ensure_auth_schema();
     db()->exec(
         'CREATE TABLE IF NOT EXISTS account_requests (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -354,6 +401,7 @@ function create_account_request($fullName, $email, $username = '', $password)
 
 function ensure_employee_role_exists()
 {
+    ensure_auth_schema();
     $stmt = db()->prepare('SELECT id FROM roles WHERE name = ? LIMIT 1');
     $stmt->execute(['employee']);
     $role = $stmt->fetch();
@@ -370,17 +418,33 @@ function ensure_employee_role_exists()
 
 function create_user_directly($firstName, $middleName, $lastName, $email, $password)
 {
-    $stmt = db()->prepare(
-        'INSERT INTO users (first_name, last_name, email, password, created_at)
-         VALUES (?, ?, ?, ?, NOW())'
-    );
+    ensure_auth_schema();
 
-    $stmt->execute([
-        trim($firstName),
-        trim($lastName),
-        normalize_identifier($email),
-        password_hash($password, PASSWORD_DEFAULT),
-    ]);
+    $hasMiddleName = auth_table_has_column('users', 'middle_name');
+    if ($hasMiddleName) {
+        $stmt = db()->prepare(
+            'INSERT INTO users (first_name, middle_name, last_name, email, password, created_at)
+             VALUES (?, ?, ?, ?, ?, NOW())'
+        );
+        $stmt->execute([
+            trim($firstName),
+            trim($middleName) !== '' ? trim($middleName) : null,
+            trim($lastName),
+            normalize_identifier($email),
+            password_hash($password, PASSWORD_DEFAULT),
+        ]);
+    } else {
+        $stmt = db()->prepare(
+            'INSERT INTO users (first_name, last_name, email, password, created_at)
+             VALUES (?, ?, ?, ?, NOW())'
+        );
+        $stmt->execute([
+            trim($firstName),
+            trim($lastName),
+            normalize_identifier($email),
+            password_hash($password, PASSWORD_DEFAULT),
+        ]);
+    }
 
     $userId = db()->lastInsertId();
     

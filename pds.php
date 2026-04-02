@@ -1,6 +1,8 @@
 <?php
 $pageTitle = 'Personal Data Sheet (CSC Form No. 212)';
 $activePage = 'pds.php';
+require_once 'includes/auth.php';
+require_roles(['employee', 'hr_officer', 'admin', 'superadmin']);
 require_once 'includes/header.php';
 
 // Get current employee ID (for demo purposes, using session or parameter)
