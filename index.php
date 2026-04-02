@@ -1025,6 +1025,200 @@ $contactLink = ['label' => 'Contact Us', 'href' => '#', 'active' => false, 'care
             update();
             start();
         }());
+<<<<<<< ours
+=======
+
+        (function() {
+            // Password Validation Functionality
+            const passwordField = document.getElementById('registerModalPassword');
+            const validationIndicator = document.getElementById('passwordValidationIndicator');
+            const strengthAlert = document.getElementById('passwordStrengthAlert');
+            const progressBar = document.getElementById('passwordStrengthProgressBar');
+            const confirmPasswordField = document.getElementById('registerModalConfirmPassword');
+            const registerForm = passwordField ? passwordField.closest('form') : null;
+            
+            if (!passwordField || !validationIndicator || !strengthAlert || !progressBar) return;
+
+            function validatePassword(password) {
+                const categoryCount = [
+                    /[a-z]/.test(password),
+                    /[A-Z]/.test(password),
+                    /\d/.test(password),
+                    /[^a-zA-Z\d]/.test(password)
+                ].filter(Boolean).length;
+
+                const validations = {
+                    lowercase: /[a-z]/.test(password),
+                    uppercase: /[A-Z]/.test(password),
+                    number: /\d/.test(password),
+                    special: /[^a-zA-Z\d]/.test(password),
+                    length: password.length >= 10,
+                    categories: categoryCount >= 3,
+                    categoryCount
+                };
+
+                validations.score = ['length', 'uppercase', 'lowercase', 'number', 'special']
+                    .filter((key) => validations[key]).length;
+
+                return validations;
+            }
+
+            function getPasswordStrength(password, validations) {
+                if (!password) {
+                    return {
+                        level: 'empty',
+                        message: 'Password strength: weak.'
+                    };
+                }
+
+                if (validations.length && validations.categories) {
+                    return {
+                        level: 'strong',
+                        message: 'Password strength: strong.'
+                    };
+                }
+
+                return {
+                    level: 'weak',
+                    message: 'Password strength: weak.'
+                };
+            }
+
+            function updateValidationIndicator(validations) {
+                Object.keys(validations).forEach(key => {
+                    const item = validationIndicator.querySelector(`[data-validation="${key}"]`);
+                    if (item) {
+                        if (validations[key]) {
+                            item.classList.add('is-valid');
+                        } else {
+                            item.classList.remove('is-valid');
+                        }
+                    }
+                });
+            }
+
+            function updateStrengthAlert(strength) {
+                strengthAlert.dataset.strength = strength.level;
+                strengthAlert.textContent = strength.message;
+                strengthAlert.classList.toggle('is-hidden', strength.level === 'empty');
+            }
+
+            function updateProgressBar(validations) {
+                const progress = (validations.score / 5) * 100;
+                progressBar.style.width = `${progress}%`;
+                progressBar.dataset.strength = validations.length && validations.categories ? 'strong' : 'weak';
+            }
+
+            function checkPasswordStrength() {
+                const password = passwordField.value;
+                const validations = validatePassword(password);
+                updateValidationIndicator(validations);
+                updateStrengthAlert(getPasswordStrength(password, validations));
+                updateProgressBar(validations);
+
+                 if (!password) {
+                    passwordField.setCustomValidity('');
+                } else if (!validations.length || !validations.categories) {
+                    passwordField.setCustomValidity('Use at least 10 characters and meet at least 3 of these: lowercase, uppercase, number, special character.');
+                } else {
+                    passwordField.setCustomValidity('');
+                }
+
+                if (confirmPasswordField) {
+                    if (confirmPasswordField.value && confirmPasswordField.value !== password) {
+                        confirmPasswordField.setCustomValidity('Passwords do not match.');
+                    } else {
+                        confirmPasswordField.setCustomValidity('');
+                    }
+                }
+            }
+
+            function validateConfirmPassword() {
+                if (!confirmPasswordField) return;
+
+                if (confirmPasswordField.value && confirmPasswordField.value !== passwordField.value) {
+                    confirmPasswordField.setCustomValidity('Passwords do not match.');
+                } else {
+                    confirmPasswordField.setCustomValidity('');
+                }
+            }
+
+            // Add event listeners
+            passwordField.addEventListener('input', checkPasswordStrength);
+            passwordField.addEventListener('focus', checkPasswordStrength);
+            if (confirmPasswordField) {
+                confirmPasswordField.addEventListener('input', validateConfirmPassword);
+                confirmPasswordField.addEventListener('focus', validateConfirmPassword);
+            }
+            if (registerForm) {
+                registerForm.addEventListener('submit', () => {
+                    checkPasswordStrength();
+                    validateConfirmPassword();
+                });
+            }
+            
+            // Initial check
+            checkPasswordStrength();
+        }());
+
+        (function() {
+            // Login Form Custom Validation
+            const loginForm = document.querySelector('form[action="index.php"][novalidate]');
+            
+            if (!loginForm) return;
+
+            loginForm.addEventListener('submit', function(e) {
+                const emailField = document.getElementById('loginModalEmail');
+                const passwordField = document.getElementById('loginModalPassword');
+                
+                // Clear any previous custom validation messages
+                const existingAlert = loginForm.querySelector('.alert-error');
+                if (existingAlert) {
+                    existingAlert.remove();
+                }
+
+                // Custom validation
+                let isValid = true;
+                let errorMessage = '';
+
+                if (!emailField.value.trim()) {
+                    errorMessage = 'Please enter your email address.';
+                    isValid = false;
+                } else if (!emailField.validity.valid) {
+                    errorMessage = 'Please enter a valid email address.';
+                    isValid = false;
+                } else if (!passwordField.value.trim()) {
+                    errorMessage = 'Please enter your password.';
+                    isValid = false;
+                } else if (passwordField.value.length < 8) {
+                    errorMessage = 'Password must be at least 8 characters long.';
+                    isValid = false;
+                }
+
+                if (!isValid) {
+                    e.preventDefault();
+                    
+                    // Create and show professional error message
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = 'alert alert-error';
+                    errorDiv.textContent = errorMessage;
+                    
+                    // Insert error message at the top of the form
+                    const formBody = loginForm.querySelector('.login-modal-body');
+                    if (formBody) {
+                        formBody.insertBefore(errorDiv, formBody.firstChild);
+                    }
+                    
+                    // Focus on the first invalid field
+                    if (!emailField.value.trim() || !emailField.validity.valid) {
+                        emailField.focus();
+                    } else {
+                        passwordField.focus();
+                    }
+                }
+            });
+        }());
+>>>>>>> theirs
     </script>
 
 </body>
