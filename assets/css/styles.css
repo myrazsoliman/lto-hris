@@ -1849,6 +1849,23 @@ tbody tr:hover {
     animation: fadeInScale 0.6s ease-out 0.1s both;
 }
 
+.header-badge--gov {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    box-shadow: 0 12px 26px rgba(15, 35, 60, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.header-badge--gov i {
+    font-size: 26px;
+}
+
 @keyframes fadeInScale {
     from {
         opacity: 0;
@@ -1969,6 +1986,33 @@ tbody tr:hover {
     transform: translateX(4px);
 }
 
+.quick-action-primary .action-icon,
+.quick-action-blue .action-icon,
+.quick-action-success .action-icon,
+.quick-action-purple .action-icon {
+    color: #fff;
+}
+
+.quick-action-primary .action-icon {
+    background: linear-gradient(135deg, var(--primary), #1768a7);
+}
+
+.quick-action-blue .action-icon {
+    background: linear-gradient(135deg, #2d65c8, #0f4c81);
+}
+
+.quick-action-success .action-icon {
+    background: linear-gradient(135deg, #1c8b55, #2fa36a);
+}
+
+.quick-action-purple .action-icon {
+    background: linear-gradient(135deg, #6f63d2, #4539b5);
+}
+
+.quick-action-primary:hover {
+    background: linear-gradient(135deg, rgba(15, 76, 129, 0.10) 0%, #fff 100%);
+}
+
 .modern-panel {
     display: grid;
     grid-template-columns: 1fr;
@@ -2006,6 +2050,18 @@ tbody tr:hover {
     color: white;
     position: relative;
     overflow: hidden;
+}
+
+.stat-header--primary {
+    background: linear-gradient(135deg, var(--primary), #1768a7);
+}
+
+.stat-header--info {
+    background: linear-gradient(135deg, #2d65c8, var(--primary));
+}
+
+.stat-header--success {
+    background: linear-gradient(135deg, #1c8b55, #2fa36a);
 }
 
 .stat-header::after {
@@ -2075,6 +2131,9 @@ tbody tr:hover {
     background-clip: text;
 }
 
+.stat-number--primary { color: var(--primary); }
+.stat-number--success { color: var(--success-text); }
+
 .stat-label {
     margin: 0;
     font-size: 13px;
@@ -2106,6 +2165,10 @@ tbody tr:hover {
 
 .quick-action-green:hover {
     background: linear-gradient(135deg, #dcedc8 0%, #fff 100%);
+}
+
+.quick-action-success:hover {
+    background: linear-gradient(135deg, rgba(28, 139, 85, 0.16) 0%, #fff 100%);
 }
 
 .quick-action-blue:hover {
@@ -2175,6 +2238,11 @@ tbody tr:hover {
     cursor: pointer;
 }
 
+.activity-item--urgent { border-left-color: #c23c3c; }
+.activity-item--warning { border-left-color: #b56b00; }
+.activity-item--success { border-left-color: #1c8b55; }
+.activity-item--info { border-left-color: var(--primary); }
+
 .activity-item:hover {
     transform: translateX(6px);
     box-shadow: 0 8px 20px rgba(15, 76, 129, 0.12);
@@ -2191,6 +2259,11 @@ tbody tr:hover {
     font-size: 18px;
     flex-shrink: 0;
 }
+
+.activity-icon--urgent { background: linear-gradient(135deg, #c23c3c, #a33232); }
+.activity-icon--warning { background: linear-gradient(135deg, #f0a128, #b56b00); }
+.activity-icon--success { background: linear-gradient(135deg, #1c8b55, #2fa36a); }
+.activity-icon--info { background: linear-gradient(135deg, var(--primary), #1768a7); }
 
 .activity-content {
     flex: 1;
@@ -3024,4 +3097,143 @@ body.homepage {
 
 .login-input-shell input:valid:not(:placeholder-shown) {
     border-color: #28a745;
+}
+
+/* Employee dashboard helpers */
+.card-compact {
+    padding: 18px;
+    border-radius: 16px;
+}
+
+.tools-mini {
+    margin-top: 10px;
+    display: grid;
+    gap: 10px;
+}
+
+.tools-mini-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: 1px solid rgba(228, 235, 243, 0.95);
+    background: linear-gradient(180deg, #ffffff, rgba(248, 251, 255, 0.92));
+    color: var(--text);
+    font-weight: 700;
+    font-size: 13px;
+    transition: background 140ms ease, transform 140ms ease, border-color 140ms ease;
+}
+
+.tools-mini-link i {
+    width: 18px;
+    text-align: center;
+    color: var(--primary);
+}
+
+.tools-mini-link:hover {
+    transform: translateX(2px);
+    background: rgba(15, 76, 129, 0.05);
+    border-color: rgba(15, 76, 129, 0.20);
+}
+
+.announcement-item {
+    display: grid;
+    gap: 6px;
+    padding: 12px;
+    border-radius: 14px;
+    border: 1px solid rgba(228, 235, 243, 0.95);
+    background: rgba(248, 251, 255, 0.92);
+    margin-top: 12px;
+}
+
+.announcement-date {
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--primary);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.announcement-title {
+    font-weight: 800;
+    font-size: 14px;
+    color: var(--text);
+}
+
+.announcement-desc {
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.55;
+}
+
+.tools-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+}
+
+.tool-card {
+    display: grid;
+    gap: 10px;
+    padding: 16px;
+    border-radius: 16px;
+    border: 1px solid rgba(228, 235, 243, 0.95);
+    background: linear-gradient(180deg, #ffffff, rgba(248, 251, 255, 0.92));
+    box-shadow: 0 10px 22px rgba(15, 35, 60, 0.06);
+    color: var(--text);
+    transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease, background 160ms ease;
+}
+
+.tool-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(15, 76, 129, 0.18);
+    box-shadow: 0 18px 36px rgba(15, 35, 60, 0.12);
+    background: linear-gradient(180deg, #ffffff, var(--surface-soft));
+}
+
+.tool-card h4 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.tool-card p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.55;
+}
+
+.tool-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 18px;
+}
+
+.tool-icon--primary { background: linear-gradient(135deg, var(--primary), #1768a7); }
+.tool-icon--info { background: linear-gradient(135deg, #2d65c8, var(--primary)); }
+.tool-icon--success { background: linear-gradient(135deg, #1c8b55, #2fa36a); }
+.tool-icon--warning { background: linear-gradient(135deg, #f0a128, #b56b00); }
+
+.tool-cta {
+    margin-top: 6px;
+    font-weight: 800;
+    font-size: 12px;
+    color: var(--primary);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+@media (max-width: 1100px) {
+    .tools-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 560px) {
+    .tools-grid { grid-template-columns: 1fr; }
 }
