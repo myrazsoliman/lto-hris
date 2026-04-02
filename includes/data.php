@@ -19,38 +19,43 @@ function get_nav_items($userRoles = []) {
     if ($primaryRole === 'superadmin') {
         return [
             'superadmin-dashboard.php' => 'Dashboard',
-            'profile.php' => 'My Account',
+            'account.php' => 'My Account',
+            'admin-accounts.php' => 'Admin Accounts',
             'employees.php' => 'User Management',
             'pds.php' => 'System PDS',
             'csc-forms.php' => 'CSC Forms',
             'saln.php' => 'SALN Monitoring',
             'form-templates.php' => 'Form Templates',
             'reports.php' => 'System Reports',
-            '#' => 'System Settings',
+            'activity-logs.php' => 'Activity Logs',
+            'system-settings.php' => 'System Settings',
         ];
     }
 
     if ($primaryRole === 'admin' || $primaryRole === 'hr_officer') {
         return [
             'admin-dashboard.php' => 'Dashboard',
-            'profile.php' => 'My Profile',
+            'account.php' => 'My Account',
             'employees.php' => 'Employees',
+            'leave-request.php' => 'Leave Requests',
             'pds.php' => 'PDS',
             'csc-forms.php' => 'CSC Forms',
             'saln.php' => 'SALN',
             'reports.php' => 'Reports',
+            'documents.php' => 'Employee Files',
         ];
     }
 
     // Default: employee (and also used when roles are missing/empty)
     return [
         'employee-dashboard.php' => 'Dashboard',
-        'profile.php' => 'My Profile',
+        'account.php' => 'My Account',
         'pds.php' => 'My PDS',
         'saln.php' => 'My SALN',
         'csc-forms.php' => 'Forms',
         'leave-request.php' => 'Leave Request',
         'documents.php' => 'My Documents',
+        'help.php' => 'Help',
     ];
 }
 

@@ -3,12 +3,12 @@ LTO HRIS - Admin Accounts
 
 Super Admin Account:
 Email: superadmin@lto.gov.ph
-Password: SuperAdmin123!
+Password: Superadmin123!
 Role: Super Administrator
 
 Admin Account:
 Email: admin@lto.gov.ph
-Password: Admin123!
+Password: Systemadmin123!
 Role: System Administrator
 
 Login URL: http://localhost/lto-hris-main/

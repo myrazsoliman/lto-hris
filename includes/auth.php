@@ -60,9 +60,34 @@ function ensure_auth_schema()
             INDEX idx_role (role_id)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4'
     );
+
+    ensure_base_roles_exist();
 }
 
 ensure_auth_schema();
+
+function ensure_base_roles_exist()
+{
+    db()->exec(
+        "CREATE TABLE IF NOT EXISTS roles (
+            id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+            name VARCHAR(60) NOT NULL UNIQUE,
+            description VARCHAR(255) NULL
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4"
+    );
+
+    $roles = [
+        ['superadmin', 'Super administrator with full system control'],
+        ['admin', 'Administrator managing employee records and approvals'],
+        ['hr_officer', 'HR officer with personnel management permissions'],
+        ['employee', 'Regular employee with self-service access'],
+    ];
+
+    $stmt = db()->prepare('INSERT IGNORE INTO roles (name, description) VALUES (?, ?)');
+    foreach ($roles as $role) {
+        $stmt->execute($role);
+    }
+}
 
 function csrf_token()
 {
@@ -159,7 +184,25 @@ function current_user()
         ];
     }
 
-    return isset($_SESSION['user']) ? $_SESSION['user'] : null;
+    if (!isset($_SESSION['user']) || !is_array($_SESSION['user'])) {
+        return null;
+    }
+
+    static $rolesRefreshed = false;
+    if (!$rolesRefreshed && !AUTH_BYPASS_LOGIN) {
+        $rolesRefreshed = true;
+        $userId = (int) ($_SESSION['user']['id'] ?? 0);
+        if ($userId > 0) {
+            try {
+                $freshRoles = fetch_user_roles($userId);
+                $_SESSION['user']['roles'] = $freshRoles;
+            } catch (Throwable $e) {
+                // Ignore role refresh failures (e.g., during initial schema setup)
+            }
+        }
+    }
+
+    return $_SESSION['user'];
 }
 
 function is_logged_in()

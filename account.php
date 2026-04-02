@@ -1,6 +1,6 @@
 <?php
 $pageTitle = 'My Account';
-$activePage = 'profile.php';
+$activePage = 'account.php';
 require_once 'includes/auth.php';
 require_login();
 
@@ -71,7 +71,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $user = fetch_user_record($currentUser['email']);
                 if ($user && password_verify($currentPassword, $user['password'])) {
                     // Check password policy
-                    $passwordErrors = password_policy_errors($newPassword, '', $newEmail);
+                    $passwordErrors = password_policy_errors($newPassword, '', $currentUser['email'] ?? '');
                     if (!empty($passwordErrors)) {
                         $error = implode(' ', $passwordErrors);
                     } else {

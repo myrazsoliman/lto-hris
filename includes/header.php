@@ -18,6 +18,7 @@ $navIconMap = [
     'Dashboard' => 'fa-solid fa-house',
     'My Account' => 'fa-solid fa-user',
     'My Profile' => 'fa-solid fa-user',
+    'Admin Accounts' => 'fa-solid fa-users-gear',
     'Employees' => 'fa-solid fa-users',
     'User Management' => 'fa-solid fa-user-shield',
     'PDS' => 'fa-solid fa-id-card',
@@ -32,7 +33,10 @@ $navIconMap = [
     'System Reports' => 'fa-solid fa-chart-column',
     'Form Templates' => 'fa-solid fa-layer-group',
     'System Settings' => 'fa-solid fa-gear',
+    'Activity Logs' => 'fa-solid fa-clipboard-list',
     'Leave Request' => 'fa-solid fa-calendar-check',
+    'Leave Requests' => 'fa-solid fa-calendar-check',
+    'Employee Files' => 'fa-solid fa-folder-open',
     'My Documents' => 'fa-solid fa-folder-open'
 ];
 ?>
