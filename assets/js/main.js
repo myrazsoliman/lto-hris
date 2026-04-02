@@ -172,47 +172,140 @@ document.addEventListener('DOMContentLoaded',function(){
   attachSpotlight('.spotlight-card');
   attachSpotlight('.request-item.focus-hover');
 
-  // Topbar search (filters sidebar navigation)
+  // Topbar search (live results; do not filter sidebar navigation)
   function initHeaderSearch(){
     var input = document.getElementById('topbarSearch');
     if(!input) return;
-
     var form = input.closest('form');
-    if(form){
-      form.addEventListener('submit', function(e){ e.preventDefault(); });
+    var dropdown = document.getElementById('topbarSearchDropdown');
+    var results = document.getElementById('topbarSearchResults');
+    if(!form || !dropdown || !results) return;
+
+    var open = false;
+    var lastQuery = '';
+    var timer = null;
+
+    function escapeHtml(value){
+      return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
     }
 
-    var links = Array.from(document.querySelectorAll('.nav-link'));
-    if(!links.length) return;
-
-    var getLabel = function(link){
-      var span = link.querySelector('span');
-      return (span ? span.textContent : link.textContent || '').toLowerCase().trim();
-    };
-
-    function apply(){
-      var q = (input.value || '').toLowerCase().trim();
-      links.forEach(function(link){
-        if(!q){
-          link.classList.remove('is-hidden');
-          return;
-        }
-        var match = getLabel(link).indexOf(q) !== -1;
-        var keep = match || link.classList.contains('active');
-        link.classList.toggle('is-hidden', !keep);
+    function formatTime(value){
+      var date = new Date(String(value).replace(' ', 'T'));
+      if(Number.isNaN(date.getTime())) return '';
+      return date.toLocaleString([], {
+        month: 'short',
+        day: '2-digit',
+        hour: 'numeric',
+        minute: '2-digit'
       });
     }
 
-    input.addEventListener('input', apply);
-    input.addEventListener('keydown', function(e){
-      if(e.key === 'Escape'){
-        input.value = '';
-        apply();
-        input.blur();
+    function setOpen(next){
+      open = !!next;
+      dropdown.hidden = !open;
+      form.classList.toggle('is-open', open);
+    }
+
+    function render(data){
+      var pages = (data && data.pages) ? data.pages : [];
+      var notifs = (data && data.notifications) ? data.notifications : [];
+
+      if(!pages.length && !notifs.length){
+        results.innerHTML = '<div class="notification-empty">No results found.</div>';
+        return;
+      }
+
+      var html = '';
+      if(pages.length){
+        html += '<div class="search-group">';
+        html += '<div class="search-group-title">Pages</div>';
+        pages.forEach(function(p){
+          html += '' +
+            '<a class="search-suggest" href="' + escapeHtml(p.href) + '">' +
+              '<i class="fa-solid fa-arrow-right" aria-hidden="true"></i>' +
+              '<span>' + escapeHtml(p.label) + '</span>' +
+            '</a>';
+        });
+        html += '</div>';
+      }
+      if(notifs.length){
+        html += '<div class="search-group">';
+        html += '<div class="search-group-title">Notifications</div>';
+        notifs.forEach(function(n){
+          var body = n.body ? '<div class="search-suggest-sub">' + escapeHtml(n.body) + '</div>' : '';
+          var href = n.link ? n.link : 'notification-center.php';
+          html += '' +
+            '<a class="search-suggest search-suggest--notif" href="' + escapeHtml(href) + '">' +
+              '<span class="search-suggest-icon"><i class="' + escapeHtml(n.icon) + '" aria-hidden="true"></i></span>' +
+              '<span class="search-suggest-body">' +
+                '<div class="search-suggest-title">' + escapeHtml(n.title) + '</div>' +
+                body +
+                '<div class="search-suggest-meta">' + escapeHtml(formatTime(n.created_at)) + '</div>' +
+              '</span>' +
+            '</a>';
+        });
+        html += '</div>';
+      }
+
+      results.innerHTML = html;
+    }
+
+    function fetchResults(){
+      var q = (input.value || '').trim();
+      if(!q){
+        results.innerHTML = '<div class="notification-empty">Type to search…</div>';
+        setOpen(false);
+        return;
+      }
+      if(q === lastQuery) return;
+      lastQuery = q;
+
+      fetch('search-api.php?q=' + encodeURIComponent(q), { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(function(resp){ return resp.ok ? resp.json() : null; })
+        .then(function(data){
+          if(!data || !data.ok) return;
+          render(data);
+          setOpen(true);
+        })
+        .catch(function(){});
+    }
+
+    function scheduleFetch(){
+      if(timer) window.clearTimeout(timer);
+      timer = window.setTimeout(fetchResults, 140);
+    }
+
+    input.addEventListener('input', function(){
+      scheduleFetch();
+    });
+
+    input.addEventListener('focus', function(){
+      if((input.value || '').trim()){
+        fetchResults();
       }
     });
 
-    apply();
+    input.addEventListener('keydown', function(e){
+      if(e.key === 'Escape'){
+        input.value = '';
+        input.blur();
+        lastQuery = '';
+        results.innerHTML = '<div class="notification-empty">Type to search…</div>';
+        setOpen(false);
+      }
+    });
+
+    document.addEventListener('click', function(e){
+      if(!form.contains(e.target)){
+        setOpen(false);
+      }
+    });
+
   }
 
   // Password UI helpers (toggle, caps-lock, strength, confirm)
