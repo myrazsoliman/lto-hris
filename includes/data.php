@@ -4,55 +4,54 @@ $systemOffice = 'LTO Pila, Laguna';
 
 // Role-based navigation items
 function get_nav_items($userRoles = []) {
-    // Determine dashboard link
-    $dashboardLink = 'employee-dashboard.php';
-    if (in_array('superadmin', $userRoles)) {
-        $dashboardLink = 'superadmin-dashboard.php';
-    } elseif (in_array('admin', $userRoles) || in_array('hr_officer', $userRoles)) {
-        $dashboardLink = 'admin-dashboard.php';
+    $roles = array_values(array_filter((array) $userRoles, 'is_string'));
+
+    // Pick a single "primary" role so the sidebar is distinct per role.
+    // Priority: superadmin > admin > hr_officer > employee
+    $primaryRole = 'employee';
+    foreach (['superadmin', 'admin', 'hr_officer', 'employee'] as $role) {
+        if (in_array($role, $roles, true)) {
+            $primaryRole = $role;
+            break;
+        }
     }
-    
-    $baseNavItems = [
-        $dashboardLink => 'Dashboard',
-        'profile.php' => in_array('superadmin', $userRoles) ? 'My Account' : 'My Profile'
-    ];
-    
-    // Admin/HR Officer navigation
-    if (in_array('admin', $userRoles) || in_array('hr_officer', $userRoles)) {
-        $baseNavItems = array_merge($baseNavItems, [
-            'employees.php' => 'Employees',
-            'pds.php' => 'PDS',
-            'csc-forms.php' => 'CSC Forms',
-            'saln.php' => 'SALN',
-            'reports.php' => 'Reports'
-        ]);
-    }
-    
-    // Superadmin navigation
-    if (in_array('superadmin', $userRoles)) {
-        $baseNavItems = array_merge($baseNavItems, [
+
+    if ($primaryRole === 'superadmin') {
+        return [
+            'superadmin-dashboard.php' => 'Dashboard',
+            'profile.php' => 'My Account',
             'employees.php' => 'User Management',
             'pds.php' => 'System PDS',
             'csc-forms.php' => 'CSC Forms',
             'saln.php' => 'SALN Monitoring',
             'form-templates.php' => 'Form Templates',
             'reports.php' => 'System Reports',
-            '#' => 'System Settings'
-        ]);
+            '#' => 'System Settings',
+        ];
     }
-    
-    // Employee navigation
-    if (in_array('employee', $userRoles) || empty($userRoles)) {
-        $baseNavItems = array_merge($baseNavItems, [
-            'pds.php' => 'My PDS',
-            'saln.php' => 'My SALN',
-            'csc-forms.php' => 'Forms',
-            'leave-request.php' => 'Leave Request',
-            'documents.php' => 'My Documents'
-        ]);
+
+    if ($primaryRole === 'admin' || $primaryRole === 'hr_officer') {
+        return [
+            'admin-dashboard.php' => 'Dashboard',
+            'profile.php' => 'My Profile',
+            'employees.php' => 'Employees',
+            'pds.php' => 'PDS',
+            'csc-forms.php' => 'CSC Forms',
+            'saln.php' => 'SALN',
+            'reports.php' => 'Reports',
+        ];
     }
-    
-    return $baseNavItems;
+
+    // Default: employee (and also used when roles are missing/empty)
+    return [
+        'employee-dashboard.php' => 'Dashboard',
+        'profile.php' => 'My Profile',
+        'pds.php' => 'My PDS',
+        'saln.php' => 'My SALN',
+        'csc-forms.php' => 'Forms',
+        'leave-request.php' => 'Leave Request',
+        'documents.php' => 'My Documents',
+    ];
 }
 
 // Default navigation for non-logged in users
