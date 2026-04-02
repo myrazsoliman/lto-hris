@@ -84,6 +84,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form_action'] ?? '') === '
 
         if ($policyErrors) {
             $registerError = $policyErrors[0];
+        } elseif (email_exists_in_lto_db($registerEmail) === false) {
+            $registerError = 'This email address was not found in the LTO personnel records.';
         } elseif (user_exists($registerEmail)) {
             $registerError = 'An account with this email already exists.';
         } else {

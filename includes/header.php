@@ -12,6 +12,7 @@ require_once __DIR__ . '/auth.php';
 $user = current_user();
 $userRoles = $user ? $user['roles'] : [];
 $navItems = get_nav_items($userRoles);
+$profileName = $user['display_name'] ?? 'User';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -51,26 +52,32 @@ $navItems = get_nav_items($userRoles);
 
         <main class="main">
             <header class="topbar">
-                <div style="display:flex;align-items:center;gap:12px">
+                <div class="topbar-left">
                     <img src="assets/img/lto_logo.png" alt="LTO logo" style="height:40px;display:block">
-                    <div>
+                    <div class="topbar-title">
                         <span class="eyebrow">Human Resource Management System</span>
                         <h2><?php echo htmlspecialchars($pageTitle); ?></h2>
                     </div>
                 </div>
                 <div class="topbar-actions">
                     <?php if (is_logged_in()): ?>
-                        <a href="logout.php" class="btn btn-outline">Logout</a>
-                        <?php
-                        // Determine dashboard link based on role
-                        $dashboardLink = 'employee-dashboard.php';
-                        if (in_array('superadmin', $userRoles)) {
-                            $dashboardLink = 'superadmin-dashboard.php';
-                        } elseif (in_array('admin', $userRoles) || in_array('hr_officer', $userRoles)) {
-                            $dashboardLink = 'admin-dashboard.php';
-                        }
-                        ?>
-                        <a href="<?php echo $dashboardLink; ?>" class="btn btn-primary">Dashboard</a>
+                        <button type="button" class="topbar-mini-icon" aria-label="Notifications">
+                            <i class="far fa-bell" aria-hidden="true"></i>
+                        </button>
+                        <button type="button" class="topbar-mini-icon" aria-label="Messages">
+                            <i class="far fa-envelope" aria-hidden="true"></i>
+                        </button>
+                        <div class="profile-menu">
+                            <button type="button" class="profile-summary" aria-label="Open profile menu">
+                                <span class="profile-avatar" aria-hidden="true">P</span>
+                                <i class="fas fa-chevron-down" aria-hidden="true"></i>
+                            </button>
+                            <div class="profile-dropdown">
+                                <a href="account.php">My Profile</a>
+                                <a href="help.php">Help</a>
+                                <a href="logout.php" class="danger">Logout</a>
+                            </div>
+                        </div>
                     <?php else: ?>
                         <a href="login.php" class="btn btn-outline">Secure Login</a>
                         <a href="index.php" class="btn btn-primary">Dashboard</a>

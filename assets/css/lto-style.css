@@ -476,7 +476,7 @@ opacity:.9}
 .register-modal-panel > .register-modal-body{width:min(calc(100% - 40px),720px);margin:0 auto}
 .register-modal-header-plain{background:linear-gradient(135deg,#163f7a 0%,#2b5fa5 55%,#6f95c9 100%)}
 .register-modal-header-plain{padding:26px 24px 14px}
-.register-modal-header-plain h2{font-size:30px}
+.register-modal-header-plain h2{font-size:42px;line-height:1}
 .register-modal-header-plain .login-modal-subtitle{margin-top:10px;font-size:12px;line-height:1.35}
 .register-modal-body{padding:12px 40px 20px}
 .register-form-modal{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 12px;align-items:start}

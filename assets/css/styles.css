@@ -137,9 +137,14 @@ a {
 .topbar {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
+    align-items: center;
     gap: 12px;
     margin-bottom: 20px;
+    padding: 18px 22px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(246,250,255,0.96));
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    box-shadow: var(--shadow-md);
 }
 
 /* Topbar enhancements */
@@ -147,22 +152,25 @@ a {
 .brand-link { display:inline-flex; align-items:center }
 .brand-logo { height:44px; width:auto; display:block }
 .topbar-title h2 { margin:0 }
-.topbar-center { flex:1; display:flex; justify-content:center; align-items:center }
-.topbar-search { display:flex; gap:8px; align-items:center; max-width:520px; width:100% }
-.topbar-search input { width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--border); outline:none }
-.topbar-search button { background:var(--primary); color:#fff; border:none; padding:8px 10px; border-radius:8px }
-.topbar-actions { display:flex; gap:10px; align-items:center }
-.icon-btn { position:relative; background:transparent; border:0; padding:8px; border-radius:8px; cursor:pointer }
-.icon-btn .badge { position:absolute; top:4px; right:4px; background:#e74c3c; color:#fff; font-size:11px; padding:2px 6px; border-radius:999px }
-.user-menu { position:relative }
-.user-btn { display:inline-flex; gap:8px; align-items:center; background:transparent; border:0; cursor:pointer; padding:6px 8px; border-radius:8px }
-.user-btn .avatar { width:32px; height:32px; border-radius:8px; background:var(--primary); color:#fff; display:grid; place-items:center; font-weight:700 }
-.user-dropdown { position:absolute; right:0; top:calc(100% + 8px); background:var(--surface); border:1px solid var(--border); padding:8px; border-radius:8px; min-width:160px; box-shadow:var(--shadow-md); z-index:40 }
-.user-dropdown a { display:block; padding:8px 10px; color:var(--text) }
-.user-dropdown a.danger { color:var(--danger-text) }
+.topbar-actions { display:flex; gap:18px; align-items:center; margin-left:auto }
+.topbar-mini-icon { width:26px; height:26px; display:inline-flex; align-items:center; justify-content:center; padding:0; border:0; background:transparent; color:#c1c6ce; cursor:pointer }
+.topbar-mini-icon i { font-size:20px; line-height:1 }
+.topbar-mini-icon:hover { color:#9aa1ac }
+.profile-menu { position:relative }
+.profile-summary { display:inline-flex; align-items:center; gap:9px; padding:0 0 0 2px; border:0; background:transparent; color:#444b55; cursor:pointer; font:inherit }
+.profile-avatar { width:32px; height:32px; border-radius:999px; overflow:hidden; display:inline-flex; align-items:center; justify-content:center; background:linear-gradient(180deg,#c94556,#8d1025); color:#fff; font-size:13px; font-weight:700; line-height:1; box-shadow:0 0 0 1px rgba(0,0,0,.04) }
+.profile-label { font-size:15px; font-weight:500; line-height:1 }
+.profile-summary .fa-chevron-down { font-size:15px; color:#8a919e; margin-left:1px }
+.profile-dropdown { position:absolute; right:0; top:calc(100% + 10px); min-width:160px; background:#fff; border:1px solid var(--border); border-radius:12px; box-shadow:var(--shadow-md); padding:8px; z-index:60; opacity:0; visibility:hidden; transform:translateY(6px); transition:opacity .18s ease, transform .18s ease, visibility .18s ease }
+.profile-menu:hover .profile-dropdown,
+.profile-menu:focus-within .profile-dropdown { opacity:1; visibility:visible; transform:translateY(0) }
+.profile-dropdown a { display:block; padding:8px 10px; border-radius:8px; color:var(--text); font-size:13px }
+.profile-dropdown a:hover { background:var(--surface-soft) }
+.profile-dropdown a.danger { color:var(--danger-text) }
 
 @media (max-width: 880px) {
-    .topbar-center { display:none }
+    .topbar-actions { gap:8px }
+    .profile-label { display:none }
 }
 
 /* Hero image */
@@ -2227,5 +2235,3 @@ body.homepage {
 .login-input-shell input:valid:not(:placeholder-shown) {
     border-color: #28a745;
 }
-
-
