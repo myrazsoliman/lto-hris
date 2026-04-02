@@ -1,5 +1,5 @@
 <?php
-$pageTitle = 'Superadmin Dashboard';
+$pageTitle = 'Dashboard';
 $activePage = 'superadmin-dashboard.php';
 require_once 'includes/auth.php';
 require_roles(['superadmin']);
@@ -137,7 +137,7 @@ require_once 'includes/data.php';
                     <div class="admin-stats">
                         <div class="admin-stat">
                             <span class="stat-number">12</span>
-                            <span class="stat-label">Superadmins</span>
+                            <span class="stat-label">Superadmin</span>
                         </div>
                         <div class="admin-stat">
                             <span class="stat-number">28</span>

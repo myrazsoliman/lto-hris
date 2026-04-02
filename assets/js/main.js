@@ -63,6 +63,49 @@ document.addEventListener('DOMContentLoaded',function(){
   attachSpotlight('.spotlight-card');
   attachSpotlight('.request-item.focus-hover');
 
+  // Topbar search (filters sidebar navigation)
+  function initHeaderSearch(){
+    var input = document.getElementById('topbarSearch');
+    if(!input) return;
+
+    var form = input.closest('form');
+    if(form){
+      form.addEventListener('submit', function(e){ e.preventDefault(); });
+    }
+
+    var links = Array.from(document.querySelectorAll('.nav-link'));
+    if(!links.length) return;
+
+    var getLabel = function(link){
+      var span = link.querySelector('span');
+      return (span ? span.textContent : link.textContent || '').toLowerCase().trim();
+    };
+
+    function apply(){
+      var q = (input.value || '').toLowerCase().trim();
+      links.forEach(function(link){
+        if(!q){
+          link.classList.remove('is-hidden');
+          return;
+        }
+        var match = getLabel(link).indexOf(q) !== -1;
+        var keep = match || link.classList.contains('active');
+        link.classList.toggle('is-hidden', !keep);
+      });
+    }
+
+    input.addEventListener('input', apply);
+    input.addEventListener('keydown', function(e){
+      if(e.key === 'Escape'){
+        input.value = '';
+        apply();
+        input.blur();
+      }
+    });
+
+    apply();
+  }
+
   // Tabs switcher
   function initTabs(){
     var buttons = document.querySelectorAll('.tab-button');
@@ -197,6 +240,7 @@ document.addEventListener('DOMContentLoaded',function(){
   initTour();
   initCarousel();
   initBannerCarousel();
+  initHeaderSearch();
 });
 
 // Simple carousel initializer for announcements
