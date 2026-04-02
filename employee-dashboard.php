@@ -32,7 +32,7 @@ function employee_activity_variant($type)
 }
 ?>
 
-<section class="modern-hero modern-hero--employee">
+<section class="modern-hero">
     <div class="hero-content">
         <div class="hero-header">
             <div class="header-badge header-badge--gov" aria-hidden="true">
@@ -79,32 +79,40 @@ function employee_activity_variant($type)
                 <i class="fa-solid fa-chevron-right action-arrow" aria-hidden="true"></i>
             </a>
         </div>
+    </div>
 
-        <div class="employee-mini-stats" aria-label="Quick summary">
-            <a class="employee-mini-stat employee-mini-stat--primary" href="notification-center.php">
-                <span class="mini-icon" aria-hidden="true"><i class="fa-regular fa-bell"></i></span>
-                <span class="mini-body">
-                    <small>Unread Notifications</small>
-                    <strong><?php echo (int) $unreadCount; ?></strong>
-                    <span class="mini-note">View updates</span>
-                </span>
-            </a>
-            <a class="employee-mini-stat employee-mini-stat--info" href="account.php">
-                <span class="mini-icon" aria-hidden="true"><i class="fa-regular fa-id-card"></i></span>
-                <span class="mini-body">
-                    <small>Profile</small>
-                    <strong>Active</strong>
-                    <span class="mini-note">Account status</span>
-                </span>
-            </a>
-            <a class="employee-mini-stat employee-mini-stat--success" href="leave-request.php">
-                <span class="mini-icon" aria-hidden="true"><i class="fa-regular fa-calendar-check"></i></span>
-                <span class="mini-body">
-                    <small>Requests</small>
-                    <strong>Ready</strong>
-                    <span class="mini-note">File & track</span>
-                </span>
-            </a>
+    <div class="hero-panel modern-panel">
+        <div class="stat-widget stat-widget--primary">
+            <div class="stat-header stat-header--primary">
+                <span class="stat-icon"><i class="fa-regular fa-bell"></i></span>
+                <h4>Unread Notifications</h4>
+            </div>
+            <div class="stat-body">
+                <p class="stat-number stat-number--primary"><?php echo (int) $unreadCount; ?></p>
+                <p class="stat-label">Items requiring your attention</p>
+            </div>
+        </div>
+
+        <div class="stat-widget stat-widget--info">
+            <div class="stat-header stat-header--info">
+                <span class="stat-icon"><i class="fa-regular fa-id-card"></i></span>
+                <h4>Profile</h4>
+            </div>
+            <div class="stat-body">
+                <p class="stat-number stat-number--primary">Active</p>
+                <p class="stat-label">Account is in good standing</p>
+            </div>
+        </div>
+
+        <div class="stat-widget stat-widget--success">
+            <div class="stat-header stat-header--success">
+                <span class="stat-icon"><i class="fa-regular fa-calendar-check"></i></span>
+                <h4>Requests</h4>
+            </div>
+            <div class="stat-body">
+                <p class="stat-number stat-number--success">Ready</p>
+                <p class="stat-label">File leave and track approvals</p>
+            </div>
         </div>
     </div>
 </section>
@@ -220,3 +228,4 @@ function employee_activity_variant($type)
 </section>
 
 <?php require_once 'includes/footer.php'; ?>
+
