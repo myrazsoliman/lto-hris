@@ -16,6 +16,34 @@ $userName = $currentUser['display_name'] ?? 'Employee';
 $unreadCount = $userId > 0 ? get_unread_notification_count($userId) : 0;
 $recentNotifications = $userId > 0 ? get_notifications_for_user($userId, 6) : [];
 
+$quickReminders = [
+    [
+        'href' => 'account.php',
+        'icon' => 'fa-regular fa-user',
+        'label' => 'Update profile details',
+    ],
+    [
+        'href' => 'documents.php',
+        'icon' => 'fa-regular fa-folder-open',
+        'label' => 'Upload supporting files',
+    ],
+    [
+        'href' => 'leave-request.php',
+        'icon' => 'fa-regular fa-calendar-check',
+        'label' => 'File leave request',
+    ],
+    [
+        'href' => 'pds.php',
+        'icon' => 'fa-solid fa-id-card',
+        'label' => 'Review and update PDS',
+    ],
+    [
+        'href' => 'saln.php',
+        'icon' => 'fa-solid fa-scale-balanced',
+        'label' => 'Review SALN requirements',
+    ],
+];
+
 function employee_activity_variant($type)
 {
     $type = (string) $type;
@@ -150,15 +178,6 @@ function employee_activity_variant($type)
                 <?php endforeach; ?>
             <?php endif; ?>
 
-            <div class="card card-compact">
-                <div class="section-head" style="margin-bottom: 10px;">
-                    <div>
-                        <span class="tag">Notifications</span>
-                        <h3 style="font-size: 18px;">View all updates</h3>
-                    </div>
-                </div>
-                <a class="btn btn-primary" href="notification-center.php">Open Notification Center</a>
-            </div>
         </div>
 
         <div class="activities-sidebar">
@@ -166,9 +185,19 @@ function employee_activity_variant($type)
                 <h4><i class="fa-solid fa-list-check" aria-hidden="true"></i> Quick Reminders</h4>
                 <p class="text-muted small-text">Keep your records updated and review pending items.</p>
                 <div class="tools-mini">
-                    <a class="tools-mini-link" href="account.php"><i class="fa-regular fa-user" aria-hidden="true"></i> Update profile details</a>
-                    <a class="tools-mini-link" href="documents.php"><i class="fa-regular fa-folder-open" aria-hidden="true"></i> Upload supporting files</a>
-                    <a class="tools-mini-link" href="leave-request.php"><i class="fa-regular fa-calendar-check" aria-hidden="true"></i> File leave request</a>
+                    <?php foreach (array_slice($quickReminders, 0, 3) as $reminder): ?>
+                        <a class="tools-mini-link" href="<?php echo htmlspecialchars($reminder['href']); ?>">
+                            <i class="<?php echo htmlspecialchars($reminder['icon']); ?>" aria-hidden="true"></i>
+                            <?php echo htmlspecialchars($reminder['label']); ?>
+                        </a>
+                    <?php endforeach; ?>
+
+                    <?php if (count($quickReminders) > 3): ?>
+                        <a class="tools-mini-link tools-mini-link--seeall" href="tasks.php">
+                            <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+                            See all tasks
+                        </a>
+                    <?php endif; ?>
                 </div>
             </div>
 

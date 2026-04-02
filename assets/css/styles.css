@@ -3137,6 +3137,15 @@ body.homepage {
     border-color: rgba(15, 76, 129, 0.20);
 }
 
+.tools-mini-link--seeall {
+    justify-content: space-between;
+    font-weight: 900;
+}
+
+.tools-mini-link--seeall i {
+    color: var(--primary);
+}
+
 .announcement-item {
     display: grid;
     gap: 6px;
@@ -3236,4 +3245,89 @@ body.homepage {
 
 @media (max-width: 560px) {
     .tools-grid { grid-template-columns: 1fr; }
+}
+
+/* Checklist page */
+.checklist {
+    display: grid;
+    gap: 10px;
+}
+
+.checklist-item {
+    display: grid;
+    grid-template-columns: 34px 1fr auto;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 14px;
+    border-radius: 16px;
+    border: 1px solid rgba(228, 235, 243, 0.95);
+    background: linear-gradient(180deg, #ffffff, rgba(248, 251, 255, 0.92));
+}
+
+.checklist-check {
+    position: relative;
+    width: 34px;
+    height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.checklist-check input {
+    position: absolute;
+    opacity: 0;
+    inset: 0;
+    cursor: pointer;
+}
+
+.checklist-box {
+    width: 20px;
+    height: 20px;
+    border-radius: 6px;
+    border: 1px solid rgba(15, 76, 129, 0.22);
+    background: #fff;
+    box-shadow: 0 6px 14px rgba(15, 35, 60, 0.06);
+}
+
+.checklist-check input:checked + .checklist-box {
+    background: linear-gradient(135deg, var(--primary), #1768a7);
+    border-color: rgba(15, 76, 129, 0.35);
+}
+
+.checklist-check input:checked + .checklist-box::after {
+    content: "";
+    position: absolute;
+    width: 9px;
+    height: 5px;
+    border-left: 2px solid #fff;
+    border-bottom: 2px solid #fff;
+    transform: rotate(-45deg);
+    margin-top: -2px;
+}
+
+.checklist-body {
+    min-width: 0;
+    display: grid;
+    gap: 4px;
+}
+
+.checklist-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 900;
+    color: var(--text);
+    font-size: 14px;
+}
+
+.checklist-title i {
+    width: 18px;
+    text-align: center;
+    color: var(--primary);
+}
+
+.checklist-desc {
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.5;
 }
