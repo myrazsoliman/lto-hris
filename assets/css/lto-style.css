@@ -135,7 +135,7 @@ body{font-family:Arial,Helvetica,sans-serif;margin:0;color:#111;background:var(-
 .center-brand{text-align:left;padding-top:0;min-width:0;max-width:min(48vw,760px)}
 .center-brand .govtext{font-size:clamp(11px,1.35vw,18px);color:#2f2f2f;line-height:0.98;font-family:'UnifrakturCook',cursive;font-weight:700;letter-spacing:0;text-transform:none}
 .center-brand .govtext strong{display:block;margin-top:6px;font-size:clamp(13px,1.55vw,20px);font-family:'Oswald',sans-serif;font-weight:600;letter-spacing:clamp(0.8px,0.15vw,1.6px)}
-.center-brand h1{margin:4px 0 0;font-size:clamp(22px,3.35vw,50px);letter-spacing:0.4px;color:#222;font-family:'Oswald',sans-serif;font-weight:700;line-height:0.92;text-transform:uppercase;word-break:break-word}
+.center-brand h1{margin:4px 0 0;font-size:clamp(16px,2.15vw,34px);letter-spacing:0.35px;color:#222;font-family:'Oswald',sans-serif;font-weight:700;line-height:0.92;text-transform:uppercase;word-break:break-word}
 .right-info{display:flex;flex-direction:column;align-items:flex-end;justify-content:flex-start;color:#222;font-size:clamp(9px,0.95vw,13px);min-width:clamp(118px,16vw,240px);max-width:22vw;padding-top:0;margin-top:clamp(-20px,-1.5vw,0px);margin-right:clamp(0px,1.5vw,24px)}
 .right-info .time{text-align:right;line-height:1.1;margin-top:0;padding-top:8px}
 .right-info .icons{display:flex;align-items:center;justify-content:flex-end;gap:clamp(6px,0.8vw,10px);margin-top:clamp(8px,1.2vw,14px)}
@@ -347,11 +347,12 @@ body{font-family:Arial,Helvetica,sans-serif;margin:0;color:#111;background:var(-
 .login-modal.is-open::before,
 .login-modal.is-open::after{opacity:1;transform:scale(1)}
 .login-modal-backdrop{position:absolute;inset:0;background:rgba(11,30,54,0.78)}
-.login-modal-dialog{position:relative;z-index:1;width:min(100%,1080px);max-height:calc(100vh - 48px);overflow-y:auto;overflow-x:hidden;scrollbar-width:none;-ms-overflow-style:none;border-radius:34px;transform:translateY(28px) scale(.97);opacity:0;transition:transform 320ms cubic-bezier(.2,.8,.2,1),opacity 320ms ease}
+.login-modal-dialog{position:relative;z-index:1;width:min(100%,1080px);max-height:calc(100vh - 48px);overflow-y:auto;overflow-x:hidden;scrollbar-width:none;-ms-overflow-style:none;border-radius:34px;background:linear-gradient(135deg,#163f7a 0%,#2b5fa5 55%,#6f95c9 100%);transform:translateY(28px) scale(.97);opacity:0;transition:transform 320ms cubic-bezier(.2,.8,.2,1),opacity 320ms ease}
 .login-modal-dialog::-webkit-scrollbar{width:0;height:0}
 .login-modal.is-open .login-modal-dialog{transform:translateY(0) scale(1);opacity:1}
-.login-card-modal{display:block;width:100%;padding:0;border-radius:34px;overflow:hidden;background:linear-gradient(180deg,#ffffff,#f8fbff 70%,#f1f5fb 100%);box-shadow:0 18px 46px rgba(15,35,60,.18);border:1px solid rgba(43,95,165,.16)}
+.login-card-modal{display:block;width:100%;padding:0;border-radius:34px;overflow:hidden;background:transparent;box-shadow:none;border:0}
 .login-card-modal-split{position:relative;display:grid;grid-template-columns:.88fr 1.12fr;width:100%;min-height:540px;border-radius:34px;overflow:hidden;background:#fff;box-shadow:0 28px 70px rgba(32,43,78,.18)}
+#loginModal .login-card-modal-split{margin-top:-4px}
 .login-card-modal-split::after{display:none}
 .login-card-modal-split::before{display:none}
 .login-modal-visual{position:relative;display:flex;align-items:center;justify-content:center;order:1;padding:28px 30px;background:
@@ -375,10 +376,10 @@ opacity:.9}
 .login-modal-visual-subtitle{margin:0;font-size:13px;line-height:1.1;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.94);font-weight:700;white-space:nowrap}
 .login-modal-visual-kicker{margin-top:18px;padding:10px 16px;border-radius:999px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.16);font-size:9px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#ffffff;white-space:nowrap}
 .login-modal-panel{position:relative;display:flex;flex-direction:column;justify-content:center;order:2;padding:0;background:#fff}
-.login-modal-panel::before{content:"";position:absolute;top:-2px;left:0;right:0;height:18px;background:#224f8f;pointer-events:none;z-index:3}
+.login-modal-panel::before{display:none}
 .login-modal-panel > .login-modal-header-plain{width:100%;margin:0}
 .login-modal-panel > .login-modal-body-plain{width:min(calc(100% - 48px),640px);margin:0 auto}
-.login-modal-header-plain{position:relative;display:flex;align-items:center;justify-content:center;padding:34px 24px 18px 24px;margin-top:-1px;background:linear-gradient(135deg,#163f7a 0%,#2b5fa5 55%,#6f95c9 100%);color:#fff;border-bottom:1px solid rgba(255,255,255,.10);overflow:hidden}
+.login-modal-header-plain{position:relative;display:flex;align-items:center;justify-content:center;padding:34px 24px 18px 24px;margin-top:0;background:linear-gradient(135deg,#163f7a 0%,#2b5fa5 55%,#6f95c9 100%);color:#fff;border-bottom:1px solid rgba(255,255,255,.10);overflow:hidden}
 .login-modal-header-plain::before,.login-modal-header-plain::after{display:none}
 .login-modal-header-plain .login-modal-header-copy{width:100%;max-width:calc(100% - 72px);margin:0 auto;text-align:center}
 .login-modal-title-row{display:flex;justify-content:center}
@@ -392,15 +393,16 @@ opacity:.9}
 .login-modal-role-band{margin:0 0 18px;padding:0 0 12px;border:0;border-bottom:1px solid rgba(43,95,165,.14);border-radius:0;background:transparent;text-align:center;font-size:11px;font-weight:800;letter-spacing:.24em;text-transform:uppercase;color:#7f8ca2}
 .login-card-modal-split .login-form-modal{gap:14px}
 .login-card-modal-split .login-input-shell{min-height:60px;padding:14px 18px;border-radius:14px;border-color:#d7e3f5;background:linear-gradient(180deg,#fbfdff,#f4f8ff);box-shadow:inset 0 1px 0 rgba(255,255,255,.75)}
-.login-card-modal-split .login-input-wrap-modal input{min-height:24px;padding:14px 0 0;font-size:14px;line-height:1.25;color:#2d3b53}
-.login-card-modal-split .login-floating-label{left:58px;top:48%;font-size:16px;color:#8a95a7}
+.login-card-modal-split .login-input-wrap-modal input{min-height:24px;padding:14px 0 0;font-size:14px;line-height:1.25;color:#2d3b53;font-family:"Segoe UI",Tahoma,Arial,sans-serif}
+.login-card-modal-split .login-floating-label{left:56px;top:48%;font-size:15px;color:#7a8798;font-family:"Segoe UI",Tahoma,Arial,sans-serif;letter-spacing:.01em}
 .login-card-modal-split .login-input-wrap-modal input:focus + .login-floating-label,
-.login-card-modal-split .login-input-wrap-modal input:not(:placeholder-shown) + .login-floating-label{top:10px;font-size:10px;letter-spacing:.16em;color:#2b5fa5}
+.login-card-modal-split .login-input-wrap-modal input:not(:placeholder-shown) + .login-floating-label{top:10px;font-size:10px;letter-spacing:.04em;color:#2b5fa5}
 .login-card-modal-split .login-input-wrap-modal:hover .login-input-shell{border-color:rgba(43,95,165,.28);background:#f7fbff}
 .login-card-modal-split .login-input-wrap-modal:focus-within .login-input-shell{border-color:rgba(178,122,18,.64);box-shadow:0 0 0 4px rgba(178,122,18,.10);transform:none}
 .login-card-modal-split .login-input-icon{color:#5d6475}
-.login-card-modal-split .login-password-toggle{right:14px;width:30px;height:30px;background:transparent;color:#5d6475}
-.login-card-modal-split .login-password-toggle:hover{background:rgba(43,95,165,.10);color:#2b5fa5}
+.login-card-modal-split .login-password-toggle{right:12px;width:34px;height:34px;padding:0;background:transparent;color:#b67812;border:0;border-radius:999px;box-shadow:none}
+.login-card-modal-split .login-password-toggle:hover{background:transparent;color:#9b6200;transform:translateY(-50%)}
+.login-card-modal-split .login-password-toggle.is-active{background:transparent;color:#b67812}
 .login-modal-actions-row-split{display:flex;justify-content:flex-end;align-items:center;gap:18px;margin-top:4px;padding-top:0}
 .login-recover-btn{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:0 18px;border:1px solid rgba(93,100,117,.36);border-radius:8px;background:#fff;color:#56667c;font-size:13px;text-decoration:none}
 .login-recover-btn:hover{border-color:#2b5fa5;color:#2b5fa5}
@@ -436,9 +438,9 @@ opacity:.9}
 .login-input-wrap-modal input{display:block;grid-column:2;width:100%;margin:0;height:auto;min-height:32px;padding:12px 0 2px;border:0;border-radius:0;background:transparent;font-size:18px;line-height:1.35;color:#24344d;box-shadow:none;text-indent:0;appearance:none}
 .login-input-wrap-modal:has(.login-password-toggle) input{padding-right:52px}
 .login-input-wrap-modal input::placeholder{color:transparent}
-.login-floating-label{position:absolute;left:60px;top:48%;transform:translateY(-50%);color:#6c7d93;font-size:18px;font-weight:500;line-height:1;pointer-events:none;transition:top 180ms ease,transform 180ms ease,font-size 180ms ease,color 180ms ease,letter-spacing 180ms ease}
+.login-floating-label{position:absolute;left:56px;top:48%;transform:translateY(-50%);color:#6c7d93;font-size:17px;font-weight:600;line-height:1;pointer-events:none;font-family:"Segoe UI",Tahoma,Arial,sans-serif;letter-spacing:.01em;transition:top 180ms ease,transform 180ms ease,font-size 180ms ease,color 180ms ease,letter-spacing 180ms ease}
 .login-input-wrap-modal input:focus + .login-floating-label,
-.login-input-wrap-modal input:not(:placeholder-shown) + .login-floating-label{top:14px;transform:none;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#2b5fa5}
+.login-input-wrap-modal input:not(:placeholder-shown) + .login-floating-label{top:14px;transform:none;font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:none;color:#2b5fa5}
 .login-input-wrap-modal:hover .login-input-shell{border-color:rgba(43,95,165,.34);background:linear-gradient(180deg,#f2f8ff,#e8f1ff)}
 .login-input-wrap-modal:focus-within .login-input-shell{border-color:#f0a128;box-shadow:0 0 0 4px rgba(240,161,40,.14),0 10px 22px rgba(32,72,154,.08);transform:translateY(-1px)}
 .login-input-wrap-modal input:hover{border-color:#bdd0f6}
@@ -474,7 +476,7 @@ opacity:.9}
 .register-modal-panel > .register-modal-body{width:min(calc(100% - 40px),720px);margin:0 auto}
 .register-modal-header-plain{background:linear-gradient(135deg,#163f7a 0%,#2b5fa5 55%,#6f95c9 100%)}
 .register-modal-header-plain{padding:26px 24px 14px}
-.register-modal-header-plain h2{font-size:24px}
+.register-modal-header-plain h2{font-size:30px}
 .register-modal-header-plain .login-modal-subtitle{margin-top:10px;font-size:12px;line-height:1.35}
 .register-modal-body{padding:12px 40px 20px}
 .register-form-modal{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 12px;align-items:start}
@@ -489,24 +491,31 @@ opacity:.9}
 .register-form-modal > .register-submit-btn-modal{order:8}
 .register-input-wrap .login-input-shell{min-height:62px;padding:14px 18px;border-radius:16px}
 .register-input-wrap input{min-height:24px;padding:13px 0 0;font-size:14px}
-.register-input-wrap .login-floating-label{left:60px}
+.register-input-wrap .login-floating-label{left:56px}
 .register-input-wrap .login-floating-label{font-size:15px}
 .register-input-wrap input:focus + .login-floating-label,
 .register-input-wrap input:not(:placeholder-shown) + .login-floating-label{top:10px;font-size:10px}
 .register-modal-role-band{margin:0 0 20px;padding:12px 16px;border:1px solid rgba(178,122,18,.18);border-radius:999px;background:linear-gradient(180deg,#fffaf1,#fff6e6);text-align:center;font-size:12px;font-weight:800;letter-spacing:.28em;text-transform:uppercase;color:#9b6500}
-.register-form-modal .login-password-toggle{width:28px;height:28px;right:12px}
+.register-form-modal .login-password-toggle{right:12px;width:34px;height:34px;padding:0;background:transparent;color:#b67812;border:0;border-radius:999px;box-shadow:none}
+.register-form-modal .login-password-toggle:hover{background:transparent;color:#9b6200;transform:translateY(-50%)}
+.register-form-modal .login-password-toggle.is-active{background:transparent;color:#b67812}
+.register-form-modal .login-password-icon{width:20px;height:20px}
+.register-form-modal .login-password-icon svg{width:20px;height:20px}
 .register-submit-btn-modal{min-height:44px;margin-top:2px}
 .register-form-modal .password-validation-indicator{margin-top:6px;padding:14px 0 0;background:transparent;border:0;box-shadow:none}
+.register-form-modal .password-validation-indicator.is-hidden{display:none}
 .register-form-modal .password-strength-progress{position:relative;width:100%;height:6px;margin-bottom:16px;border-radius:999px;background:#d7dde5;overflow:hidden}
 .register-form-modal .password-strength-progress-bar{display:block;width:0;height:100%;border-radius:999px;background:linear-gradient(90deg,#d92d20,#f59e0b);transition:width 220ms ease,background 220ms ease}
+.register-form-modal .password-strength-progress-bar[data-strength="medium"]{background:linear-gradient(90deg,#d49a18,#f0c35a)}
 .register-form-modal .password-strength-progress-bar[data-strength="strong"]{background:linear-gradient(90deg,#2e8b57,#6fbe7b)}
 .register-form-modal .password-strength-alert{display:flex;align-items:center;gap:10px;margin-bottom:14px;font-size:13px;font-weight:700;line-height:1.35;color:#b42318}
 .register-form-modal .password-strength-alert.is-hidden{display:none}
 .register-form-modal .password-strength-alert::before{content:"";flex:0 0 10px;width:10px;height:10px;border-radius:999px;background:currentColor}
 .register-form-modal .password-strength-alert[data-strength="empty"],
 .register-form-modal .password-strength-alert[data-strength="weak"]{color:#b42318}
+.register-form-modal .password-strength-alert[data-strength="medium"]{color:#b58112}
 .register-form-modal .password-strength-alert[data-strength="strong"]{color:#2e8b57}
-.register-form-modal .password-validation-title{margin-bottom:12px;font-size:14px;font-weight:700;color:#2b3748;letter-spacing:0;text-transform:none}
+.register-form-modal .password-validation-title{margin-bottom:12px;font-size:14px;font-weight:700;color:#163f7a;letter-spacing:0;text-transform:none}
 .register-form-modal .password-validation-list{display:grid;grid-template-columns:1fr;gap:9px}
 .register-form-modal .password-validation-item{display:flex;align-items:flex-start;gap:10px;margin:0;padding:0;font-size:12px}
 .register-form-modal .validation-icon{width:18px;height:18px;font-size:10px;background:transparent;border:2px solid currentColor;box-shadow:none}

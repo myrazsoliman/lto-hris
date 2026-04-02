@@ -481,7 +481,10 @@ $contactLink = ['label' => 'Contact Us', 'href' => '#', 'active' => false, 'care
                                 </span>
                                 <span class="login-password-icon login-password-icon-hide" aria-hidden="true">
                                     <svg viewBox="0 0 24 24" fill="none">
-                                        <path d="M3 4.3 19.7 21l1.4-1.4L4.4 2.9 3 4.3Zm9 3.7c5.5 0 9.9 3.6 11 7-.4 1.3-1.4 2.7-2.7 4l-1.4-1.4c.8-.8 1.4-1.7 1.8-2.6-1.1-2.4-4.4-5-8.7-5-.9 0-1.7.1-2.5.3L8 8.9c1.2-.6 2.6-.9 4-.9Zm0 3a4 4 0 0 1 4 4c0 .7-.2 1.4-.5 2l-5.5-5.5c.6-.3 1.3-.5 2-.5Zm-9 4c.9 2.7 4.1 5.6 8.5 6.1l-1.9-1.9c-2.8-.6-4.9-2.4-5.9-4.2.4-.9 1.1-1.8 2-2.6L4.2 11C3.6 11.6 3.2 12.3 3 13Z" fill="currentColor" />
+                                        <path d="M2.6 3.9 20.1 21.4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                                        <path d="M10.6 6.3A11.2 11.2 0 0 1 12 6.2c5.3 0 9.6 3.3 10.8 5.8-.5 1.1-1.5 2.6-3 3.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M7.2 7.4C4.8 8.5 3 10.4 1.9 12c1.3 2.7 5.5 5.8 10.1 5.8 1.6 0 3.2-.4 4.6-1.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M9.9 9.1a4 4 0 0 1 5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
                                     </svg>
                                 </span>
                             </button>
@@ -617,7 +620,10 @@ $contactLink = ['label' => 'Contact Us', 'href' => '#', 'active' => false, 'care
                                 </span>
                                 <span class="login-password-icon login-password-icon-hide" aria-hidden="true">
                                     <svg viewBox="0 0 24 24" fill="none">
-                                        <path d="M3 4.3 19.7 21l1.4-1.4L4.4 2.9 3 4.3Zm9 3.7c5.5 0 9.9 3.6 11 7-.4 1.3-1.4 2.7-2.7 4l-1.4-1.4c.8-.8 1.4-1.7 1.8-2.6-1.1-2.4-4.4-5-8.7-5-.9 0-1.7.1-2.5.3L8 8.9c1.2-.6 2.6-.9 4-.9Zm0 3a4 4 0 0 1 4 4c0 .7-.2 1.4-.5 2l-5.5-5.5c.6-.3 1.3-.5 2-.5Zm-9 4c.9 2.7 4.1 5.6 8.5 6.1l-1.9-1.9c-2.8-.6-4.9-2.4-5.9-4.2.4-.9 1.1-1.8 2-2.6L4.2 11C3.6 11.6 3.2 12.3 3 13Z" fill="currentColor" />
+                                        <path d="M2.6 3.9 20.1 21.4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                                        <path d="M10.6 6.3A11.2 11.2 0 0 1 12 6.2c5.3 0 9.6 3.3 10.8 5.8-.5 1.1-1.5 2.6-3 3.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M7.2 7.4C4.8 8.5 3 10.4 1.9 12c1.3 2.7 5.5 5.8 10.1 5.8 1.6 0 3.2-.4 4.6-1.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M9.9 9.1a4 4 0 0 1 5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
                                     </svg>
                                 </span>
                             </button>
@@ -641,13 +647,16 @@ $contactLink = ['label' => 'Contact Us', 'href' => '#', 'active' => false, 'care
                                 </span>
                                 <span class="login-password-icon login-password-icon-hide" aria-hidden="true">
                                     <svg viewBox="0 0 24 24" fill="none">
-                                        <path d="M3 4.3 19.7 21l1.4-1.4L4.4 2.9 3 4.3Zm9 3.7c5.5 0 9.9 3.6 11 7-.4 1.3-1.4 2.7-2.7 4l-1.4-1.4c.8-.8 1.4-1.7 1.8-2.6-1.1-2.4-4.4-5-8.7-5-.9 0-1.7.1-2.5.3L8 8.9c1.2-.6 2.6-.9 4-.9Zm0 3a4 4 0 0 1 4 4c0 .7-.2 1.4-.5 2l-5.5-5.5c.6-.3 1.3-.5 2-.5Zm-9 4c.9 2.7 4.1 5.6 8.5 6.1l-1.9-1.9c-2.8-.6-4.9-2.4-5.9-4.2.4-.9 1.1-1.8 2-2.6L4.2 11C3.6 11.6 3.2 12.3 3 13Z" fill="currentColor" />
+                                        <path d="M2.6 3.9 20.1 21.4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                                        <path d="M10.6 6.3A11.2 11.2 0 0 1 12 6.2c5.3 0 9.6 3.3 10.8 5.8-.5 1.1-1.5 2.6-3 3.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M7.2 7.4C4.8 8.5 3 10.4 1.9 12c1.3 2.7 5.5 5.8 10.1 5.8 1.6 0 3.2-.4 4.6-1.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M9.9 9.1a4 4 0 0 1 5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
                                     </svg>
                                 </span>
                             </button>
                         </div>
 
-                        <div class="password-validation-indicator" id="passwordValidationIndicator">
+                        <div class="password-validation-indicator is-hidden" id="passwordValidationIndicator">
                             <div class="password-strength-progress" aria-hidden="true">
                                 <span class="password-strength-progress-bar" id="passwordStrengthProgressBar"></span>
                             </div>
@@ -658,11 +667,6 @@ $contactLink = ['label' => 'Contact Us', 'href' => '#', 'active' => false, 'care
                                     <span class="validation-icon validation-icon-invalid">✕</span>
                                     <span class="validation-icon validation-icon-valid">✓</span>
                                     <span class="validation-text">At least 10 characters</span>
-                                </div>
-                                <div class="password-validation-item" data-validation="categories">
-                                    <span class="validation-icon validation-icon-invalid">✕</span>
-                                    <span class="validation-icon validation-icon-valid">✓</span>
-                                    <span class="validation-text">At least 3 of the following:</span>
                                 </div>
                                 <div class="password-validation-item" data-validation="lowercase">
                                     <span class="validation-icon validation-icon-invalid">✕</span>
@@ -1139,6 +1143,13 @@ $contactLink = ['label' => 'Contact Us', 'href' => '#', 'active' => false, 'care
                     };
                 }
 
+                if (validations.score >= 3 || validations.categoryCount >= 2) {
+                    return {
+                        level: 'medium',
+                        message: 'Password strength: medium.'
+                    };
+                }
+
                 return {
                     level: 'weak',
                     message: 'Password strength: weak.'
@@ -1166,13 +1177,19 @@ $contactLink = ['label' => 'Contact Us', 'href' => '#', 'active' => false, 'care
 
             function updateProgressBar(validations) {
                 const progress = (validations.score / 5) * 100;
+                const strength = getPasswordStrength(passwordField.value, validations);
                 progressBar.style.width = `${progress}%`;
-                progressBar.dataset.strength = validations.length && validations.categories ? 'strong' : 'weak';
+                progressBar.dataset.strength = strength.level;
+            }
+
+            function updateValidationVisibility(password) {
+                validationIndicator.classList.toggle('is-hidden', !password);
             }
 
             function checkPasswordStrength() {
                 const password = passwordField.value;
                 const validations = validatePassword(password);
+                updateValidationVisibility(password);
                 updateValidationIndicator(validations);
                 updateProgressBar(validations);
 
@@ -1217,10 +1234,8 @@ $contactLink = ['label' => 'Contact Us', 'href' => '#', 'active' => false, 'care
 
             // Add event listeners
             passwordField.addEventListener('input', checkPasswordStrength);
-            passwordField.addEventListener('focus', checkPasswordStrength);
             if (confirmPasswordField) {
                 confirmPasswordField.addEventListener('input', validateConfirmPassword);
-                confirmPasswordField.addEventListener('focus', validateConfirmPassword);
             }
             if (registerForm) {
                 registerForm.addEventListener('submit', () => {
