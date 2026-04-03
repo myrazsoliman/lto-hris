@@ -216,6 +216,7 @@ CREATE TABLE IF NOT EXISTS `pds_government_id` (
 CREATE TABLE IF NOT EXISTS `pds_signature` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
   `pds_id` INT NOT NULL,
+  `applicant_photo` TEXT, -- Uploaded applicant photo path
   `applicant_signature` TEXT, -- Base64 encoded signature image
   `thumbmark` TEXT, -- Base64 encoded thumbmark image
   `date_signed` DATE,

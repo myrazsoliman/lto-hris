@@ -2,46 +2,293 @@
 $pageTitle = 'Personal Data Sheet (CSC Form No. 212)';
 $activePage = 'pds.php';
 require_once 'includes/auth.php';
+require_once 'includes/data.php';
+require_once 'includes/pds-document-render.php';
 require_roles(['employee', 'hr_officer', 'admin', 'superadmin']);
 require_once 'includes/header.php';
 
-// Get current employee ID (for demo purposes, using session or parameter)
-$employeeId = isset($_GET['employee_id']) ? (int)$_GET['employee_id'] : 1;
+// Resolve employee ID from current user by default.
+$currentUser = current_user();
+$userRoles = get_user_roles($currentUser);
+$isEmployeeRole = in_array('employee', $userRoles, true);
+$defaultEmployeeId = $isEmployeeRole
+    ? ensure_employee_record_for_user((int) ($currentUser['id'] ?? 0))
+    : resolve_employee_id_for_user((int) ($currentUser['id'] ?? 0));
+$requestedEmployeeId = isset($_GET['employee_id']) ? (int) $_GET['employee_id'] : 0;
+$employeeId = $isEmployeeRole
+    ? (int) $defaultEmployeeId
+    : ($requestedEmployeeId > 0 ? $requestedEmployeeId : (int) $defaultEmployeeId);
 $currentYear = date('Y');
 
 // Check if PDS exists for current year
-$pdsExists = false; // This would be checked from database
+$pdsRecord = get_pds_record($employeeId, $currentYear);
+$pdsExists = (bool) $pdsRecord;
+$pdsContext = $pdsExists ? pds_document_get_context($employeeId, $currentYear) : null;
+$generatedPdfPath = $pdsExists ? ($pdsRecord['generated_pdf_path'] ?? '') : '';
+$pdsStatus = $pdsExists ? ($pdsRecord['status'] ?? 'draft') : 'draft';
+$submittedNow = isset($_GET['submitted']) && (int) $_GET['submitted'] === 1;
+$hasViewableDocument = ($pdsExists && in_array($pdsStatus, ['submitted', 'for_review', 'approved'], true)) || $submittedNow || !empty($generatedPdfPath);
+$officialTemplateHref = 'uploads/form_templates/PH GSIS CS 212 2017-2026.pdf';
+$documentPreviewHref = $officialTemplateHref;
+$initialPdsFormState = [
+    'fields' => [
+        'surname' => $pdsContext['personal']['surname'] ?? '',
+        'first_name' => $pdsContext['personal']['first_name'] ?? '',
+        'middle_name' => $pdsContext['personal']['middle_name'] ?? '',
+        'name_extension' => $pdsContext['personal']['name_extension'] ?? '',
+        'date_of_birth' => $pdsContext['personal']['date_of_birth'] ?? '',
+        'place_of_birth' => $pdsContext['personal']['place_of_birth'] ?? '',
+        'sex' => $pdsContext['personal']['sex'] ?? '',
+        'civil_status' => $pdsContext['personal']['civil_status'] ?? '',
+        'citizenship' => $pdsContext['personal']['citizenship'] ?? '',
+        'height_m' => $pdsContext['personal']['height_m'] ?? '',
+        'weight_kg' => $pdsContext['personal']['weight_kg'] ?? '',
+        'blood_type' => $pdsContext['personal']['blood_type'] ?? '',
+        'gsis_id' => $pdsContext['personal']['gsis_id'] ?? '',
+        'pagibig_id' => $pdsContext['personal']['pagibig_id'] ?? '',
+        'philhealth_id' => $pdsContext['personal']['philhealth_id'] ?? '',
+        'sss_id' => $pdsContext['personal']['sss_id'] ?? '',
+        'tin_id' => $pdsContext['personal']['tin_id'] ?? '',
+        'agency_employee_no' => $pdsContext['personal']['agency_employee_no'] ?? '',
+        'residential_address' => $pdsContext['personal']['residential_address'] ?? '',
+        'residential_zip_code' => $pdsContext['personal']['residential_zip_code'] ?? '',
+        'residential_telephone' => $pdsContext['personal']['residential_telephone'] ?? '',
+        'permanent_address' => $pdsContext['personal']['permanent_address'] ?? '',
+        'permanent_zip_code' => $pdsContext['personal']['permanent_zip_code'] ?? '',
+        'permanent_telephone' => $pdsContext['personal']['permanent_telephone'] ?? '',
+        'email_address' => $pdsContext['personal']['email_address'] ?? '',
+        'mobile_number' => $pdsContext['personal']['mobile_number'] ?? '',
+        'spouse_surname' => $pdsContext['family']['spouse_surname'] ?? '',
+        'spouse_first_name' => $pdsContext['family']['spouse_first_name'] ?? '',
+        'spouse_middle_name' => $pdsContext['family']['spouse_middle_name'] ?? '',
+        'spouse_name_extension' => $pdsContext['family']['spouse_name_extension'] ?? '',
+        'spouse_occupation' => $pdsContext['family']['spouse_occupation'] ?? '',
+        'spouse_employer_business_name' => $pdsContext['family']['spouse_employer_business_name'] ?? '',
+        'spouse_business_address' => $pdsContext['family']['spouse_business_address'] ?? '',
+        'spouse_telephone' => $pdsContext['family']['spouse_telephone'] ?? '',
+        'father_surname' => $pdsContext['family']['father_surname'] ?? '',
+        'father_first_name' => $pdsContext['family']['father_first_name'] ?? '',
+        'father_middle_name' => $pdsContext['family']['father_middle_name'] ?? '',
+        'father_name_extension' => $pdsContext['family']['father_name_extension'] ?? '',
+        'mother_maiden_surname' => $pdsContext['family']['mother_maiden_surname'] ?? '',
+        'mother_first_name' => $pdsContext['family']['mother_first_name'] ?? '',
+        'mother_middle_name' => $pdsContext['family']['mother_middle_name'] ?? '',
+        'special_skills' => $pdsContext['otherInfo']['special_skills_hobbies'] ?? '',
+        'non_academic_distinctions' => $pdsContext['otherInfo']['non_academic_distinctions_recognitions'] ?? '',
+        'membership_organizations' => $pdsContext['otherInfo']['membership_association_organizations'] ?? '',
+        'q34_related' => $pdsContext['questions']['q34_related_by_blood_marriage'] ?? '',
+        'q34_details' => $pdsContext['questions']['q34_relationship_details'] ?? '',
+        'q35_guilty' => $pdsContext['questions']['q35_guilty_administrative_offense'] ?? '',
+        'q35_details' => $pdsContext['questions']['q35_offense_details'] ?? '',
+        'q36_charged' => $pdsContext['questions']['q36_criminally_charged'] ?? '',
+        'q36_details' => $pdsContext['questions']['q36_case_details'] ?? '',
+        'q37_convicted' => $pdsContext['questions']['q37_convicted_final_judgment'] ?? '',
+        'q37_details' => $pdsContext['questions']['q37_case_details'] ?? '',
+        'q38_separated' => $pdsContext['questions']['q38_separated_service'] ?? '',
+        'q38_details' => $pdsContext['questions']['q38_reason_details'] ?? '',
+        'q39_immigrant' => $pdsContext['questions']['q39_immigrant_status'] ?? '',
+        'q39_details' => $pdsContext['questions']['q39_country_details'] ?? '',
+        'q40_indigenous' => $pdsContext['questions']['q40_indigenous_member'] ?? '',
+        'q40_details' => $pdsContext['questions']['q40_group_details'] ?? '',
+        'id_type' => $pdsContext['governmentId']['id_type'] ?? '',
+        'id_number' => $pdsContext['governmentId']['id_number'] ?? '',
+        'id_date_issued' => $pdsContext['governmentId']['date_issued'] ?? '',
+        'id_issuing_authority' => $pdsContext['governmentId']['issuing_authority'] ?? '',
+        'date_signed' => $pdsContext['signature']['date_signed'] ?? '',
+    ],
+    'children' => array_map(static function ($child) {
+        return [
+            'children_name[]' => $child['child_name'] ?? '',
+            'children_birthdate[]' => $child['date_of_birth'] ?? '',
+        ];
+    }, $pdsContext['children'] ?? []),
+    'education' => array_map(static function ($row) {
+        return [
+            'education_level[]' => $row['level'] ?? '',
+            'school_name[]' => $row['school_name'] ?? '',
+            'degree_course[]' => $row['degree_course'] ?? '',
+            'education_from[]' => $row['period_from'] ?? '',
+            'education_to[]' => $row['period_to'] ?? '',
+            'highest_level[]' => $row['highest_level_units_earned'] ?? '',
+            'year_graduated[]' => $row['year_graduated'] ?? '',
+            'scholarship_honors[]' => $row['scholarship_academic_honors'] ?? '',
+        ];
+    }, $pdsContext['education'] ?? []),
+    'eligibility' => array_map(static function ($row) {
+        return [
+            'career_service[]' => $row['career_service'] ?? '',
+            'eligibility_rating[]' => $row['rating'] ?? '',
+            'exam_date[]' => $row['date_of_examination_conferment'] ?? '',
+            'exam_place[]' => $row['place_of_examination_conferment'] ?? '',
+            'license_number[]' => $row['license_number'] ?? '',
+            'license_release_date[]' => $row['date_of_release'] ?? '',
+        ];
+    }, $pdsContext['eligibility'] ?? []),
+    'workExperience' => array_map(static function ($row) {
+        return [
+            'work_from[]' => $row['inclusive_dates_from'] ?? '',
+            'work_to[]' => $row['inclusive_dates_to'] ?? '',
+            'position_title[]' => $row['position_title'] ?? '',
+            'department[]' => $row['department_agency_office'] ?? '',
+            'monthly_salary[]' => $row['monthly_salary'] ?? '',
+            'salary_grade[]' => $row['salary_grade'] ?? '',
+            'step_increment[]' => $row['step_increment'] ?? '',
+            'appointment_status[]' => $row['status_of_appointment'] ?? '',
+            'government_service[]' => $row['government_service'] ?? '',
+        ];
+    }, $pdsContext['workExperience'] ?? []),
+    'voluntaryWork' => array_map(static function ($row) {
+        return [
+            'org_name_address[]' => $row['name_organization_address'] ?? '',
+            'voluntary_from[]' => $row['inclusive_dates_from'] ?? '',
+            'voluntary_to[]' => $row['inclusive_dates_to'] ?? '',
+            'voluntary_hours[]' => $row['number_of_hours'] ?? '',
+            'voluntary_position[]' => $row['position_nature_of_work'] ?? '',
+        ];
+    }, $pdsContext['voluntaryWork'] ?? []),
+    'training' => array_map(static function ($row) {
+        return [
+            'training_title[]' => $row['title_of_learning_development_programs'] ?? '',
+            'training_from[]' => $row['inclusive_dates_from'] ?? '',
+            'training_to[]' => $row['inclusive_dates_to'] ?? '',
+            'training_hours[]' => $row['number_of_hours'] ?? '',
+            'training_type[]' => $row['type_of_ld'] ?? '',
+            'training_sponsored[]' => $row['sponsored_by'] ?? '',
+        ];
+    }, $pdsContext['training'] ?? []),
+    'references' => array_reduce($pdsContext['references'] ?? [], static function ($carry, $row) {
+        $referenceNumber = (int) ($row['reference_number'] ?? 0);
+        if ($referenceNumber > 0) {
+            $carry["ref{$referenceNumber}_name"] = $row['name'] ?? '';
+            $carry["ref{$referenceNumber}_address"] = $row['address'] ?? '';
+            $carry["ref{$referenceNumber}_tel"] = $row['telephone'] ?? '';
+        }
+        return $carry;
+    }, []),
+    'uploads' => [
+        'applicant_photo_preview' => $pdsContext['signature']['applicant_photo'] ?? '',
+        'applicant_signature_preview' => $pdsContext['signature']['applicant_signature'] ?? '',
+        'thumbmark_preview' => $pdsContext['signature']['thumbmark'] ?? '',
+    ],
+];
 ?>
 <section class="card pds-container">
     <div class="pds-header">
-        <div class="pds-header-badge">PDS</div>
-        <div>
-            <h1>PERSONAL DATA SHEET</h1>
-            <p>CS Form No. 212 (Revised 2017) • <?php echo (int) $currentYear; ?></p>
-            <p class="pds-header-note">Print legibly. Tick appropriate boxes and indicate N/A if not applicable. Do not abbreviate.</p>
-            <div class="pds-header-meta" aria-label="PDS metadata">
+        <div class="pds-header-main">
+            <div class="pds-header-brand">
+                <div class="pds-header-badge">PDS</div>
+                <div class="pds-header-agency">
+                    <span class="pds-eyebrow">Republic of the Philippines</span>
+                    <strong>Land Transportation Office Human Resource Information System</strong>
+                    <span class="pds-agency-subline">Human Resource Management Division</span>
+                </div>
+            </div>
+            <div class="pds-header-copy">
+                <div class="pds-form-tag">Government Personnel Record</div>
+                <h1>PERSONAL DATA SHEET</h1>
+                <p>CSC Form No. 212 (Revised 2017)</p>
+            </div>
+        </div>
+        <div class="pds-header-panel" aria-label="PDS filing overview">
+            <div class="pds-header-panel-title">Filing Overview</div>
+            <div class="pds-header-meta">
                 <span class="pds-meta-pill"><i class="fa-solid fa-calendar" aria-hidden="true"></i> Filing year: <?php echo (int) $currentYear; ?></span>
                 <span class="pds-meta-pill"><i class="fa-solid fa-id-card" aria-hidden="true"></i> Employee ID: <?php echo (int) $employeeId; ?></span>
                 <span class="pds-meta-pill"><i class="fa-solid fa-asterisk" aria-hidden="true"></i> Required fields marked *</span>
+                <span class="pds-meta-pill"><i class="fa-solid fa-file-shield" aria-hidden="true"></i> Status: <?php echo $pdsExists ? 'On file' : 'For completion'; ?></span>
             </div>
         </div>
     </div>
-    <div class="pds-warning-bar">
-        <strong>WARNING:</strong>
-        <span>Any misrepresentation made in the Personal Data Sheet and the Work Experience Sheet shall cause the filing of administrative/criminal case/s against the person concerned.</span>
+
+    <div class="pds-top-grid">
+        <div class="pds-warning-bar">
+            <div class="pds-info-icon"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i></div>
+            <div class="pds-info-copy">
+                <strong>Warning</strong>
+                <span>Any misrepresentation made in the Personal Data Sheet and the Work Experience Sheet shall cause the filing of administrative/criminal case/s against the person concerned.</span>
+            </div>
+        </div>
+        <div class="pds-document-note">
+            <div class="pds-info-icon"><i class="fa-solid fa-book-open-reader" aria-hidden="true"></i></div>
+            <div class="pds-info-copy">
+                <div class="pds-document-note-title">Official form guide</div>
+                <p>Review the CSC Form 212 guide before completing this form. <a href="<?php echo htmlspecialchars($officialTemplateHref); ?>" target="_blank" rel="noopener">Open blank CSC PDF</a></p>
+            </div>
+        </div>
     </div>
-    <div class="pds-document-note">
-        <div class="pds-document-note-title">Official form guide</div>
-        <p>Read the attached guide to filling out the Personal Data Sheet before accomplishing the form. This page mirrors the CSC Form 212 structure so the employee can complete it as a fill-out document.</p>
-    </div>
+
+    <?php if ($hasViewableDocument): ?>
+        <div class="pds-document-actions" id="pdsDocumentActions" tabindex="-1">
+            <div class="pds-document-actions-copy">
+                <div class="pds-document-actions-title">Submitted PDS Document Ready</div>
+                <p>Your accomplished PDS is now available for viewing and printing.</p>
+            </div>
+            <div class="pds-document-actions-buttons">
+                <a href="<?php echo htmlspecialchars($documentPreviewHref); ?>" class="btn btn-primary" target="_blank" rel="noopener" id="pdsViewDocumentBtn">View Document</a>
+                <?php if (!empty($generatedPdfPath)): ?>
+                    <a href="<?php echo htmlspecialchars($generatedPdfPath); ?>" class="btn btn-outline" target="_blank" rel="noopener">Print PDF</a>
+                <?php endif; ?>
+            </div>
+        </div>
+    <?php endif; ?>
+
+    <section class="card" style="margin-top: 18px; border: 1px solid #d7e0ea; overflow: hidden;">
+        <div style="padding: 18px 20px; border-bottom: 1px solid #d7e0ea; background: linear-gradient(135deg, #f7fafc, #eef4f8); display: flex; justify-content: space-between; gap: 12px; align-items: center; flex-wrap: wrap;">
+            <div>
+                <div style="font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: #0f4c81;">Template Preview</div>
+                <h3 style="margin: 6px 0 0; font-size: 20px; color: #183247;">CSC Form 212 Template With Live Review</h3>
+                <p style="margin: 6px 0 0; color: #5f7286;">The official PDF template is displayed on the left side of this page. The right side shows the current values entered by the user.</p>
+            </div>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <a href="<?php echo htmlspecialchars($officialTemplateHref); ?>" class="btn btn-outline" target="_blank" rel="noopener">Open Official PDF</a>
+                <a href="<?php echo htmlspecialchars($documentPreviewHref); ?>" class="btn btn-primary" target="_blank" rel="noopener">Open Printable Preview</a>
+            </div>
+        </div>
+        <div style="display: grid; grid-template-columns: minmax(320px, 1fr) minmax(340px, 1.1fr); gap: 0; align-items: stretch;">
+            <div style="min-height: 840px; border-right: 1px solid #d7e0ea; background: #eef3f8;">
+                <iframe
+                    src="<?php echo htmlspecialchars($officialTemplateHref); ?>#toolbar=0&navpanes=0&scrollbar=1"
+                    title="PH GSIS CS 212 2017-2026 PDF"
+                    style="width: 100%; height: 100%; min-height: 840px; border: 0; background: #eef3f8;"
+                ></iframe>
+            </div>
+            <div style="min-height: 840px; background: #fff;">
+                <div style="padding: 16px 18px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; gap: 10px; align-items: center; flex-wrap: wrap;">
+                    <div>
+                        <div style="font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: #0f4c81;">Live Data Review</div>
+                        <div style="margin-top: 4px; color: #5f7286;">This preview follows the values currently entered in `pds.php`.</div>
+                    </div>
+                    <button type="button" class="btn btn-outline" onclick="renderLivePdsPreview()">Refresh Preview</button>
+                </div>
+                <div id="pdsLivePreviewContent" style="padding: 18px; max-height: 840px; overflow: auto; background: linear-gradient(180deg, #ffffff, #f9fbfd);"></div>
+            </div>
+        </div>
+    </section>
+
     <div class="pds-form-intro">
-        <div class="form-group">
-            <label>1. CS ID NO. <span class="pds-csc-note">(Do not fill up. For CSC use only)</span></label>
-            <input type="text" name="cs_id_no_display" form="pdsForm" readonly placeholder="Reserved for CSC use only">
+        <div class="pds-form-intro-main">
+            <div class="pds-intro-header">
+                <div>
+                    <div class="pds-intro-title">Record Preparation</div>
+                    <div class="pds-intro-caption">Complete entries exactly as they appear on official documents.</div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>1. CS ID NO. <span class="pds-csc-note">(Do not fill up. For CSC use only)</span></label>
+                <input type="text" name="cs_id_no_display" form="pdsForm" readonly placeholder="Reserved for CSC use only">
+            </div>
+            <div class="pds-intro-note">
+                <i class="fa-solid fa-folder-open" aria-hidden="true"></i>
+                <span>Prepare IDs, employment history, eligibility, and training records.</span>
+            </div>
         </div>
         <div class="pds-photo-box" aria-label="Passport photo placeholder">
-            <div class="pds-photo-box-title">Photo</div>
-            <p>Insert 4.5 cm x 3.5 cm passport-size photograph with name tag if required by your office process.</p>
+            <div class="pds-photo-box-icon"><i class="fa-solid fa-camera" aria-hidden="true"></i></div>
+            <div class="pds-photo-box-title">Photo Requirement</div>
+            <p>Insert 4.5 cm x 3.5 cm passport-size photograph if required.</p>
+            <label class="pds-upload-button" for="applicant_photo">Upload Photo</label>
+            <input type="file" name="applicant_photo" id="applicant_photo" class="pds-file-input" accept="image/png,image/jpeg">
+            <div class="pds-upload-preview pds-photo-preview" id="applicant_photo_preview" hidden></div>
         </div>
     </div>
 
@@ -65,9 +312,10 @@ $pdsExists = false; // This would be checked from database
         <div class="pds-progress" aria-hidden="true"><div id="pdsProgressBar"></div></div>
     </div>
 
-    <form id="pdsForm" method="POST" action="pds_process.php">
+    <form id="pdsForm" method="POST" action="pds_process.php" enctype="multipart/form-data">
         <input type="hidden" name="employee_id" value="<?php echo $employeeId; ?>">
         <input type="hidden" name="year" value="<?php echo $currentYear; ?>">
+        <input type="hidden" name="action" id="pdsAction" value="submit">
         <div id="pdsAlert" class="pds-alert" role="alert" hidden>
             <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
             <div>Please complete the required fields on this page before continuing.</div>
@@ -239,7 +487,7 @@ $pdsExists = false; // This would be checked from database
 
             <div class="form-section">
                 <h4>II. FAMILY BACKGROUND</h4>
-                <h5 style="margin-top: 0; color: #666;">Spouse (If married)</h5>
+                <h5 class="pds-subsection-title pds-subsection-tight">Spouse (If married)</h5>
                 <div class="form-row">
                     <div class="form-group">
                         <label>Surname</label>
@@ -277,7 +525,7 @@ $pdsExists = false; // This would be checked from database
                     </div>
                 </div>
 
-                <h5 style="color: #666;">Parents</h5>
+                <h5 class="pds-subsection-title">Parents</h5>
                 <div class="form-row">
                     <div class="form-group">
                         <label>Father's Surname</label>
@@ -646,15 +894,21 @@ $pdsExists = false; // This would be checked from database
                 <h5>SIGNATURE AND THUMBMARK</h5>
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Signature (Please sign in the space provided)</label>
-                        <div style="border: 2px solid #ccc; height: 100px; background: white; cursor: crosshair;" id="signaturePad">
-                            <p style="text-align: center; line-height: 100px; color: #999;">Click to sign</p>
+                        <label>Signature Image</label>
+                        <div class="pds-signature-box pds-upload-box">
+                            <label class="pds-upload-button" for="applicant_signature">Upload Signature</label>
+                            <input type="file" name="applicant_signature" id="applicant_signature" class="pds-file-input" accept="image/png,image/jpeg">
+                            <div class="pds-upload-preview" id="applicant_signature_preview" hidden></div>
+                            <p class="pds-signature-placeholder">PNG or JPG only</p>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label>Thumbmark</label>
-                        <div style="border: 2px solid #ccc; height: 100px; width: 100px; background: white; cursor: crosshair;" id="thumbmarkPad">
-                            <p style="text-align: center; line-height: 100px; color: #999;">Click</p>
+                        <label>Thumbmark Image</label>
+                        <div class="pds-signature-box pds-thumbmark-box pds-upload-box">
+                            <label class="pds-upload-button" for="thumbmark">Upload Thumbmark</label>
+                            <input type="file" name="thumbmark" id="thumbmark" class="pds-file-input" accept="image/png,image/jpeg">
+                            <div class="pds-upload-preview" id="thumbmark_preview" hidden></div>
+                            <p class="pds-signature-placeholder">PNG or JPG only</p>
                         </div>
                     </div>
                 </div>
@@ -670,6 +924,10 @@ $pdsExists = false; // This would be checked from database
         <div class="pds-actions">
             <div class="pds-actions-left">
                 <div class="pds-step-indicator" id="pdsStepIndicator" aria-live="polite">Step 1 of 4</div>
+                <a href="<?php echo htmlspecialchars($documentPreviewHref); ?>" class="btn btn-outline" target="_blank" rel="noopener">Preview Document</a>
+                <?php if (!empty($generatedPdfPath)): ?>
+                    <a href="<?php echo htmlspecialchars($generatedPdfPath); ?>" class="btn btn-outline" target="_blank" rel="noopener">Open Saved PDF</a>
+                <?php endif; ?>
             </div>
             <div class="pds-actions-right">
                 <button type="button" class="btn btn-outline" onclick="previousPage()" id="prevBtn" style="display: none;">Previous</button>
@@ -684,6 +942,7 @@ $pdsExists = false; // This would be checked from database
 <script>
 let currentPage = 1;
 const totalPages = 4;
+const existingPdsData = <?php echo json_encode($initialPdsFormState, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>;
 
 function setAlertVisible(isVisible) {
     const alertEl = document.getElementById('pdsAlert');
@@ -783,56 +1042,492 @@ function validateCurrentPage() {
 }
 
 function saveDraft() {
-    // Show saving message
-    const saveBtn = document.getElementById('saveBtn');
-    const originalText = saveBtn.textContent;
-    saveBtn.textContent = 'Saving...';
-    saveBtn.disabled = true;
-    
-    // Simulate save (in real implementation, this would submit to server)
-    setTimeout(() => {
-        saveBtn.textContent = 'Draft Saved!';
-        setTimeout(() => {
-            saveBtn.textContent = originalText;
-            saveBtn.disabled = false;
-        }, 2000);
-    }, 1000);
+    const form = document.getElementById('pdsForm');
+    const actionInput = document.getElementById('pdsAction');
+    if (!form || !actionInput) return;
+
+    actionInput.value = 'save_draft';
+    form.submit();
 }
 
-// Bind step navigation
-document.querySelectorAll('.pds-nav-item[data-page]').forEach(btn => {
-    btn.addEventListener('click', () => {
-        const pageNum = Number(btn.getAttribute('data-page') || '0');
-        if (!pageNum || pageNum === currentPage) return;
-        if (pageNum > currentPage && !validateCurrentPage()) return;
-        showPage(pageNum);
+function bindImagePreview(inputId, previewId) {
+    const input = document.getElementById(inputId);
+    const preview = document.getElementById(previewId);
+    if (!input || !preview) return;
+
+    input.addEventListener('change', () => {
+        const file = input.files && input.files[0];
+
+        if (!file) {
+            preview.hidden = true;
+            preview.innerHTML = '';
+            return;
+        }
+
+        if (!file.type.startsWith('image/')) {
+            preview.hidden = false;
+            preview.innerHTML = '<span class="pds-upload-error">Please choose a valid image file.</span>';
+            input.value = '';
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            preview.hidden = false;
+            preview.innerHTML = `<img src="${event.target.result}" alt="Upload preview">`;
+        };
+        reader.readAsDataURL(file);
     });
-});
-
-// Dynamic list functions
-function removeDynamicItem(button) {
-    if (confirm('Remove this item?')) {
-        button.parentElement.remove();
-    }
 }
 
-function addChild() {
-    const container = document.getElementById('childrenList');
-    const newItem = document.createElement('div');
-    newItem.className = 'dynamic-item';
-    newItem.innerHTML = `
+function showExistingImagePreview(previewId, imagePath) {
+    const preview = document.getElementById(previewId);
+    if (!preview || !imagePath) return;
+
+    preview.hidden = false;
+    preview.innerHTML = `<img src="${imagePath}" alt="Saved upload preview">`;
+}
+
+function setFieldValue(name, value) {
+    const fields = document.querySelectorAll(`[name="${name}"]`);
+    if (!fields.length) return;
+
+    fields.forEach((field) => {
+        if (field.type === 'radio') {
+            field.checked = field.value === String(value);
+            return;
+        }
+
+        if (field.type === 'checkbox') {
+            field.checked = Boolean(value);
+            return;
+        }
+
+        field.value = value ?? '';
+    });
+}
+
+function escapeHtml(value) {
+    return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+function previewDisplayValue(value, fallback = 'Not provided') {
+    const normalized = String(value ?? '').trim();
+    return normalized === '' ? fallback : escapeHtml(normalized);
+}
+
+function getInputValue(name) {
+    const field = document.querySelector(`[name="${name}"]`);
+    return field ? field.value : '';
+}
+
+function getRadioValue(name) {
+    const selected = document.querySelector(`[name="${name}"]:checked`);
+    return selected ? selected.value : '';
+}
+
+function collectRows(fieldNames) {
+    const rowCount = Math.max(
+        0,
+        ...fieldNames.map((name) => document.querySelectorAll(`[name="${name}"]`).length)
+    );
+
+    const rows = [];
+    for (let i = 0; i < rowCount; i += 1) {
+        const row = {};
+        let hasValue = false;
+
+        fieldNames.forEach((name) => {
+            const field = document.querySelectorAll(`[name="${name}"]`)[i];
+            const value = field ? String(field.value ?? '').trim() : '';
+            row[name] = value;
+            if (value !== '') {
+                hasValue = true;
+            }
+        });
+
+        if (hasValue) {
+            rows.push(row);
+        }
+    }
+
+    return rows;
+}
+
+function renderPreviewField(label, value) {
+    return `
+        <div style="border: 1px solid #dbe5ef; background: #fff; border-radius: 12px; padding: 12px 14px;">
+            <div style="font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: #718499;">${escapeHtml(label)}</div>
+            <div style="margin-top: 6px; font-size: 14px; line-height: 1.5; color: #183247; font-weight: 600;">${previewDisplayValue(value)}</div>
+        </div>
+    `;
+}
+
+function renderPreviewSection(title, fieldsHtml) {
+    return `
+        <section style="margin-bottom: 18px; border: 1px solid #dbe5ef; border-radius: 16px; overflow: hidden; background: #fff;">
+            <div style="padding: 11px 14px; background: linear-gradient(90deg, #0f4c81, #0b3558); color: #fff; font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase;">${escapeHtml(title)}</div>
+            <div style="padding: 14px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;">${fieldsHtml}</div>
+        </section>
+    `;
+}
+
+function renderPreviewList(title, itemsHtml, emptyMessage = 'No entries yet.') {
+    return `
+        <section style="margin-bottom: 18px; border: 1px solid #dbe5ef; border-radius: 16px; overflow: hidden; background: #fff;">
+            <div style="padding: 11px 14px; background: linear-gradient(90deg, #0f4c81, #0b3558); color: #fff; font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase;">${escapeHtml(title)}</div>
+            <div style="padding: 14px; display: grid; gap: 12px;">${itemsHtml || `<div style="padding: 14px; border: 1px dashed #cbd6e2; border-radius: 12px; color: #607286; background: #f8fbfd;">${escapeHtml(emptyMessage)}</div>`}</div>
+        </section>
+    `;
+}
+
+function renderLivePdsPreview() {
+    const target = document.getElementById('pdsLivePreviewContent');
+    if (!target) return;
+
+    const childrenRows = collectRows(['children_name[]', 'children_birthdate[]']);
+    const educationRows = collectRows(['education_level[]', 'school_name[]', 'degree_course[]', 'education_from[]', 'education_to[]', 'highest_level[]', 'year_graduated[]', 'scholarship_honors[]']);
+    const eligibilityRows = collectRows(['career_service[]', 'eligibility_rating[]', 'exam_date[]', 'exam_place[]', 'license_number[]', 'license_release_date[]']);
+    const workRows = collectRows(['work_from[]', 'work_to[]', 'position_title[]', 'department[]', 'monthly_salary[]', 'salary_grade[]', 'step_increment[]', 'appointment_status[]', 'government_service[]']);
+    const voluntaryRows = collectRows(['org_name_address[]', 'voluntary_from[]', 'voluntary_to[]', 'voluntary_hours[]', 'voluntary_position[]']);
+    const trainingRows = collectRows(['training_title[]', 'training_from[]', 'training_to[]', 'training_hours[]', 'training_type[]', 'training_sponsored[]']);
+
+    const personalHtml = [
+        renderPreviewField('Surname', getInputValue('surname')),
+        renderPreviewField('First Name', getInputValue('first_name')),
+        renderPreviewField('Middle Name', getInputValue('middle_name')),
+        renderPreviewField('Name Extension', getInputValue('name_extension')),
+        renderPreviewField('Date of Birth', getInputValue('date_of_birth')),
+        renderPreviewField('Place of Birth', getInputValue('place_of_birth')),
+        renderPreviewField('Sex', getInputValue('sex')),
+        renderPreviewField('Civil Status', getInputValue('civil_status')),
+        renderPreviewField('Citizenship', getInputValue('citizenship')),
+        renderPreviewField('Height (m)', getInputValue('height_m')),
+        renderPreviewField('Weight (kg)', getInputValue('weight_kg')),
+        renderPreviewField('Blood Type', getInputValue('blood_type')),
+        renderPreviewField('GSIS ID No.', getInputValue('gsis_id')),
+        renderPreviewField('PAG-IBIG ID No.', getInputValue('pagibig_id')),
+        renderPreviewField('PhilHealth No.', getInputValue('philhealth_id')),
+        renderPreviewField('SSS No.', getInputValue('sss_id')),
+        renderPreviewField('TIN No.', getInputValue('tin_id')),
+        renderPreviewField('Agency Employee No.', getInputValue('agency_employee_no')),
+        renderPreviewField('Residential Address', getInputValue('residential_address')),
+        renderPreviewField('Residential Zip Code', getInputValue('residential_zip_code')),
+        renderPreviewField('Residential Telephone', getInputValue('residential_telephone')),
+        renderPreviewField('Permanent Address', getInputValue('permanent_address')),
+        renderPreviewField('Permanent Zip Code', getInputValue('permanent_zip_code')),
+        renderPreviewField('Permanent Telephone', getInputValue('permanent_telephone')),
+        renderPreviewField('Email Address', getInputValue('email_address')),
+        renderPreviewField('Mobile Number', getInputValue('mobile_number'))
+    ].join('');
+
+    const familyHtml = [
+        renderPreviewField('Spouse Surname', getInputValue('spouse_surname')),
+        renderPreviewField('Spouse First Name', getInputValue('spouse_first_name')),
+        renderPreviewField('Spouse Middle Name', getInputValue('spouse_middle_name')),
+        renderPreviewField('Spouse Extension', getInputValue('spouse_name_extension')),
+        renderPreviewField('Spouse Occupation', getInputValue('spouse_occupation')),
+        renderPreviewField('Employer / Business Name', getInputValue('spouse_employer_business_name')),
+        renderPreviewField('Business Address', getInputValue('spouse_business_address')),
+        renderPreviewField('Spouse Telephone', getInputValue('spouse_telephone')),
+        renderPreviewField("Father's Surname", getInputValue('father_surname')),
+        renderPreviewField("Father's First Name", getInputValue('father_first_name')),
+        renderPreviewField("Father's Middle Name", getInputValue('father_middle_name')),
+        renderPreviewField("Father's Name Extension", getInputValue('father_name_extension')),
+        renderPreviewField("Mother's Maiden Surname", getInputValue('mother_maiden_surname')),
+        renderPreviewField("Mother's First Name", getInputValue('mother_first_name')),
+        renderPreviewField("Mother's Middle Name", getInputValue('mother_middle_name'))
+    ].join('');
+
+    const childrenHtml = childrenRows.map((row, index) => `
+        <div style="border: 1px solid #dbe5ef; border-radius: 12px; padding: 12px 14px; background: #fff;">
+            <div style="font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: #718499;">Child ${index + 1}</div>
+            <div style="margin-top: 6px; color: #183247; font-weight: 700;">${previewDisplayValue(row['children_name[]'])}</div>
+            <div style="margin-top: 4px; color: #607286;">Date of Birth: ${previewDisplayValue(row['children_birthdate[]'])}</div>
+        </div>
+    `).join('');
+
+    const educationHtml = educationRows.map((row, index) => `
+        <div style="border: 1px solid #dbe5ef; border-radius: 12px; padding: 12px 14px; background: #fff;">
+            <div style="font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: #718499;">Education ${index + 1}</div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin-top: 10px;">
+                ${renderPreviewField('Level', row['education_level[]'])}
+                ${renderPreviewField('School Name', row['school_name[]'])}
+                ${renderPreviewField('Degree / Course', row['degree_course[]'])}
+                ${renderPreviewField('From', row['education_from[]'])}
+                ${renderPreviewField('To', row['education_to[]'])}
+                ${renderPreviewField('Highest Level / Units Earned', row['highest_level[]'])}
+                ${renderPreviewField('Year Graduated', row['year_graduated[]'])}
+                ${renderPreviewField('Scholarship / Honors', row['scholarship_honors[]'])}
+            </div>
+        </div>
+    `).join('');
+
+    const eligibilityHtml = eligibilityRows.map((row, index) => `
+        <div style="border: 1px solid #dbe5ef; border-radius: 12px; padding: 12px 14px; background: #fff;">
+            <div style="font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: #718499;">Eligibility ${index + 1}</div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin-top: 10px;">
+                ${renderPreviewField('Career Service', row['career_service[]'])}
+                ${renderPreviewField('Rating', row['eligibility_rating[]'])}
+                ${renderPreviewField('Date of Exam / Conferment', row['exam_date[]'])}
+                ${renderPreviewField('Place of Exam / Conferment', row['exam_place[]'])}
+                ${renderPreviewField('License Number', row['license_number[]'])}
+                ${renderPreviewField('Date of Release', row['license_release_date[]'])}
+            </div>
+        </div>
+    `).join('');
+
+    const workHtml = workRows.map((row, index) => `
+        <div style="border: 1px solid #dbe5ef; border-radius: 12px; padding: 12px 14px; background: #fff;">
+            <div style="font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: #718499;">Work Experience ${index + 1}</div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin-top: 10px;">
+                ${renderPreviewField('From', row['work_from[]'])}
+                ${renderPreviewField('To', row['work_to[]'])}
+                ${renderPreviewField('Position Title', row['position_title[]'])}
+                ${renderPreviewField('Department / Agency / Office', row['department[]'])}
+                ${renderPreviewField('Monthly Salary', row['monthly_salary[]'])}
+                ${renderPreviewField('Salary Grade', row['salary_grade[]'])}
+                ${renderPreviewField('Step', row['step_increment[]'])}
+                ${renderPreviewField('Appointment Status', row['appointment_status[]'])}
+                ${renderPreviewField("Gov't Service", row['government_service[]'])}
+            </div>
+        </div>
+    `).join('');
+
+    const voluntaryHtml = voluntaryRows.map((row, index) => `
+        <div style="border: 1px solid #dbe5ef; border-radius: 12px; padding: 12px 14px; background: #fff;">
+            <div style="font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: #718499;">Voluntary Work ${index + 1}</div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin-top: 10px;">
+                ${renderPreviewField('Organization / Address', row['org_name_address[]'])}
+                ${renderPreviewField('From', row['voluntary_from[]'])}
+                ${renderPreviewField('To', row['voluntary_to[]'])}
+                ${renderPreviewField('Number of Hours', row['voluntary_hours[]'])}
+                ${renderPreviewField('Position / Nature of Work', row['voluntary_position[]'])}
+            </div>
+        </div>
+    `).join('');
+
+    const trainingHtml = trainingRows.map((row, index) => `
+        <div style="border: 1px solid #dbe5ef; border-radius: 12px; padding: 12px 14px; background: #fff;">
+            <div style="font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: #718499;">Training ${index + 1}</div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin-top: 10px;">
+                ${renderPreviewField('Program Title', row['training_title[]'])}
+                ${renderPreviewField('From', row['training_from[]'])}
+                ${renderPreviewField('To', row['training_to[]'])}
+                ${renderPreviewField('Number of Hours', row['training_hours[]'])}
+                ${renderPreviewField('Type', row['training_type[]'])}
+                ${renderPreviewField('Sponsored By', row['training_sponsored[]'])}
+            </div>
+        </div>
+    `).join('');
+
+    const questionsHtml = [
+        renderPreviewField('Q34 Related by Consanguinity / Affinity', getRadioValue('q34_related')),
+        renderPreviewField('Q34 Details', getInputValue('q34_details')),
+        renderPreviewField('Q35 Guilty of Administrative Offense', getRadioValue('q35_guilty')),
+        renderPreviewField('Q35 Details', getInputValue('q35_details')),
+        renderPreviewField('Q36 Criminally Charged', getRadioValue('q36_charged')),
+        renderPreviewField('Q36 Details', getInputValue('q36_details')),
+        renderPreviewField('Q37 Convicted', getRadioValue('q37_convicted')),
+        renderPreviewField('Q37 Details', getInputValue('q37_details')),
+        renderPreviewField('Q38 Separated from Service', getRadioValue('q38_separated')),
+        renderPreviewField('Q38 Details', getInputValue('q38_details')),
+        renderPreviewField('Q39 Foreign Citizenship / Dual Citizenship', getRadioValue('q39_immigrant')),
+        renderPreviewField('Q39 Details', getInputValue('q39_details')),
+        renderPreviewField('Q40 Indigenous Group Member', getRadioValue('q40_indigenous')),
+        renderPreviewField('Q40 Details', getInputValue('q40_details'))
+    ].join('');
+
+    const referencesHtml = [1, 2, 3].map((index) => `
+        <div style="border: 1px solid #dbe5ef; border-radius: 12px; padding: 12px 14px; background: #fff;">
+            <div style="font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: #718499;">Reference ${index}</div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin-top: 10px;">
+                ${renderPreviewField('Name', getInputValue(`ref${index}_name`))}
+                ${renderPreviewField('Address', getInputValue(`ref${index}_address`))}
+                ${renderPreviewField('Telephone', getInputValue(`ref${index}_tel`))}
+            </div>
+        </div>
+    `).join('');
+
+    const governmentHtml = [
+        renderPreviewField('ID Type', getInputValue('id_type')),
+        renderPreviewField('ID Number', getInputValue('id_number')),
+        renderPreviewField('Date Issued', getInputValue('id_date_issued')),
+        renderPreviewField('Issuing Authority', getInputValue('id_issuing_authority')),
+        renderPreviewField('Date Signed', getInputValue('date_signed'))
+    ].join('');
+
+    target.innerHTML = [
+        renderPreviewSection('I. Personal Information', personalHtml),
+        renderPreviewSection('II. Family Background', familyHtml),
+        renderPreviewList('Children', childrenHtml),
+        renderPreviewList('III. Educational Background', educationHtml),
+        renderPreviewList('IV. Civil Service Eligibility', eligibilityHtml),
+        renderPreviewList('V. Work Experience', workHtml),
+        renderPreviewList('VI. Voluntary Work', voluntaryHtml),
+        renderPreviewList('VII. Learning and Development', trainingHtml),
+        renderPreviewSection('VIII. Other Information', [
+            renderPreviewField('Special Skills and Hobbies', getInputValue('special_skills')),
+            renderPreviewField('Non-Academic Distinctions / Recognitions', getInputValue('non_academic_distinctions')),
+            renderPreviewField('Membership in Associations / Organizations', getInputValue('membership_organizations'))
+        ].join('')),
+        renderPreviewSection('IX. Questions', questionsHtml),
+        renderPreviewList('X. References', referencesHtml),
+        renderPreviewSection('XI. Government Issued ID / Signature Date', governmentHtml)
+    ].join('');
+}
+
+function renderTemplateLine(label, value, width = '1fr') {
+    return `
+        <div style="display: grid; grid-template-columns: 140px minmax(0, ${width}); border-bottom: 1px solid #2f2f2f;">
+            <div style="padding: 6px 8px; border-right: 1px solid #2f2f2f; font-size: 11px; font-weight: 700; background: #f2f2f2; text-transform: uppercase;">${escapeHtml(label)}</div>
+            <div style="padding: 6px 8px; font-size: 13px; min-height: 30px;">${previewDisplayValue(value, '&nbsp;')}</div>
+        </div>
+    `;
+}
+
+function renderTemplatePair(leftLabel, leftValue, rightLabel, rightValue) {
+    return `
+        <div style="display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid #2f2f2f;">
+            <div style="display: grid; grid-template-columns: 140px minmax(0, 1fr); border-right: 1px solid #2f2f2f;">
+                <div style="padding: 6px 8px; border-right: 1px solid #2f2f2f; font-size: 11px; font-weight: 700; background: #f2f2f2; text-transform: uppercase;">${escapeHtml(leftLabel)}</div>
+                <div style="padding: 6px 8px; font-size: 13px; min-height: 30px;">${previewDisplayValue(leftValue, '&nbsp;')}</div>
+            </div>
+            <div style="display: grid; grid-template-columns: 140px minmax(0, 1fr);">
+                <div style="padding: 6px 8px; border-right: 1px solid #2f2f2f; font-size: 11px; font-weight: 700; background: #f2f2f2; text-transform: uppercase;">${escapeHtml(rightLabel)}</div>
+                <div style="padding: 6px 8px; font-size: 13px; min-height: 30px;">${previewDisplayValue(rightValue, '&nbsp;')}</div>
+            </div>
+        </div>
+    `;
+}
+
+function renderTemplateListRows(title, rows, formatter) {
+    const content = rows.length
+        ? rows.map(formatter).join('')
+        : `<div style="padding: 10px 12px; font-size: 12px; color: #4f6275;">No entries yet.</div>`;
+
+    return `
+        <section style="border: 2px solid #2f2f2f; background: #fff; margin-top: 14px;">
+            <div style="padding: 7px 10px; background: #d9d9d9; border-bottom: 2px solid #2f2f2f; font-size: 12px; font-weight: 800; text-transform: uppercase;">${escapeHtml(title)}</div>
+            ${content}
+        </section>
+    `;
+}
+
+function renderLiveTemplatePreview() {
+    const target = document.getElementById('pdsTemplateLiveView');
+    if (!target) return;
+
+    const childrenRows = collectRows(['children_name[]', 'children_birthdate[]']);
+    const educationRows = collectRows(['education_level[]', 'school_name[]', 'degree_course[]', 'education_from[]', 'education_to[]']);
+    const workRows = collectRows(['work_from[]', 'work_to[]', 'position_title[]', 'department[]']);
+
+    target.innerHTML = `
+        <div style="background: #ffffff; border: 3px solid #222; box-shadow: 0 10px 24px rgba(15,76,129,.08);">
+            <div style="padding: 8px 10px; border-bottom: 2px solid #222;">
+                <div style="font-size: 10px; font-weight: 800;">CS Form No. 212</div>
+                <div style="font-size: 10px; font-style: italic; font-weight: 700;">Revised 2017</div>
+                <div style="margin-top: 4px; font-size: 14px; font-weight: 900; text-align: center; letter-spacing: .04em;">PERSONAL DATA SHEET</div>
+            </div>
+
+            <div style="padding: 8px 10px; font-size: 10px; line-height: 1.4; border-bottom: 2px solid #222; background: #fafafa;">
+                Live template preview from current user input.
+            </div>
+
+            <section style="border-bottom: 2px solid #222;">
+                <div style="padding: 6px 10px; background: #d9d9d9; border-bottom: 2px solid #222; font-size: 12px; font-weight: 800; text-transform: uppercase;">I. Personal Information</div>
+                ${renderTemplatePair('Surname', getInputValue('surname'), 'First Name', getInputValue('first_name'))}
+                ${renderTemplatePair('Middle Name', getInputValue('middle_name'), 'Name Extension', getInputValue('name_extension'))}
+                ${renderTemplatePair('Date of Birth', getInputValue('date_of_birth'), 'Place of Birth', getInputValue('place_of_birth'))}
+                ${renderTemplatePair('Sex', getInputValue('sex'), 'Civil Status', getInputValue('civil_status'))}
+                ${renderTemplatePair('Citizenship', getInputValue('citizenship'), 'Blood Type', getInputValue('blood_type'))}
+                ${renderTemplatePair('Height (m)', getInputValue('height_m'), 'Weight (kg)', getInputValue('weight_kg'))}
+                ${renderTemplatePair('GSIS ID No.', getInputValue('gsis_id'), 'PAG-IBIG ID No.', getInputValue('pagibig_id'))}
+                ${renderTemplatePair('PhilHealth No.', getInputValue('philhealth_id'), 'SSS No.', getInputValue('sss_id'))}
+                ${renderTemplatePair('TIN No.', getInputValue('tin_id'), 'Agency Employee No.', getInputValue('agency_employee_no'))}
+                ${renderTemplateLine('Residential Address', getInputValue('residential_address'))}
+                ${renderTemplatePair('Residential Zip Code', getInputValue('residential_zip_code'), 'Residential Telephone', getInputValue('residential_telephone'))}
+                ${renderTemplateLine('Permanent Address', getInputValue('permanent_address'))}
+                ${renderTemplatePair('Permanent Zip Code', getInputValue('permanent_zip_code'), 'Permanent Telephone', getInputValue('permanent_telephone'))}
+                ${renderTemplatePair('Mobile No.', getInputValue('mobile_number'), 'Email Address', getInputValue('email_address'))}
+            </section>
+
+            <section style="border-bottom: 2px solid #222;">
+                <div style="padding: 6px 10px; background: #d9d9d9; border-bottom: 2px solid #222; font-size: 12px; font-weight: 800; text-transform: uppercase;">II. Family Background</div>
+                ${renderTemplatePair('Spouse Surname', getInputValue('spouse_surname'), 'Spouse First Name', getInputValue('spouse_first_name'))}
+                ${renderTemplatePair('Spouse Middle Name', getInputValue('spouse_middle_name'), 'Spouse Extension', getInputValue('spouse_name_extension'))}
+                ${renderTemplatePair('Occupation', getInputValue('spouse_occupation'), 'Employer / Business', getInputValue('spouse_employer_business_name'))}
+                ${renderTemplatePair('Business Address', getInputValue('spouse_business_address'), 'Telephone No.', getInputValue('spouse_telephone'))}
+                ${renderTemplatePair("Father's Surname", getInputValue('father_surname'), "Father's First Name", getInputValue('father_first_name'))}
+                ${renderTemplatePair("Father's Middle Name", getInputValue('father_middle_name'), "Father's Extension", getInputValue('father_name_extension'))}
+                ${renderTemplatePair("Mother's Maiden Surname", getInputValue('mother_maiden_surname'), "Mother's First Name", getInputValue('mother_first_name'))}
+                ${renderTemplateLine("Mother's Middle Name", getInputValue('mother_middle_name'))}
+            </section>
+
+            ${renderTemplateListRows('Children', childrenRows, (row, index) => `
+                <div style="display: grid; grid-template-columns: 50px 1fr 180px; border-bottom: 1px solid #2f2f2f;">
+                    <div style="padding: 6px 8px; border-right: 1px solid #2f2f2f; font-size: 11px; background: #f8f8f8;">${index + 1}</div>
+                    <div style="padding: 6px 8px; border-right: 1px solid #2f2f2f; font-size: 13px;">${previewDisplayValue(row['children_name[]'], '&nbsp;')}</div>
+                    <div style="padding: 6px 8px; font-size: 13px;">${previewDisplayValue(row['children_birthdate[]'], '&nbsp;')}</div>
+                </div>
+            `)}
+
+            ${renderTemplateListRows('Educational Background', educationRows, (row, index) => `
+                <div style="display: grid; grid-template-columns: 40px 120px 1fr 1fr 110px 110px; border-bottom: 1px solid #2f2f2f;">
+                    <div style="padding: 6px 8px; border-right: 1px solid #2f2f2f; font-size: 11px; background: #f8f8f8;">${index + 1}</div>
+                    <div style="padding: 6px 8px; border-right: 1px solid #2f2f2f; font-size: 12px;">${previewDisplayValue(row['education_level[]'], '&nbsp;')}</div>
+                    <div style="padding: 6px 8px; border-right: 1px solid #2f2f2f; font-size: 12px;">${previewDisplayValue(row['school_name[]'], '&nbsp;')}</div>
+                    <div style="padding: 6px 8px; border-right: 1px solid #2f2f2f; font-size: 12px;">${previewDisplayValue(row['degree_course[]'], '&nbsp;')}</div>
+                    <div style="padding: 6px 8px; border-right: 1px solid #2f2f2f; font-size: 12px;">${previewDisplayValue(row['education_from[]'], '&nbsp;')}</div>
+                    <div style="padding: 6px 8px; font-size: 12px;">${previewDisplayValue(row['education_to[]'], '&nbsp;')}</div>
+                </div>
+            `)}
+
+            ${renderTemplateListRows('Work Experience', workRows, (row, index) => `
+                <div style="display: grid; grid-template-columns: 40px 110px 110px 1fr 1fr; border-bottom: 1px solid #2f2f2f;">
+                    <div style="padding: 6px 8px; border-right: 1px solid #2f2f2f; font-size: 11px; background: #f8f8f8;">${index + 1}</div>
+                    <div style="padding: 6px 8px; border-right: 1px solid #2f2f2f; font-size: 12px;">${previewDisplayValue(row['work_from[]'], '&nbsp;')}</div>
+                    <div style="padding: 6px 8px; border-right: 1px solid #2f2f2f; font-size: 12px;">${previewDisplayValue(row['work_to[]'], '&nbsp;')}</div>
+                    <div style="padding: 6px 8px; border-right: 1px solid #2f2f2f; font-size: 12px;">${previewDisplayValue(row['position_title[]'], '&nbsp;')}</div>
+                    <div style="padding: 6px 8px; font-size: 12px;">${previewDisplayValue(row['department[]'], '&nbsp;')}</div>
+                </div>
+            `)}
+        </div>
+    `;
+}
+
+function appendDynamicItem(containerId, templateHtml, values) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    const item = document.createElement('div');
+    item.className = 'dynamic-item';
+    item.innerHTML = templateHtml;
+    container.appendChild(item);
+
+    Object.entries(values || {}).forEach(([name, value]) => {
+        const field = item.querySelector(`[name="${name}"]`);
+        if (field) {
+            field.value = value ?? '';
+        }
+    });
+}
+
+function childTemplate() {
+    return `
         <input type="text" placeholder="Child's Full Name" name="children_name[]">
         <input type="date" placeholder="Date of Birth" name="children_birthdate[]">
         <button type="button" class="btn btn-outline btn-small pds-remove" onclick="removeDynamicItem(this)">Remove</button>
     `;
-    container.appendChild(newItem);
 }
 
-function addEducation() {
-    const container = document.getElementById('educationList');
-    const newItem = document.createElement('div');
-    newItem.className = 'dynamic-item';
-    newItem.innerHTML = `
+function educationTemplate() {
+    return `
         <select name="education_level[]" required>
             <option value="">Select Level...</option>
             <option value="Elementary">Elementary</option>
@@ -850,14 +1545,10 @@ function addEducation() {
         <input type="text" placeholder="Scholarship/Academic Honors" name="scholarship_honors[]">
         <button type="button" class="btn btn-outline btn-small pds-remove" onclick="removeDynamicItem(this)">Remove</button>
     `;
-    container.appendChild(newItem);
 }
 
-function addEligibility() {
-    const container = document.getElementById('eligibilityList');
-    const newItem = document.createElement('div');
-    newItem.className = 'dynamic-item';
-    newItem.innerHTML = `
+function eligibilityTemplate() {
+    return `
         <select name="career_service[]" required>
             <option value="">Select...</option>
             <option value="Professional">Professional</option>
@@ -873,14 +1564,10 @@ function addEligibility() {
         <input type="date" placeholder="Date of Release" name="license_release_date[]">
         <button type="button" class="btn btn-outline btn-small pds-remove" onclick="removeDynamicItem(this)">Remove</button>
     `;
-    container.appendChild(newItem);
 }
 
-function addWorkExperience() {
-    const container = document.getElementById('workExperienceList');
-    const newItem = document.createElement('div');
-    newItem.className = 'dynamic-item';
-    newItem.innerHTML = `
+function workExperienceTemplate() {
+    return `
         <input type="date" placeholder="From" name="work_from[]" required>
         <input type="date" placeholder="To (leave blank if present)" name="work_to[]">
         <input type="text" placeholder="Position Title" name="position_title[]" required>
@@ -904,14 +1591,10 @@ function addWorkExperience() {
         </select>
         <button type="button" class="btn btn-outline btn-small pds-remove" onclick="removeDynamicItem(this)">Remove</button>
     `;
-    container.appendChild(newItem);
 }
 
-function addVoluntaryWork() {
-    const container = document.getElementById('voluntaryWorkList');
-    const newItem = document.createElement('div');
-    newItem.className = 'dynamic-item';
-    newItem.innerHTML = `
+function voluntaryWorkTemplate() {
+    return `
         <input type="text" placeholder="Name & Address of Organization" name="org_name_address[]" required>
         <input type="date" placeholder="From" name="voluntary_from[]" required>
         <input type="date" placeholder="To" name="voluntary_to[]" required>
@@ -919,14 +1602,10 @@ function addVoluntaryWork() {
         <input type="text" placeholder="Position/Nature of Work" name="voluntary_position[]" required>
         <button type="button" class="btn btn-outline btn-small pds-remove" onclick="removeDynamicItem(this)">Remove</button>
     `;
-    container.appendChild(newItem);
 }
 
-function addTraining() {
-    const container = document.getElementById('trainingList');
-    const newItem = document.createElement('div');
-    newItem.className = 'dynamic-item';
-    newItem.innerHTML = `
+function trainingTemplate() {
+    return `
         <input type="text" placeholder="Title of L&D Program" name="training_title[]" required>
         <input type="date" placeholder="From" name="training_from[]" required>
         <input type="date" placeholder="To" name="training_to[]" required>
@@ -941,11 +1620,120 @@ function addTraining() {
         <input type="text" placeholder="Sponsored By" name="training_sponsored[]" required>
         <button type="button" class="btn btn-outline btn-small pds-remove" onclick="removeDynamicItem(this)">Remove</button>
     `;
-    container.appendChild(newItem);
+}
+
+function renderDynamicSection(containerId, items, templateFactory, emptyItem = {}) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    container.innerHTML = '';
+    const source = Array.isArray(items) && items.length ? items : [emptyItem];
+    source.forEach((item) => appendDynamicItem(containerId, templateFactory(), item));
+}
+
+function hydratePdsForm() {
+    const flatFields = {
+        ...(existingPdsData.fields || {}),
+        ...(existingPdsData.references || {}),
+    };
+
+    Object.entries(flatFields).forEach(([name, value]) => {
+        setFieldValue(name, value);
+    });
+
+    renderDynamicSection('childrenList', existingPdsData.children, childTemplate, {});
+    renderDynamicSection('educationList', existingPdsData.education, educationTemplate, {});
+    renderDynamicSection('eligibilityList', existingPdsData.eligibility, eligibilityTemplate, {});
+    renderDynamicSection('workExperienceList', existingPdsData.workExperience, workExperienceTemplate, {});
+    renderDynamicSection('voluntaryWorkList', existingPdsData.voluntaryWork, voluntaryWorkTemplate, {});
+    renderDynamicSection('trainingList', existingPdsData.training, trainingTemplate, {});
+
+    Object.entries(existingPdsData.uploads || {}).forEach(([previewId, imagePath]) => {
+        showExistingImagePreview(previewId, imagePath);
+    });
+}
+
+// Bind step navigation
+document.querySelectorAll('.pds-nav-item[data-page]').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const pageNum = Number(btn.getAttribute('data-page') || '0');
+        if (!pageNum || pageNum === currentPage) return;
+        if (pageNum > currentPage && !validateCurrentPage()) return;
+        showPage(pageNum);
+    });
+});
+
+// Dynamic list functions
+function removeDynamicItem(button) {
+    if (confirm('Remove this item?')) {
+        button.parentElement.remove();
+    }
+}
+
+function addChild() {
+    appendDynamicItem('childrenList', childTemplate(), {});
+}
+
+function addEducation() {
+    appendDynamicItem('educationList', educationTemplate(), {});
+}
+
+function addEligibility() {
+    appendDynamicItem('eligibilityList', eligibilityTemplate(), {});
+}
+
+function addWorkExperience() {
+    appendDynamicItem('workExperienceList', workExperienceTemplate(), {});
+}
+
+function addVoluntaryWork() {
+    appendDynamicItem('voluntaryWorkList', voluntaryWorkTemplate(), {});
+}
+
+function addTraining() {
+    appendDynamicItem('trainingList', trainingTemplate(), {});
 }
 
 // Initialize
+hydratePdsForm();
+bindImagePreview('applicant_photo', 'applicant_photo_preview');
+bindImagePreview('applicant_signature', 'applicant_signature_preview');
+bindImagePreview('thumbmark', 'thumbmark_preview');
+renderLiveTemplatePreview();
+renderLivePdsPreview();
+document.getElementById('pdsForm')?.addEventListener('input', () => {
+    renderLiveTemplatePreview();
+    renderLivePdsPreview();
+});
+document.getElementById('pdsForm')?.addEventListener('change', () => {
+    renderLiveTemplatePreview();
+    renderLivePdsPreview();
+});
+document.getElementById('pdsForm')?.addEventListener('submit', () => {
+    const actionInput = document.getElementById('pdsAction');
+    if (actionInput && actionInput.value !== 'save_draft') {
+        actionInput.value = 'submit';
+    }
+});
 updateButtons();
+
+const shouldFocusDocumentPanel = <?php echo $submittedNow ? 'true' : 'false'; ?>;
+if (shouldFocusDocumentPanel) {
+    window.addEventListener('load', () => {
+        const panel = document.getElementById('pdsDocumentActions');
+        const primaryAction = document.getElementById('pdsViewDocumentBtn');
+        if (!panel) return;
+
+        panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        window.setTimeout(() => {
+            if (primaryAction) {
+                primaryAction.focus({ preventScroll: true });
+            } else {
+                panel.focus({ preventScroll: true });
+            }
+        }, 350);
+    });
+}
 </script>
 
 <?php require_once 'includes/footer.php'; ?>

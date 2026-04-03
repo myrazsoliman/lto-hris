@@ -268,6 +268,116 @@ function getEmployeeData($employee_id) {
     return $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
 }
 
+function resolve_employee_id_for_user($userId) {
+    global $pdo;
+
+    $userId = (int) $userId;
+    if ($userId <= 0) {
+        return 0;
+    }
+
+    try {
+        $stmt = $pdo->prepare("SELECT id FROM employees WHERE id = ? LIMIT 1");
+        $stmt->execute([$userId]);
+        $directMatch = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($directMatch) {
+            return (int) $directMatch['id'];
+        }
+
+        $stmt = $pdo->prepare("
+            SELECT
+                e.id,
+                CASE
+                    WHEN e.first_name = u.first_name AND e.last_name = u.last_name THEN 1
+                    WHEN TRIM(CONCAT_WS(' ', e.first_name, e.middle_name, e.last_name)) = TRIM(CONCAT_WS(' ', u.first_name, u.middle_name, u.last_name)) THEN 2
+                    WHEN TRIM(CONCAT_WS(' ', e.first_name, e.last_name)) = TRIM(CONCAT_WS(' ', u.first_name, u.last_name)) THEN 3
+                    WHEN TRIM(CONCAT_WS(' ', e.first_name, COALESCE(e.middle_name, ''))) = TRIM(u.first_name) AND e.last_name = u.last_name THEN 4
+                    ELSE 9
+                END AS match_rank
+            FROM users u
+            JOIN employees e
+              ON (
+                    (e.first_name = u.first_name AND e.last_name = u.last_name)
+                 OR TRIM(CONCAT_WS(' ', e.first_name, e.middle_name, e.last_name)) = TRIM(CONCAT_WS(' ', u.first_name, u.middle_name, u.last_name))
+                 OR TRIM(CONCAT_WS(' ', e.first_name, e.last_name)) = TRIM(CONCAT_WS(' ', u.first_name, u.last_name))
+                 OR (TRIM(CONCAT_WS(' ', e.first_name, COALESCE(e.middle_name, ''))) = TRIM(u.first_name) AND e.last_name = u.last_name)
+              )
+            WHERE u.id = ?
+            ORDER BY match_rank, e.id
+            LIMIT 1
+        ");
+        $stmt->execute([$userId]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($row) {
+            return (int) $row['id'];
+        }
+
+        return $userId;
+    } catch (PDOException $e) {
+        error_log('Employee resolution failed: ' . $e->getMessage());
+        return $userId;
+    }
+}
+
+function ensure_employee_record_for_user($userId) {
+    global $pdo;
+
+    $resolvedId = resolve_employee_id_for_user($userId);
+    if ($resolvedId > 0) {
+        $stmt = $pdo->prepare("SELECT id FROM employees WHERE id = ? LIMIT 1");
+        $stmt->execute([$resolvedId]);
+        $existing = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($existing) {
+            return (int) $existing['id'];
+        }
+    }
+
+    $userId = (int) $userId;
+    if ($userId <= 0) {
+        return 0;
+    }
+
+    try {
+        $hasMiddleName = false;
+        try {
+            $checkStmt = $pdo->query("SHOW COLUMNS FROM users LIKE 'middle_name'");
+            $hasMiddleName = (bool) $checkStmt->fetch(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            $hasMiddleName = false;
+        }
+
+        $userSelect = $hasMiddleName
+            ? "SELECT id, first_name, middle_name, last_name FROM users WHERE id = ? LIMIT 1"
+            : "SELECT id, first_name, NULL AS middle_name, last_name FROM users WHERE id = ? LIMIT 1";
+
+        $stmt = $pdo->prepare($userSelect);
+        $stmt->execute([$userId]);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$user) {
+            return $resolvedId > 0 ? $resolvedId : 0;
+        }
+
+        $employeeNumber = 'EMP-' . str_pad((string) $userId, 4, '0', STR_PAD_LEFT);
+        $stmt = $pdo->prepare("
+            INSERT INTO employees (
+                id, employee_number, first_name, middle_name, last_name, status
+            ) VALUES (?, ?, ?, ?, ?, 'Active')
+        ");
+        $stmt->execute([
+            $userId,
+            $employeeNumber,
+            $user['first_name'] ?? 'Employee',
+            $user['middle_name'] ?? null,
+            $user['last_name'] ?? 'User',
+        ]);
+
+        return $userId;
+    } catch (PDOException $e) {
+        error_log('Employee auto-create failed: ' . $e->getMessage());
+        return $resolvedId > 0 ? $resolvedId : 0;
+    }
+}
+
 // PDS Functions
 function get_pds_record($employeeId, $year = null) {
     global $pdo;

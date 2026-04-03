@@ -2,9 +2,11 @@
 require_once 'includes/auth.php';
 require_once 'includes/db.php';
 require_once 'includes/data.php';
+require_once 'includes/pds-document-render.php';
+require_once 'includes/upload.php';
 
 // Check if user is authenticated
-if (!is_authenticated()) {
+if (!is_logged_in()) {
     header('Location: index.php');
     exit();
 }
@@ -22,7 +24,9 @@ $action = $_POST['action'] ?? 'submit'; // Can be 'submit' or 'save_draft'
 
 // Validate employee access
 $userRoles = get_user_roles($_SESSION['user_id']);
-$currentUserEmployeeId = get_employee_id_from_user($_SESSION['user_id']);
+$currentUserEmployeeId = in_array('employee', $userRoles, true)
+    ? ensure_employee_record_for_user((int) ($_SESSION['user']['id'] ?? 0))
+    : resolve_employee_id_for_user((int) ($_SESSION['user']['id'] ?? 0));
 
 // Employees can only edit their own PDS, HR/Admin can edit any
 if (in_array('employee', $userRoles) && $currentUserEmployeeId != $employeeId) {
@@ -32,6 +36,9 @@ if (in_array('employee', $userRoles) && $currentUserEmployeeId != $employeeId) {
 }
 
 try {
+    ensure_pds_signature_columns();
+    ensure_pds_record_pdf_column();
+
     // Get or create PDS record
     $pdsRecord = get_pds_record($employeeId, $year);
     
@@ -397,29 +404,73 @@ try {
         $stmt->execute($values);
     }
     
-    // Process signature
+    // Process photo, signature, and thumbmark images
+    $signatureRecord = get_pds_signature($pdsId);
     $signatureData = [
-        'date_signed' => $_POST['date_signed'] ?? null
-        // Note: Signature and thumbmark would be handled via file upload or canvas data
+        'applicant_photo' => is_array($signatureRecord) ? ($signatureRecord['applicant_photo'] ?? null) : null,
+        'applicant_signature' => is_array($signatureRecord) ? ($signatureRecord['applicant_signature'] ?? null) : null,
+        'thumbmark' => is_array($signatureRecord) ? ($signatureRecord['thumbmark'] ?? null) : null,
+        'date_signed' => $_POST['date_signed'] ?? null,
     ];
-    
+
+    $uploadFields = [
+        'applicant_photo' => 'Applicant photo',
+        'applicant_signature' => 'Signature image',
+        'thumbmark' => 'Thumbmark image',
+    ];
+
+    foreach ($uploadFields as $fieldName => $label) {
+        if (!empty($_FILES[$fieldName]) && ($_FILES[$fieldName]['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE) {
+            [$uploaded, $uploadResult] = handle_image_upload($fieldName, 'pds');
+            if (!$uploaded) {
+                throw new Exception($label . ' upload failed: ' . $uploadResult);
+            }
+            $signatureData[$fieldName] = $uploadResult;
+        }
+    }
+
     $stmt = $pdo->prepare("SELECT id FROM pds_signature WHERE pds_id = ?");
     $stmt->execute([$pdsId]);
-    
+
     if ($stmt->fetch()) {
-        if (!empty($signatureData['date_signed'])) {
-            $stmt = $pdo->prepare("UPDATE pds_signature SET date_signed = ? WHERE pds_id = ?");
-            $stmt->execute([$signatureData['date_signed'], $pdsId]);
-        }
+        $stmt = $pdo->prepare("
+            UPDATE pds_signature
+            SET applicant_photo = ?, applicant_signature = ?, thumbmark = ?, date_signed = ?
+            WHERE pds_id = ?
+        ");
+        $stmt->execute([
+            $signatureData['applicant_photo'],
+            $signatureData['applicant_signature'],
+            $signatureData['thumbmark'],
+            $signatureData['date_signed'],
+            $pdsId,
+        ]);
     } else {
-        $stmt = $pdo->prepare("INSERT INTO pds_signature (pds_id, date_signed) VALUES (?, ?)");
-        $stmt->execute([$pdsId, $signatureData['date_signed']]);
+        $stmt = $pdo->prepare("
+            INSERT INTO pds_signature (pds_id, applicant_photo, applicant_signature, thumbmark, date_signed)
+            VALUES (?, ?, ?, ?, ?)
+        ");
+        $stmt->execute([
+            $pdsId,
+            $signatureData['applicant_photo'],
+            $signatureData['applicant_signature'],
+            $signatureData['thumbmark'],
+            $signatureData['date_signed'],
+        ]);
     }
     
     // Update PDS status
     $newStatus = ($action === 'submit') ? 'submitted' : 'draft';
     if (!update_pds_status($pdsId, $newStatus)) {
         throw new Exception('Failed to update PDS status');
+    }
+
+    if ($action === 'submit') {
+        $generatedPdfPath = generate_pds_pdf($employeeId, $year);
+        if ($generatedPdfPath !== null) {
+            $stmt = $pdo->prepare("UPDATE pds_records SET generated_pdf_path = ? WHERE id = ?");
+            $stmt->execute([$generatedPdfPath, $pdsId]);
+        }
     }
     
     // Set success message
@@ -431,7 +482,13 @@ try {
     
     // Redirect based on user role
     if (in_array('employee', $userRoles)) {
-        header('Location: pds.php');
+        $redirectUrl = 'pds.php';
+        if ($action === 'submit') {
+            $redirectUrl .= '?submitted=1';
+        } elseif ($action === 'save_draft') {
+            $redirectUrl .= '?draft_saved=1';
+        }
+        header('Location: ' . $redirectUrl);
     } else {
         header('Location: employees.php?view=employee&id=' . $employeeId);
     }
@@ -442,22 +499,299 @@ try {
     header('Location: pds.php');
 }
 
-function get_employee_id_from_user($userId) {
+function ensure_pds_signature_columns()
+{
     global $pdo;
-    
-    try {
-        $stmt = $pdo->prepare("
-            SELECT e.id 
-            FROM employees e
-            JOIN users u ON e.first_name = u.first_name AND e.last_name = u.last_name
-            WHERE u.id = ?
-        ");
-        $stmt->execute([$userId]);
-        $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        return $result ? $result['id'] : null;
-    } catch (PDOException $e) {
-        error_log("Error getting employee ID from user: " . $e->getMessage());
-        return null;
+
+    $requiredColumns = [
+        'applicant_photo' => 'ALTER TABLE pds_signature ADD COLUMN applicant_photo TEXT NULL AFTER pds_id',
+        'applicant_signature' => 'ALTER TABLE pds_signature ADD COLUMN applicant_signature TEXT NULL AFTER applicant_photo',
+        'thumbmark' => 'ALTER TABLE pds_signature ADD COLUMN thumbmark TEXT NULL AFTER applicant_signature',
+    ];
+
+    foreach ($requiredColumns as $column => $sql) {
+        if (!auth_table_has_column('pds_signature', $column)) {
+            $pdo->exec($sql);
+        }
     }
+}
+
+function ensure_pds_record_pdf_column()
+{
+    global $pdo;
+
+    if (!auth_table_has_column('pds_records', 'generated_pdf_path')) {
+        $pdo->exec('ALTER TABLE pds_records ADD COLUMN generated_pdf_path VARCHAR(1024) NULL AFTER status');
+    }
+}
+
+function generate_pds_pdf($employeeId, $year)
+{
+    $context = pds_document_get_context($employeeId, $year);
+    if ($context === null) {
+        throw new Exception('Unable to build PDS document context for PDF generation.');
+    }
+
+    ensure_pds_filled_dir();
+    $timestamp = date('Ymd_His');
+    $baseName = 'pds_' . (int) $employeeId . '_' . (int) $year . '_' . $timestamp;
+    $filledDir = __DIR__ . '/uploads/pds/filled';
+    $pdfPath = $filledDir . '/' . $baseName . '.pdf';
+
+    $html = pds_document_render_html($context, true, true);
+    $htmlPath = $filledDir . '/' . $baseName . '.html';
+    file_put_contents($htmlPath, $html);
+
+    try {
+        $browserPath = find_pdf_browser_path();
+        if ($browserPath !== null) {
+            $command = escapeshellarg($browserPath)
+                . ' --headless=new --disable-gpu --allow-file-access-from-files'
+                . ' --print-to-pdf=' . escapeshellarg($pdfPath)
+                . ' ' . escapeshellarg(path_to_file_url($htmlPath));
+
+            exec($command, $output, $exitCode);
+
+            if ($exitCode === 0 && is_file($pdfPath) && filesize($pdfPath) > 0) {
+                return 'uploads/pds/filled/' . basename($pdfPath);
+            }
+        }
+
+        if (fill_exact_pds_template_pdf($context, $pdfPath)) {
+            return 'uploads/pds/filled/' . basename($pdfPath);
+        }
+    } finally {
+        if (is_file($htmlPath)) {
+            @unlink($htmlPath);
+        }
+    }
+
+    throw new Exception('Unable to generate PDS PDF.');
+}
+
+function ensure_pds_filled_dir()
+{
+    ensure_upload_dirs();
+    $dir = __DIR__ . '/uploads/pds/filled';
+    if (!is_dir($dir)) {
+        mkdir($dir, 0777, true);
+    }
+}
+
+function find_pdf_browser_path()
+{
+    $paths = [
+        'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+        'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+        'C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe',
+        'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe',
+    ];
+
+    foreach ($paths as $path) {
+        if (is_file($path)) {
+            return $path;
+        }
+    }
+
+    return null;
+}
+
+function path_to_file_url($path)
+{
+    $normalized = str_replace(DIRECTORY_SEPARATOR, '/', realpath($path) ?: $path);
+    return 'file:///' . str_replace(' ', '%20', ltrim($normalized, '/'));
+}
+
+function fill_exact_pds_template_pdf(array $context, $outputPdfPath)
+{
+    $pdftkPath = find_pdftk_path();
+    $templatePath = find_pds_template_pdf();
+
+    if ($pdftkPath === null || $templatePath === null) {
+        return false;
+    }
+
+    $fdfPath = preg_replace('/\.pdf$/i', '.fdf', $outputPdfPath);
+    $fields = build_pds_template_field_values($context);
+    file_put_contents($fdfPath, build_fdf_content($fields));
+
+    try {
+        $command = escapeshellarg($pdftkPath)
+            . ' ' . escapeshellarg($templatePath)
+            . ' fill_form ' . escapeshellarg($fdfPath)
+            . ' output ' . escapeshellarg($outputPdfPath)
+            . ' need_appearances flatten';
+
+        exec($command, $output, $exitCode);
+        return $exitCode === 0 && is_file($outputPdfPath) && filesize($outputPdfPath) > 0;
+    } finally {
+        if (is_file($fdfPath)) {
+            @unlink($fdfPath);
+        }
+    }
+}
+
+function find_pdftk_path()
+{
+    $paths = [
+        'C:\\Program Files (x86)\\PDFtk Server\\bin\\pdftk.exe',
+        'C:\\Program Files\\PDFtk Server\\bin\\pdftk.exe',
+    ];
+
+    foreach ($paths as $path) {
+        if (is_file($path)) {
+            return $path;
+        }
+    }
+
+    return null;
+}
+
+function find_pds_template_pdf()
+{
+    $paths = [
+        __DIR__ . '\\uploads\\form_templates\\PH GSIS CS 212 2017-2026.pdf',
+        __DIR__ . '\\assets\\img\\PH GSIS CS 212 2017-2026.pdf',
+        'C:\\Users\\Myra\\Downloads\\PH GSIS CS 212 2017-2026.pdf',
+        __DIR__ . '\\uploads\\pds\\PH GSIS CS 212 2017-2026.pdf',
+    ];
+
+    foreach ($paths as $path) {
+        if (is_file($path)) {
+            return $path;
+        }
+    }
+
+    return null;
+}
+
+function build_pds_template_field_values(array $context)
+{
+    $personal = $context['personal'] ?? [];
+    $family = $context['family'] ?? [];
+    $children = $context['children'] ?? [];
+    $signature = $context['signature'] ?? [];
+
+    $fields = [
+        'Text_2' => $personal['surname'] ?? '',
+        'Text_3' => $personal['first_name'] ?? '',
+        'Text_4' => $personal['middle_name'] ?? '',
+        'Date_1' => format_pdf_date($personal['date_of_birth'] ?? ''),
+        'Text_5' => $personal['place_of_birth'] ?? '',
+        'Text_6' => $personal['gsis_id'] ?? '',
+        'Text_7' => $personal['pagibig_id'] ?? '',
+        'Text_8' => $personal['philhealth_id'] ?? '',
+        'Text_9' => $personal['sss_id'] ?? '',
+        'Text_10' => $personal['tin_id'] ?? '',
+        'Text_11' => $personal['agency_employee_no'] ?? '',
+        'Text_12' => $personal['citizenship'] ?? '',
+        'Text_13' => $personal['height_m'] ?? '',
+        'Text_14' => $personal['weight_kg'] ?? '',
+        'Text_15' => $personal['blood_type'] ?? '',
+        'Text_17' => $personal['residential_address'] ?? '',
+        'Zip_Code_1' => $personal['residential_zip_code'] ?? '',
+        'US_Phone_Number_1' => $personal['residential_telephone'] ?? '',
+        'Text_23' => $personal['permanent_address'] ?? '',
+        'Zip_Code_2' => $personal['permanent_zip_code'] ?? '',
+        'US_Phone_Number_2' => $personal['permanent_telephone'] ?? '',
+        'Email_1' => $personal['email_address'] ?? '',
+        'Text_29' => $personal['mobile_number'] ?? '',
+        'Text_30' => $family['spouse_surname'] ?? '',
+        'Text_31' => $family['spouse_first_name'] ?? '',
+        'Text_32' => $family['spouse_middle_name'] ?? '',
+        'Text_33' => $family['spouse_name_extension'] ?? '',
+        'Text_34' => $family['spouse_occupation'] ?? '',
+        'US_Phone_Number_3' => $family['spouse_telephone'] ?? '',
+        'Text_41' => $family['father_surname'] ?? '',
+        'Text_42' => $family['father_first_name'] ?? '',
+        'Text_43' => $family['father_middle_name'] ?? '',
+        'Text_44' => $family['father_name_extension'] ?? '',
+        'Text_45' => $family['mother_maiden_surname'] ?? '',
+        'Text_46' => $family['mother_first_name'] ?? '',
+        'Text_47' => $family['mother_middle_name'] ?? '',
+        'Date_151' => format_pdf_date($signature['date_signed'] ?? ''),
+    ];
+
+    $childFieldMap = [
+        ['Text_35', 'Date_2'],
+        ['Text_36', 'Date_3'],
+        ['Text_37', 'Date_4'],
+        ['Text_38', 'Date_5'],
+        ['Text_39', 'Date_6'],
+        ['Text_40', 'Date_7'],
+    ];
+
+    foreach ($childFieldMap as $index => [$nameField, $dateField]) {
+        $child = $children[$index] ?? [];
+        $fields[$nameField] = $child['child_name'] ?? '';
+        $fields[$dateField] = format_pdf_date($child['date_of_birth'] ?? '');
+    }
+
+    $sex = strtolower(trim((string) ($personal['sex'] ?? '')));
+    if ($sex === 'male') {
+        $fields['Checkbox_1'] = 'Checkbox_1';
+    } elseif ($sex === 'female') {
+        $fields['Checkbox_2'] = 'Checkbox_2';
+    }
+
+    $civilStatus = strtolower(trim((string) ($personal['civil_status'] ?? '')));
+    $civilMap = [
+        'single' => 'Checkbox_3',
+        'married' => 'Checkbox_4',
+        'widowed' => 'Checkbox_5',
+        'separated' => 'Checkbox_6',
+        'divorced' => 'Checkbox_7',
+        'common law' => 'Checkbox_7',
+    ];
+    if (isset($civilMap[$civilStatus])) {
+        $fields[$civilMap[$civilStatus]] = $civilMap[$civilStatus];
+    }
+
+    $citizenship = strtolower(trim((string) ($personal['citizenship'] ?? '')));
+    if ($citizenship !== '') {
+        $fields['Checkbox_8'] = 'Checkbox_8';
+        if (strpos($citizenship, 'natural') !== false) {
+            $fields['Checkbox_9'] = 'Checkbox_9';
+        }
+    }
+
+    return $fields;
+}
+
+function format_pdf_date($value)
+{
+    if (empty($value)) {
+        return '';
+    }
+
+    $timestamp = strtotime((string) $value);
+    return $timestamp ? date('m/d/Y', $timestamp) : (string) $value;
+}
+
+function build_fdf_content(array $fields)
+{
+    $lines = ["%FDF-1.2", "1 0 obj", "<<", "/FDF << /Fields ["];
+    foreach ($fields as $name => $value) {
+        if ($value === null || $value === '') {
+            continue;
+        }
+        $lines[] = "<< /T (" . fdf_escape($name) . ") /V (" . fdf_escape((string) $value) . ") >>";
+    }
+    $lines[] = "] >>";
+    $lines[] = ">>";
+    $lines[] = "endobj";
+    $lines[] = "trailer";
+    $lines[] = "<< /Root 1 0 R >>";
+    $lines[] = "%%EOF";
+    return implode("\n", $lines);
+}
+
+function fdf_escape($value)
+{
+    return str_replace(
+        ["\\", "(", ")", "\r", "\n"],
+        ["\\\\", "\\(", "\\)", '', "\\n"],
+        (string) $value
+    );
 }
 ?>

@@ -52,6 +52,48 @@ function handle_file_upload($fieldName, $category = 'csc')
     return [true, $rel];
 }
 
+function handle_image_upload($fieldName, $category = 'pds')
+{
+    ensure_upload_dirs();
+    if (empty($_FILES[$fieldName]) || $_FILES[$fieldName]['error'] !== UPLOAD_ERR_OK) {
+        return [false, 'No image uploaded or upload error.'];
+    }
+
+    $file = $_FILES[$fieldName];
+    $maxSize = 5 * 1024 * 1024; // 5MB
+    if ($file['size'] > $maxSize) {
+        return [false, 'Image exceeds maximum size (5MB).'];
+    }
+
+    [$validImage, $imageData] = get_uploaded_image_size($file['tmp_name']);
+    if (!$validImage) {
+        return [false, $imageData];
+    }
+
+    $allowedImageMimes = ['image/jpeg', 'image/png'];
+    if (!in_array($imageData['mime'], $allowedImageMimes, true)) {
+        return [false, 'Image must be a JPG or PNG file.'];
+    }
+
+    $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+    if ($ext === 'jpeg') {
+        $ext = 'jpg';
+    }
+    if (!in_array($ext, ['jpg', 'png'], true)) {
+        $ext = $imageData['mime'] === 'image/png' ? 'png' : 'jpg';
+    }
+
+    $safe = basename($fieldName) . '_' . bin2hex(random_bytes(8)) . '.' . $ext;
+    $dir = __DIR__ . '/../uploads/' . basename($category);
+    $dest = $dir . '/' . $safe;
+
+    if (!move_uploaded_file($file['tmp_name'], $dest)) {
+        return [false, 'Failed to move uploaded image.'];
+    }
+
+    return [true, 'uploads/' . basename($category) . '/' . $safe];
+}
+
 function handle_news_banner_upload($fieldName)
 {
     ensure_upload_dirs();
