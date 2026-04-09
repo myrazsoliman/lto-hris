@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded',function(){
     var notifBtn = document.getElementById('notifBtn');
     var notifMenu = document.getElementById('notificationMenu');
     var notifDropdown = document.getElementById('notificationDropdown');
+    var profileMenu = document.querySelector('.profile-menu');
     var notifCount = document.getElementById('notifCount');
     var notifList = document.getElementById('notificationList');
     var notifSummary = document.getElementById('notificationSummary');
@@ -124,6 +125,15 @@ document.addEventListener('DOMContentLoaded',function(){
         setOpen(false);
       }
     });
+
+    if(profileMenu){
+      profileMenu.addEventListener('mouseenter', function(){
+        setOpen(false);
+      });
+      profileMenu.addEventListener('focusin', function(){
+        setOpen(false);
+      });
+    }
 
     notifList.addEventListener('click', function(e){
       var item = e.target.closest('[data-notification-id]');

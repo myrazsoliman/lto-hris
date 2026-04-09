@@ -18,6 +18,27 @@ $twoFaError = '';
 $twoFaSuccess = '';
 $twoFaCodePrefill = '';
 
+function redirect_to_dashboard_by_roles($roles)
+{
+    $normalizedRoles = array_map(
+        static fn($role) => strtolower(trim((string) $role)),
+        (array) $roles
+    );
+
+    if (in_array('superadmin', $normalizedRoles, true)) {
+        header('Location: superadmin-dashboard.php');
+        exit;
+    }
+
+    if (in_array('admin', $normalizedRoles, true) || in_array('hr_officer', $normalizedRoles, true)) {
+        header('Location: admin-dashboard.php');
+        exit;
+    }
+
+    header('Location: employee-dashboard.php');
+    exit;
+}
+
 if (isset($_GET['cancel_2fa'])) {
     unset($_SESSION['pending_2fa']);
     unset($_SESSION['flash_2fa_code']);
@@ -42,16 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form_action'] ?? '') === '
                 remember_trusted_device($pendingUser['id'] ?? 0, 'Trusted device');
             }
             login_user($pendingUser);
-
-            $roles = $pendingUser['roles'] ?? [];
-            if (in_array('superadmin', $roles)) {
-                header('Location: superadmin-dashboard.php');
-            } elseif (in_array('admin', $roles) || in_array('hr_officer', $roles)) {
-                header('Location: admin-dashboard.php');
-            } else {
-                header('Location: employee-dashboard.php');
-            }
-            exit;
+            redirect_to_dashboard_by_roles($pendingUser['roles'] ?? []);
         }
 
         $twoFaError = (string) ($pendingUser ?: 'Invalid verification code.');
@@ -96,36 +108,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form_action'] ?? '') === '
             regenerate_csrf_token();
 
             $roles = $user['roles'] ?? [];
-            if (requires_2fa($roles)) {
-                if (is_trusted_device($user['id'] ?? 0)) {
-                    login_user($user);
-                    log_auth_event('2fa_skipped_trusted_device', $user['id'] ?? null, $user['email'] ?? null);
-
-                    if (in_array('superadmin', $roles)) {
-                        header('Location: superadmin-dashboard.php');
-                    } elseif (in_array('admin', $roles) || in_array('hr_officer', $roles)) {
-                        header('Location: admin-dashboard.php');
-                    } else {
-                        header('Location: employee-dashboard.php');
-                    }
-                    exit;
-                }
-                start_2fa_challenge($user);
-                header('Location: index.php?2fa=1');
-                exit;
-            }
-
             login_user($user);
-
-            // Redirect to appropriate dashboard based on role
-            if (in_array('superadmin', $roles)) {
-                header('Location: superadmin-dashboard.php');
-            } elseif (in_array('admin', $roles) || in_array('hr_officer', $roles)) {
-                header('Location: admin-dashboard.php');
-            } else {
-                header('Location: employee-dashboard.php');
-            }
-            exit;
+            redirect_to_dashboard_by_roles($roles);
         }
 
         register_failed_attempt('login');
