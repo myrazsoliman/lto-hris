@@ -154,8 +154,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form_action'] ?? '') === '
 
     if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
         $registerError = 'Your session has expired. Please try again.';
-    } elseif ($registerHoneypot !== '') {
-        $registerError = 'Unable to submit registration request.';
     } elseif (is_rate_limited('register')) {
         $registerError = 'Too many registration attempts. Please wait a few minutes before trying again.';
     } elseif ($registerFirstName === '' || $registerLastName === '' || $registerEmail === '' || $password === '' || $confirmPassword === '') {
@@ -180,9 +178,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form_action'] ?? '') === '
             if ($userId) {
                 clear_failed_attempts('register');
                 regenerate_csrf_token();
-                
-                // Redirect to login with success message
-                header('Location: index.php?login=1&registration_success=1');
+
+                // After successful registration, proceed directly to verification modal.
+                $newUser = fetch_user_record($registerEmail);
+                if ($newUser && is_array($newUser)) {
+                    start_2fa_challenge($newUser);
+                    header('Location: index.php?2fa=1');
+                } else {
+                    header('Location: index.php?login=1&registration_success=1');
+                }
                 exit;
             } else {
                 $registerError = 'Registration failed. Please try again.';
@@ -1182,8 +1186,23 @@ $contactLink = ['label' => 'Contact Us', 'href' => '#', 'active' => false, 'care
                 });
 
                 input.addEventListener('keydown', (event) => {
-                    if (event.key === 'Backspace' && !input.value && index > 0) {
-                        digitInputs[index - 1].focus();
+                    if (event.key === 'Backspace') {
+                        event.preventDefault();
+                        if (input.value) {
+                            input.value = '';
+                        } else if (index > 0) {
+                            const prev = digitInputs[index - 1];
+                            prev.value = '';
+                            prev.focus();
+                        }
+                        setState();
+                        return;
+                    }
+                    if (event.key === 'Delete') {
+                        event.preventDefault();
+                        input.value = '';
+                        setState();
+                        return;
                     }
                     if (event.key === 'ArrowLeft' && index > 0) {
                         event.preventDefault();
