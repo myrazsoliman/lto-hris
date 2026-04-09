@@ -16,6 +16,7 @@ $csrfToken = csrf_token();
 $show2faModal = isset($_GET['2fa']) || isset($_SESSION['pending_2fa']);
 $twoFaError = '';
 $twoFaSuccess = '';
+$twoFaCodePrefill = '';
 
 if (isset($_GET['cancel_2fa'])) {
     unset($_SESSION['pending_2fa']);
@@ -29,6 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form_action'] ?? '') === '
         $twoFaError = 'Your session has expired. Please try again.';
     } else {
         $code = trim((string) ($_POST['otp_code'] ?? ''));
+        $twoFaCodePrefill = preg_replace('/\D+/', '', $code);
         [$ok, $pendingUser] = verify_2fa_code($code);
         if ($ok && is_array($pendingUser)) {
             unset($_SESSION['pending_2fa']);
@@ -57,6 +59,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form_action'] ?? '') === '
 
     $show2faModal = true;
 }
+
+$twoFaCodePrefill = substr(preg_replace('/\D+/', '', $twoFaCodePrefill), 0, 6);
+$twoFaDigits = str_split($twoFaCodePrefill);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form_action'] ?? '') === 'resend_2fa') {
     if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
@@ -225,6 +230,44 @@ $contactLink = ['label' => 'Contact Us', 'href' => '#', 'active' => false, 'care
     <title>LTO-HRIS</title>
     <link rel="stylesheet" href="assets/css/styles.css">
     <link rel="stylesheet" href="assets/css/lto-style.css">
+    <style>
+        #twoFaModal .verification-form .verification-otp-row {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 10px !important;
+        }
+        #twoFaModal .verification-form .verification-otp-row > .verification-otp-digit {
+            display: inline-block !important;
+            flex: 0 0 42px !important;
+            width: 42px !important;
+            min-width: 42px !important;
+            max-width: 42px !important;
+            height: 58px !important;
+            min-height: 58px !important;
+            max-height: 58px !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            border-radius: 8px !important;
+            text-align: center !important;
+            font-size: 36px !important;
+        }
+        #twoFaModal .verification-form .verification-remember-device {
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 8px !important;
+        }
+        #twoFaModal .verification-form .verification-remember-checkbox[type="checkbox"] {
+            appearance: auto !important;
+            -webkit-appearance: checkbox !important;
+            width: 16px !important;
+            height: 16px !important;
+            min-width: 16px !important;
+            min-height: 16px !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+    </style>
 </head>
 
 <body class="landing-page<?php echo $show2faModal ? ' login-modal-open' : ''; ?>">
@@ -587,24 +630,34 @@ $contactLink = ['label' => 'Contact Us', 'href' => '#', 'active' => false, 'care
         </div>
     </div>
 
-    <div class="login-modal<?php echo $show2faModal ? ' is-open' : ''; ?>" id="twoFaModal" aria-hidden="<?php echo $show2faModal ? 'false' : 'true'; ?>">
+    <div class="login-modal verification-modal<?php echo $show2faModal ? ' is-open' : ''; ?>" id="twoFaModal" aria-hidden="<?php echo $show2faModal ? 'false' : 'true'; ?>">
         <a class="login-modal-backdrop" href="index.php?cancel_2fa=1" aria-label="Cancel verification"></a>
-        <div class="login-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="twoFaModalTitle">
-            <div class="login-card-modern login-card-modal login-card-modal-split" style="max-width: 520px;">
-                <div class="login-modal-panel" style="width: 100%;">
-                    <div class="login-modal-header login-modal-header-plain">
+        <div class="login-modal-dialog verification-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="twoFaModalTitle">
+            <div class="login-card-modern login-card-modal login-card-modal-split verification-card-modal">
+                <div class="login-modal-visual verification-modal-visual">
+                    <div class="login-modal-visual-overlay"></div>
+                    <div class="login-modal-visual-content verification-modal-visual-content">
+                        <img src="assets/img/lto_logo.png" alt="Land Transportation Office seal" class="login-modal-visual-logo">
+                        <h2 class="login-modal-visual-title">LTO - HRIS</h2>
+                        <p class="login-modal-visual-subtitle">Land Transportation Office</p>
+                        <span class="login-modal-visual-kicker">Secure Verification Required</span>
+                    </div>
+                </div>
+
+                <div class="login-modal-panel verification-modal-panel">
+                    <div class="login-modal-header login-modal-header-plain verification-modal-header-plain">
                         <div class="login-modal-header-copy">
                             <div class="login-modal-title-row">
-                                <h2 id="twoFaModalTitle">Verification <span>Code</span></h2>
+                                <h2>Secure <span>Sign-In</span></h2>
                             </div>
-                            <p class="login-modal-subtitle">We sent a one-time code to your email.</p>
+                            <p class="login-modal-subtitle">Enter your 6-digit authentication code to continue.</p>
                         </div>
                         <a class="login-modal-close" href="index.php?cancel_2fa=1" aria-label="Cancel verification">
                             <span aria-hidden="true">&times;</span>
                         </a>
                     </div>
 
-                    <div class="login-modal-body login-modal-body-plain">
+                    <div class="login-modal-body login-modal-body-plain verification-modal-body">
                         <?php if ($twoFaError !== ''): ?>
                             <div class="alert alert-error"><?php echo htmlspecialchars($twoFaError); ?></div>
                         <?php endif; ?>
@@ -613,42 +666,38 @@ $contactLink = ['label' => 'Contact Us', 'href' => '#', 'active' => false, 'care
                             <div class="alert alert-success"><?php echo htmlspecialchars($twoFaSuccess); ?></div>
                         <?php endif; ?>
 
-                        <?php if (AUTH_DEV_MODE && isset($_SESSION['flash_2fa_code'])): ?>
-                            <div class="alert alert-success">
-                                Dev code: <?php echo htmlspecialchars((string) $_SESSION['flash_2fa_code']); ?>
-                            </div>
-                        <?php endif; ?>
+                        <div class="login-modal-role-band verification-modal-role-band">Two-Factor Authentication</div>
 
-                        <form class="login-form-modern login-form-modal" method="post" action="index.php?2fa=1">
-                            <input type="hidden" name="form_action" value="verify_2fa">
+                        <form class="login-form-modern login-form-modal verification-form" method="post" action="index.php?2fa=1" novalidate data-verification-form>
+                            <input type="hidden" id="verificationAction" name="form_action" value="<?php echo strlen($twoFaCodePrefill) === 6 ? 'verify_2fa' : 'resend_2fa'; ?>">
                             <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken); ?>">
+                            <input type="hidden" id="otpCode" name="otp_code" value="<?php echo htmlspecialchars($twoFaCodePrefill); ?>">
 
-                            <div class="login-input-wrap login-input-wrap-modal">
-                                <div class="login-input-shell">
-                                    <span class="login-input-icon" aria-hidden="true">
-                                        <svg viewBox="0 0 24 24" fill="none">
-                                            <path d="M12 2a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2h-1V7a5 5 0 0 0-5-5Zm3 8H9V7a3 3 0 1 1 6 0v3Z" fill="currentColor"/>
-                                        </svg>
-                                    </span>
-                                    <label class="sr-only" for="otpCode">Verification code</label>
-                                    <input id="otpCode" name="otp_code" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" placeholder="Enter 6-digit code" required>
-                                </div>
+                            <div class="verification-hero-icon<?php echo strlen($twoFaCodePrefill) === 6 ? ' is-ready' : ''; ?>" id="verificationHeroIcon" aria-hidden="true">
+                                <img src="assets/img/email-sent.png" alt="Email verification sent" class="verification-hero-image">
                             </div>
 
-                            <label style="display:flex; align-items:center; gap:10px; margin: 6px 2px 4px; color: var(--muted); font-size: 13px;">
-                                <input type="checkbox" name="remember_device" value="1" style="width:16px; height:16px;">
-                                Remember this device for 30 days
+                            <div class="verification-otp-row" role="group" aria-label="6-digit verification code">
+                                <input class="verification-otp-digit" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="one-time-code" value="<?php echo htmlspecialchars($twoFaDigits[0] ?? ''); ?>" aria-label="Verification digit 1">
+                                <input class="verification-otp-digit" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" value="<?php echo htmlspecialchars($twoFaDigits[1] ?? ''); ?>" aria-label="Verification digit 2">
+                                <input class="verification-otp-digit" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" value="<?php echo htmlspecialchars($twoFaDigits[2] ?? ''); ?>" aria-label="Verification digit 3">
+                                <input class="verification-otp-digit" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" value="<?php echo htmlspecialchars($twoFaDigits[3] ?? ''); ?>" aria-label="Verification digit 4">
+                                <input class="verification-otp-digit" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" value="<?php echo htmlspecialchars($twoFaDigits[4] ?? ''); ?>" aria-label="Verification digit 5">
+                                <input class="verification-otp-digit" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" value="<?php echo htmlspecialchars($twoFaDigits[5] ?? ''); ?>" aria-label="Verification digit 6">
+                                <span class="verification-otp-ready<?php echo strlen($twoFaCodePrefill) === 6 ? ' is-visible' : ''; ?>" id="verificationReadyMark" aria-hidden="true">&#10003;</span>
+                            </div>
+
+                            <h3 id="twoFaModalTitle" class="verification-title">Verification Code</h3>
+                            <p class="verification-description">Enter the 6-digit code we sent to your email to continue sign in.</p>
+
+                            <label class="verification-remember-device" for="rememberDevice">
+                                <input class="verification-remember-checkbox" id="rememberDevice" type="checkbox" name="remember_device" value="1" <?php echo (($_POST['remember_device'] ?? '') === '1') ? 'checked' : ''; ?>>
+                                <span class="verification-remember-text">Remember this device for 30 days</span>
                             </label>
 
-                            <button type="submit" class="login-submit-btn login-submit-btn-modal login-submit-btn-modal-split">
-                                <span>Verify</span>
+                            <button type="submit" class="login-submit-btn login-submit-btn-modal login-submit-btn-modal-split verification-primary-btn" id="verificationPrimaryButton">
+                                <span><?php echo strlen($twoFaCodePrefill) === 6 ? 'Confirm Code' : 'Resend'; ?></span>
                             </button>
-                        </form>
-
-                        <form method="post" action="index.php?2fa=1" style="margin-top: 12px;">
-                            <input type="hidden" name="form_action" value="resend_2fa">
-                            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken); ?>">
-                            <button type="submit" class="login-link-btn" style="width: 100%;">Resend code</button>
                         </form>
                     </div>
                 </div>
@@ -1074,6 +1123,91 @@ $contactLink = ['label' => 'Contact Us', 'href' => '#', 'active' => false, 'care
             });
 
             syncBodyState();
+        }());
+
+        (function() {
+            const modal = document.getElementById('twoFaModal');
+            if (!modal) return;
+
+            const form = modal.querySelector('[data-verification-form]');
+            const actionInput = modal.querySelector('#verificationAction');
+            const codeInput = modal.querySelector('#otpCode');
+            const primaryButton = modal.querySelector('#verificationPrimaryButton');
+            const heroIcon = modal.querySelector('#verificationHeroIcon');
+            const readyMark = modal.querySelector('#verificationReadyMark');
+            const digitInputs = Array.from(modal.querySelectorAll('.verification-otp-digit'));
+
+            if (!form || !actionInput || !codeInput || !primaryButton || !heroIcon || !readyMark || digitInputs.length !== 6) return;
+
+            const digitsOnly = (value) => (value || '').replace(/\D+/g, '').slice(0, 6);
+
+            const setState = () => {
+                const value = digitsOnly(digitInputs.map((input) => input.value).join(''));
+                codeInput.value = value;
+
+                const complete = value.length === 6;
+                actionInput.value = complete ? 'verify_2fa' : 'resend_2fa';
+                primaryButton.classList.toggle('is-ready', complete);
+                heroIcon.classList.toggle('is-ready', complete);
+                readyMark.classList.toggle('is-visible', complete);
+                primaryButton.querySelector('span').textContent = complete ? 'Confirm Code' : 'Resend';
+            };
+
+            const fillInputs = (value) => {
+                const chars = digitsOnly(value).split('');
+                digitInputs.forEach((input, index) => {
+                    input.value = chars[index] || '';
+                });
+                setState();
+            };
+
+            fillInputs(codeInput.value);
+
+            digitInputs.forEach((input, index) => {
+                input.addEventListener('input', () => {
+                    const value = digitsOnly(input.value);
+
+                    if (value.length > 1) {
+                        fillInputs(value + digitInputs.slice(index + 1).map((node) => node.value).join(''));
+                        const nextFocus = Math.min(index + value.length, digitInputs.length - 1);
+                        digitInputs[nextFocus].focus();
+                        return;
+                    }
+
+                    input.value = value;
+                    if (value && index < digitInputs.length - 1) {
+                        digitInputs[index + 1].focus();
+                    }
+                    setState();
+                });
+
+                input.addEventListener('keydown', (event) => {
+                    if (event.key === 'Backspace' && !input.value && index > 0) {
+                        digitInputs[index - 1].focus();
+                    }
+                    if (event.key === 'ArrowLeft' && index > 0) {
+                        event.preventDefault();
+                        digitInputs[index - 1].focus();
+                    }
+                    if (event.key === 'ArrowRight' && index < digitInputs.length - 1) {
+                        event.preventDefault();
+                        digitInputs[index + 1].focus();
+                    }
+                });
+
+                input.addEventListener('paste', (event) => {
+                    const pasted = digitsOnly(event.clipboardData ? event.clipboardData.getData('text') : '');
+                    if (!pasted) return;
+                    event.preventDefault();
+                    fillInputs(pasted);
+                    const focusIndex = Math.min(pasted.length, digitInputs.length - 1);
+                    digitInputs[focusIndex].focus();
+                });
+            });
+
+            form.addEventListener('submit', () => {
+                setState();
+            });
         }());
 
         (function() {
