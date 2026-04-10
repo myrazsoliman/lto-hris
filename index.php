@@ -12,6 +12,10 @@ $registerMiddleName = '';
 $registerLastName = '';
 $registerEmail = '';
 $showRegisterModal = isset($_GET['register']);
+$forgotError = '';
+$forgotSuccess = '';
+$forgotEmail = '';
+$showForgotModal = isset($_GET['forgot']);
 $csrfToken = csrf_token();
 $show2faModal = isset($_GET['2fa']) || isset($_SESSION['pending_2fa']);
 $twoFaError = '';
@@ -187,25 +191,117 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form_action'] ?? '') === '
     }
 }
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form_action'] ?? '') === 'forgot_password_modal') {
+    $forgotEmail = isset($_POST['forgot_email']) ? trim((string) $_POST['forgot_email']) : '';
+
+    if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
+        $forgotError = 'Your session has expired. Please try again.';
+    } elseif (is_rate_limited('forgot_password')) {
+        $forgotError = 'Too many requests. Please wait a few minutes before trying again.';
+    } elseif ($forgotEmail === '' || !filter_var($forgotEmail, FILTER_VALIDATE_EMAIL)) {
+        $forgotError = 'Please enter a valid email address.';
+    } else {
+        $existingUser = fetch_user_record($forgotEmail);
+        if ($existingUser) {
+            $subject = 'LTO HRIS Password Assistance';
+            $message = "A password assistance request was submitted for your LTO HRIS account.\n\n"
+                . "If you made this request, please contact your HRIS administrator to reset your password.\n\n"
+                . "If you did not make this request, you can safely ignore this email.\n\n"
+                . "LTO HRIS";
+            send_email_message($forgotEmail, $subject, $message);
+        }
+
+        clear_failed_attempts('forgot_password');
+        $forgotSuccess = 'If an account exists for this email, password assistance instructions have been sent.';
+    }
+
+    if ($forgotError !== '') {
+        register_failed_attempt('forgot_password');
+    }
+
+    $showForgotModal = true;
+}
+
 $currentPage = basename($_SERVER['PHP_SELF'] ?? 'index.php');
 $publicNavItems = [
     ['label' => 'Home', 'href' => 'index.php', 'active' => $currentPage === 'index.php', 'caret' => false],
-    [
+        [
         'label' => 'About Us',
         'href' => '#',
-        'active' => false,
+        'active' => in_array($currentPage, [
+            'news-and-updates.php',
+            'careers.php',
+            'lto-accredited.php',
+            'otdc-it-provider.php',
+            'medical-clinics.php',
+            'medical-it-providers.php',
+            'lecturers.php',
+            'driving-schools.php',
+            'driving-school-instructors.php',
+            'drivers-education-center.php',
+            'affiliates.php',
+            'ltms-portal.php',
+            'cde-program.php',
+            'cde-online-exam.php',
+            'citisend.php',
+            'resources.php',
+            'downloadable-forms.php',
+            'hrds-forms.php',
+            'mission-and-vision.php',
+            'mandate-and-functions.php',
+            'historical-background.php',
+            'road-safety-action-plan.php',
+            'lto-pila-office.php'
+        ], true),
         'caret' => true,
         'children' => [
-            ['label' => 'LTO Pila Office'],
-            ['label' => 'Employee Services'],
-            ['label' => 'Forms and Downloads'],
-            ['label' => 'Data Privacy Notice'],
+            ['label' => 'News and Updates', 'href' => 'news-and-updates.php', 'active' => $currentPage === 'news-and-updates.php'],
+            ['label' => 'Careers', 'href' => 'careers.php', 'active' => $currentPage === 'careers.php'],
+            [
+                'label' => 'LTO Accredited',
+                'href' => 'lto-accredited.php',
+                'active' => in_array($currentPage, ['lto-accredited.php', 'otdc-it-provider.php', 'medical-clinics.php', 'medical-it-providers.php', 'lecturers.php', 'driving-schools.php', 'driving-school-instructors.php', 'drivers-education-center.php'], true),
+                'children' => [
+                    ['label' => 'OTDC IT Provider', 'href' => 'otdc-it-provider.php', 'active' => $currentPage === 'otdc-it-provider.php'],
+                    ['label' => 'Medical Clinics', 'href' => 'medical-clinics.php', 'active' => $currentPage === 'medical-clinics.php'],
+                    ['label' => 'Medical IT Providers', 'href' => 'medical-it-providers.php', 'active' => $currentPage === 'medical-it-providers.php'],
+                    ['label' => 'Lecturers', 'href' => 'lecturers.php', 'active' => $currentPage === 'lecturers.php'],
+                    ['label' => 'Driving Schools', 'href' => 'driving-schools.php', 'active' => $currentPage === 'driving-schools.php'],
+                    ['label' => 'Driving School Instructors', 'href' => 'driving-school-instructors.php', 'active' => $currentPage === 'driving-school-instructors.php'],
+                    ['label' => 'Drivers Education Center', 'href' => 'drivers-education-center.php', 'active' => $currentPage === 'drivers-education-center.php'],
+                ],
+            ],
+            [
+                'label' => 'Affiliates',
+                'href' => 'affiliates.php',
+                'active' => in_array($currentPage, ['affiliates.php', 'ltms-portal.php', 'cde-program.php', 'cde-online-exam.php', 'citisend.php'], true),
+                'children' => [
+                    ['label' => 'LTMS Portal', 'href' => 'ltms-portal.php', 'active' => $currentPage === 'ltms-portal.php'],
+                    ['label' => 'CDE Program', 'href' => 'cde-program.php', 'active' => $currentPage === 'cde-program.php'],
+                    ['label' => 'CDE Online Exam', 'href' => 'cde-online-exam.php', 'active' => $currentPage === 'cde-online-exam.php'],
+                    ['label' => 'CitiSend', 'href' => 'citisend.php', 'active' => $currentPage === 'citisend.php'],
+                ],
+            ],
+            [
+                'label' => 'Resources',
+                'href' => 'resources.php',
+                'active' => in_array($currentPage, ['resources.php', 'downloadable-forms.php', 'hrds-forms.php'], true),
+                'children' => [
+                    ['label' => 'Downloadable Forms', 'href' => 'downloadable-forms.php', 'active' => $currentPage === 'downloadable-forms.php'],
+                    ['label' => 'HRDS Forms', 'href' => 'hrds-forms.php', 'active' => $currentPage === 'hrds-forms.php'],
+                ],
+            ],
+            ['label' => 'Mission and Vision', 'href' => 'mission-and-vision.php', 'active' => $currentPage === 'mission-and-vision.php'],
+            ['label' => 'Mandate and Functions', 'href' => 'mandate-and-functions.php', 'active' => $currentPage === 'mandate-and-functions.php'],
+            ['label' => 'Historical Background', 'href' => 'historical-background.php', 'active' => $currentPage === 'historical-background.php'],
+            ['label' => 'Road Safety Action Plan', 'href' => 'road-safety-action-plan.php', 'active' => $currentPage === 'road-safety-action-plan.php'],
+            ['label' => 'Data Privacy Notice', 'href' => 'data-privacy-notice.php', 'active' => $currentPage === 'data-privacy-notice.php'],
+            ['label' => 'LTO Pila Office', 'href' => 'lto-pila-office.php', 'active' => $currentPage === 'lto-pila-office.php'],
         ],
     ],
-    ['label' => 'Announcements', 'href' => '#', 'active' => false, 'caret' => false],
-    ['label' => 'Transparency Seal', 'href' => 'transparency-seal.php', 'active' => $currentPage === 'transparency-seal.php', 'caret' => false],
+    ['label' => 'Services', 'href' => 'employee-services.php', 'active' => $currentPage === 'employee-services.php', 'caret' => false],
+    ['label' => 'Policies', 'href' => 'data-privacy-notice.php', 'active' => $currentPage === 'data-privacy-notice.php', 'caret' => false],
 ];
-$contactLink = ['label' => 'Contact Us', 'href' => '#', 'active' => false, 'caret' => true];
 ?>
 <!doctype html>
 <html lang="en">
@@ -256,7 +352,7 @@ $contactLink = ['label' => 'Contact Us', 'href' => '#', 'active' => false, 'care
     </style>
 </head>
 
-<body class="landing-page<?php echo $show2faModal ? ' login-modal-open' : ''; ?>">
+<body class="landing-page<?php echo ($showLoginModal || $showRegisterModal || $showForgotModal || $show2faModal) ? ' login-modal-open' : ''; ?>">
 
     <div class="gov-topbar">
         <div class="gov-inner">
@@ -272,7 +368,21 @@ $contactLink = ['label' => 'Contact Us', 'href' => '#', 'active' => false, 'care
                             </a>
                             <div class="gov-dropdown">
                                 <?php foreach ($item['children'] as $child): ?>
-                                    <a href="#"><?php echo htmlspecialchars($child['label']); ?></a>
+                                    <?php if (!empty($child['children'])): ?>
+                                        <div class="gov-dropdown-item has-submenu">
+                                            <a href="<?php echo htmlspecialchars($child['href'] ?? '#'); ?>" class="<?php echo !empty($child['active']) ? 'active' : ''; ?>">
+                                                <span><?php echo htmlspecialchars($child['label']); ?></span>
+                                                <span class="gov-submenu-caret" aria-hidden="true"></span>
+                                            </a>
+                                            <div class="gov-submenu">
+                                                <?php foreach ($child['children'] as $grandChild): ?>
+                                                    <a href="<?php echo htmlspecialchars($grandChild['href'] ?? '#'); ?>" class="<?php echo !empty($grandChild['active']) ? 'active' : ''; ?>"><?php echo htmlspecialchars($grandChild['label']); ?></a>
+                                                <?php endforeach; ?>
+                                            </div>
+                                        </div>
+                                    <?php else: ?>
+                                        <a href="<?php echo htmlspecialchars($child['href'] ?? '#'); ?>" class="<?php echo !empty($child['active']) ? 'active' : ''; ?>"><?php echo htmlspecialchars($child['label']); ?></a>
+                                    <?php endif; ?>
                                 <?php endforeach; ?>
                             </div>
                         </div>
@@ -285,11 +395,7 @@ $contactLink = ['label' => 'Contact Us', 'href' => '#', 'active' => false, 'care
                     <?php endif; ?>
                 <?php endforeach; ?>
             </nav>
-            <a
-                href="<?php echo htmlspecialchars($contactLink['href']); ?>"
-                class="<?php echo trim('gov-contact-link ' . ($contactLink['active'] ? 'active ' : '') . ($contactLink['caret'] ? 'has-caret' : '')); ?>">
-                <?php echo htmlspecialchars($contactLink['label']); ?>
-            </a>
+            <a href="#" class="gov-contact-link has-caret">Contact Us</a>
             <div class="gov-search">
                 <input placeholder="Search...">
             </div>
@@ -325,7 +431,16 @@ $contactLink = ['label' => 'Contact Us', 'href' => '#', 'active' => false, 'care
                                 <div class="gov-mobile-submenu-title"><?php echo htmlspecialchars($item['label']); ?></div>
                                 <div class="gov-mobile-submenu">
                                     <?php foreach ($item['children'] as $child): ?>
-                                        <a href="#"><?php echo htmlspecialchars($child['label']); ?></a>
+                                        <?php if (!empty($child['children'])): ?>
+                                            <div class="gov-mobile-submenu-group">
+                                                <a href="<?php echo htmlspecialchars($child['href'] ?? '#'); ?>" class="gov-mobile-submenu-group-title-link <?php echo !empty($child['active']) ? 'active' : ''; ?>"><?php echo htmlspecialchars($child['label']); ?></a>
+                                                <?php foreach ($child['children'] as $grandChild): ?>
+                                                    <a href="<?php echo htmlspecialchars($grandChild['href'] ?? '#'); ?>" class="<?php echo !empty($grandChild['active']) ? 'active' : ''; ?>"><?php echo htmlspecialchars($grandChild['label']); ?></a>
+                                                <?php endforeach; ?>
+                                            </div>
+                                        <?php else: ?>
+                                            <a href="<?php echo htmlspecialchars($child['href'] ?? '#'); ?>" class="<?php echo !empty($child['active']) ? 'active' : ''; ?>"><?php echo htmlspecialchars($child['label']); ?></a>
+                                        <?php endif; ?>
                                     <?php endforeach; ?>
                                 </div>
                             </div>
@@ -336,7 +451,7 @@ $contactLink = ['label' => 'Contact Us', 'href' => '#', 'active' => false, 'care
                         </a>
                     <?php endif; ?>
                 <?php endforeach; ?>
-                <a href="<?php echo htmlspecialchars($contactLink['href']); ?>"><?php echo htmlspecialchars($contactLink['label']); ?></a>
+                <a href="#">Contact Us</a>
             </nav>
             <div class="gov-mobile-actions">
                 <a class="btn btn-login js-login-trigger" href="login.php">Login</a>
@@ -602,7 +717,7 @@ $contactLink = ['label' => 'Contact Us', 'href' => '#', 'active' => false, 'care
                         </div>
 
                             <div class="login-modal-actions-row login-modal-actions-row-split">
-                                <a href="#" class="login-forgot-link">Forgot password?</a>
+                                <a href="#" class="login-forgot-link js-forgot-trigger">Forgot password?</a>
                             </div>
 
                             <button type="submit" class="login-submit-btn login-submit-btn-modal login-submit-btn-modal-split">
@@ -610,6 +725,75 @@ $contactLink = ['label' => 'Contact Us', 'href' => '#', 'active' => false, 'care
                             </button>
                         </form>
 
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="login-modal forgot-modal<?php echo $showForgotModal ? ' is-open' : ''; ?>" id="forgotPasswordModal" aria-hidden="<?php echo $showForgotModal ? 'false' : 'true'; ?>">
+        <div class="login-modal-backdrop" data-close-forgot-modal></div>
+        <div class="login-modal-dialog forgot-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="forgotPasswordModalTitle">
+            <div class="login-card-modern login-card-modal login-card-modal-split forgot-card-modal">
+                <div class="login-modal-visual">
+                    <div class="login-modal-visual-overlay"></div>
+                    <div class="login-modal-visual-content">
+                        <img src="assets/img/lto_logo.png" alt="Land Transportation Office seal" class="login-modal-visual-logo">
+                        <h2 class="login-modal-visual-title">LTO - HRIS</h2>
+                        <p class="login-modal-visual-subtitle">Land Transportation Office</p>
+                        <span class="login-modal-visual-kicker">Account Recovery Portal</span>
+                    </div>
+                </div>
+
+                <div class="login-modal-panel forgot-modal-panel">
+                    <div class="login-modal-header login-modal-header-plain">
+                        <div class="login-modal-header-copy">
+                            <div class="login-modal-title-row">
+                                <h2 id="forgotPasswordModalTitle">Forgot <span>Password</span></h2>
+                            </div>
+                            <p class="login-modal-subtitle">Enter your email to reset your password.</p>
+                        </div>
+                        <button class="login-modal-close" type="button" data-close-forgot-modal aria-label="Close forgot password modal">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+
+                    <div class="login-modal-body login-modal-body-plain">
+                        <?php if ($forgotError !== ''): ?>
+                            <div class="alert alert-error"><?php echo htmlspecialchars($forgotError); ?></div>
+                        <?php endif; ?>
+
+                        <?php if ($forgotSuccess !== ''): ?>
+                            <div class="alert alert-success"><?php echo htmlspecialchars($forgotSuccess); ?></div>
+                        <?php endif; ?>
+
+                        <div class="login-modal-role-band">Password Recovery</div>
+
+                        <form class="login-form-modern login-form-modal" method="post" action="index.php" novalidate>
+                            <input type="hidden" name="form_action" value="forgot_password_modal">
+                            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken); ?>">
+
+                            <div class="login-input-wrap login-input-wrap-modal">
+                                <div class="login-input-shell">
+                                    <span class="login-input-icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none">
+                                            <path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v11A2.5 2.5 0 0 1 17.5 20h-11A2.5 2.5 0 0 1 4 17.5v-11Z" stroke="currentColor" stroke-width="1.8" />
+                                            <path d="m6 8 6 4 6-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                                        </svg>
+                                    </span>
+                                    <input type="email" id="forgotPasswordEmail" name="forgot_email" placeholder=" " value="<?php echo htmlspecialchars($forgotEmail); ?>" autocomplete="email" maxlength="150" required>
+                                    <label class="login-floating-label" for="forgotPasswordEmail">Email</label>
+                                </div>
+                            </div>
+
+                            <div class="login-modal-actions-row login-modal-actions-row-split">
+                                <a href="#" class="login-forgot-link js-login-trigger">Back to Login</a>
+                            </div>
+
+                            <button type="submit" class="login-submit-btn login-submit-btn-modal login-submit-btn-modal-split">
+                                <span>Send Email</span>
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -1017,6 +1201,11 @@ $contactLink = ['label' => 'Contact Us', 'href' => '#', 'active' => false, 'care
                     passwordToggleId: '#loginPasswordToggle'
                 },
                 {
+                    modal: document.getElementById('forgotPasswordModal'),
+                    triggerSelector: '.js-forgot-trigger',
+                    closeSelector: '[data-close-forgot-modal]'
+                },
+                {
                     modal: document.getElementById('registerModal'),
                     triggerSelector: '.js-register-trigger',
                     closeSelector: '[data-close-register-modal]',
@@ -1058,8 +1247,8 @@ $contactLink = ['label' => 'Contact Us', 'href' => '#', 'active' => false, 'care
                 } = config;
                 const openTriggers = document.querySelectorAll(triggerSelector);
                 const closeTriggers = modal.querySelectorAll(closeSelector);
-                const passwordField = modal.querySelector(passwordFieldId);
-                const passwordToggle = modal.querySelector(passwordToggleId);
+                const passwordField = passwordFieldId ? modal.querySelector(passwordFieldId) : null;
+                const passwordToggle = passwordToggleId ? modal.querySelector(passwordToggleId) : null;
 
                 const openModal = () => {
                     closeAllModals();
@@ -1596,3 +1785,11 @@ $contactLink = ['label' => 'Contact Us', 'href' => '#', 'active' => false, 'care
 </body>
 
 </html>
+
+
+
+
+
+
+
+

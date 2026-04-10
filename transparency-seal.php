@@ -98,22 +98,83 @@ $publicDisclosureLabel = 'Public Disclosure';
 $currentPage = basename($_SERVER['PHP_SELF'] ?? 'transparency-seal.php');
 $publicNavItems = [
     ['label' => 'Home', 'href' => 'index.php', 'active' => $currentPage === 'index.php', 'caret' => false],
-    [
-        'label' => 'About Us    ',
+            [
+        'label' => 'About Us',
         'href' => '#',
-        'active' => false,
+        'active' => in_array($currentPage, [
+            'news-and-updates.php',
+            'careers.php',
+            'lto-accredited.php',
+            'otdc-it-provider.php',
+            'medical-clinics.php',
+            'medical-it-providers.php',
+            'lecturers.php',
+            'driving-schools.php',
+            'driving-school-instructors.php',
+            'drivers-education-center.php',
+            'affiliates.php',
+            'ltms-portal.php',
+            'cde-program.php',
+            'cde-online-exam.php',
+            'citisend.php',
+            'resources.php',
+            'downloadable-forms.php',
+            'hrds-forms.php',
+            'mission-and-vision.php',
+            'mandate-and-functions.php',
+            'historical-background.php',
+            'road-safety-action-plan.php',
+            'lto-pila-office.php'
+        ], true),
         'caret' => true,
         'children' => [
-            ['label' => 'LTO Pila Office'],
-            ['label' => 'Employee Services'],
-            ['label' => 'Forms and Downloads'],
-            ['label' => 'Data Privacy Notice'],
+            ['label' => 'News and Updates', 'href' => 'news-and-updates.php', 'active' => $currentPage === 'news-and-updates.php'],
+            ['label' => 'Careers', 'href' => 'careers.php', 'active' => $currentPage === 'careers.php'],
+            [
+                'label' => 'LTO Accredited',
+                'href' => 'lto-accredited.php',
+                'active' => in_array($currentPage, ['lto-accredited.php', 'otdc-it-provider.php', 'medical-clinics.php', 'medical-it-providers.php', 'lecturers.php', 'driving-schools.php', 'driving-school-instructors.php', 'drivers-education-center.php'], true),
+                'children' => [
+                    ['label' => 'OTDC IT Provider', 'href' => 'otdc-it-provider.php', 'active' => $currentPage === 'otdc-it-provider.php'],
+                    ['label' => 'Medical Clinics', 'href' => 'medical-clinics.php', 'active' => $currentPage === 'medical-clinics.php'],
+                    ['label' => 'Medical IT Providers', 'href' => 'medical-it-providers.php', 'active' => $currentPage === 'medical-it-providers.php'],
+                    ['label' => 'Lecturers', 'href' => 'lecturers.php', 'active' => $currentPage === 'lecturers.php'],
+                    ['label' => 'Driving Schools', 'href' => 'driving-schools.php', 'active' => $currentPage === 'driving-schools.php'],
+                    ['label' => 'Driving School Instructors', 'href' => 'driving-school-instructors.php', 'active' => $currentPage === 'driving-school-instructors.php'],
+                    ['label' => 'Drivers Education Center', 'href' => 'drivers-education-center.php', 'active' => $currentPage === 'drivers-education-center.php'],
+                ],
+            ],
+            [
+                'label' => 'Affiliates',
+                'href' => 'affiliates.php',
+                'active' => in_array($currentPage, ['affiliates.php', 'ltms-portal.php', 'cde-program.php', 'cde-online-exam.php', 'citisend.php'], true),
+                'children' => [
+                    ['label' => 'LTMS Portal', 'href' => 'ltms-portal.php', 'active' => $currentPage === 'ltms-portal.php'],
+                    ['label' => 'CDE Program', 'href' => 'cde-program.php', 'active' => $currentPage === 'cde-program.php'],
+                    ['label' => 'CDE Online Exam', 'href' => 'cde-online-exam.php', 'active' => $currentPage === 'cde-online-exam.php'],
+                    ['label' => 'CitiSend', 'href' => 'citisend.php', 'active' => $currentPage === 'citisend.php'],
+                ],
+            ],
+            [
+                'label' => 'Resources',
+                'href' => 'resources.php',
+                'active' => in_array($currentPage, ['resources.php', 'downloadable-forms.php', 'hrds-forms.php'], true),
+                'children' => [
+                    ['label' => 'Downloadable Forms', 'href' => 'downloadable-forms.php', 'active' => $currentPage === 'downloadable-forms.php'],
+                    ['label' => 'HRDS Forms', 'href' => 'hrds-forms.php', 'active' => $currentPage === 'hrds-forms.php'],
+                ],
+            ],
+            ['label' => 'Mission and Vision', 'href' => 'mission-and-vision.php', 'active' => $currentPage === 'mission-and-vision.php'],
+            ['label' => 'Mandate and Functions', 'href' => 'mandate-and-functions.php', 'active' => $currentPage === 'mandate-and-functions.php'],
+            ['label' => 'Historical Background', 'href' => 'historical-background.php', 'active' => $currentPage === 'historical-background.php'],
+            ['label' => 'Road Safety Action Plan', 'href' => 'road-safety-action-plan.php', 'active' => $currentPage === 'road-safety-action-plan.php'],
+            ['label' => 'Data Privacy Notice', 'href' => 'data-privacy-notice.php', 'active' => $currentPage === 'data-privacy-notice.php'],
+            ['label' => 'LTO Pila Office', 'href' => 'lto-pila-office.php', 'active' => $currentPage === 'lto-pila-office.php'],
         ],
     ],
-    ['label' => 'Announcements', 'href' => '#', 'active' => false, 'caret' => false],
-    ['label' => 'Transparency Seal', 'href' => 'transparency-seal.php', 'active' => true, 'caret' => false],
+    ['label' => 'Services', 'href' => 'employee-services.php', 'active' => $currentPage === 'employee-services.php', 'caret' => false],
+    ['label' => 'Policies', 'href' => 'data-privacy-notice.php', 'active' => $currentPage === 'data-privacy-notice.php', 'caret' => false],
 ];
-$contactLink = ['label' => 'Contact Us', 'href' => '#', 'active' => false, 'caret' => true];
 
 $sealSections = [
     [
@@ -176,7 +237,21 @@ $sealSections = [
                             </a>
                             <div class="gov-dropdown">
                                 <?php foreach ($item['children'] as $child): ?>
-                                    <a href="#"><?php echo htmlspecialchars($child['label']); ?></a>
+                                    <?php if (!empty($child['children'])): ?>
+                                        <div class="gov-dropdown-item has-submenu">
+                                            <a href="<?php echo htmlspecialchars($child['href'] ?? '#'); ?>" class="<?php echo !empty($child['active']) ? 'active' : ''; ?>">
+                                                <span><?php echo htmlspecialchars($child['label']); ?></span>
+                                                <span class="gov-submenu-caret" aria-hidden="true"></span>
+                                            </a>
+                                            <div class="gov-submenu">
+                                                <?php foreach ($child['children'] as $grandChild): ?>
+                                                    <a href="<?php echo htmlspecialchars($grandChild['href'] ?? '#'); ?>" class="<?php echo !empty($grandChild['active']) ? 'active' : ''; ?>"><?php echo htmlspecialchars($grandChild['label']); ?></a>
+                                                <?php endforeach; ?>
+                                            </div>
+                                        </div>
+                                    <?php else: ?>
+                                        <a href="<?php echo htmlspecialchars($child['href'] ?? '#'); ?>" class="<?php echo !empty($child['active']) ? 'active' : ''; ?>"><?php echo htmlspecialchars($child['label']); ?></a>
+                                    <?php endif; ?>
                                 <?php endforeach; ?>
                             </div>
                         </div>
@@ -189,11 +264,7 @@ $sealSections = [
                     <?php endif; ?>
                 <?php endforeach; ?>
             </nav>
-            <a
-                href="<?php echo htmlspecialchars($contactLink['href']); ?>"
-                class="<?php echo trim('gov-contact-link ' . ($contactLink['active'] ? 'active ' : '') . ($contactLink['caret'] ? 'has-caret' : '')); ?>">
-                <?php echo htmlspecialchars($contactLink['label']); ?>
-            </a>
+            <a href="#" class="gov-contact-link has-caret">Contact Us</a>
             <div class="gov-search">
                 <input placeholder="Search..." aria-label="Search">
             </div>
@@ -229,7 +300,16 @@ $sealSections = [
                                 <div class="gov-mobile-submenu-title"><?php echo htmlspecialchars($item['label']); ?></div>
                                 <div class="gov-mobile-submenu">
                                     <?php foreach ($item['children'] as $child): ?>
-                                        <a href="#"><?php echo htmlspecialchars($child['label']); ?></a>
+                                        <?php if (!empty($child['children'])): ?>
+                                            <div class="gov-mobile-submenu-group">
+                                                <a href="<?php echo htmlspecialchars($child['href'] ?? '#'); ?>" class="gov-mobile-submenu-group-title-link <?php echo !empty($child['active']) ? 'active' : ''; ?>"><?php echo htmlspecialchars($child['label']); ?></a>
+                                                <?php foreach ($child['children'] as $grandChild): ?>
+                                                    <a href="<?php echo htmlspecialchars($grandChild['href'] ?? '#'); ?>" class="<?php echo !empty($grandChild['active']) ? 'active' : ''; ?>"><?php echo htmlspecialchars($grandChild['label']); ?></a>
+                                                <?php endforeach; ?>
+                                            </div>
+                                        <?php else: ?>
+                                            <a href="<?php echo htmlspecialchars($child['href'] ?? '#'); ?>" class="<?php echo !empty($child['active']) ? 'active' : ''; ?>"><?php echo htmlspecialchars($child['label']); ?></a>
+                                        <?php endif; ?>
                                     <?php endforeach; ?>
                                 </div>
                             </div>
@@ -240,7 +320,7 @@ $sealSections = [
                         </a>
                     <?php endif; ?>
                 <?php endforeach; ?>
-                <a href="<?php echo htmlspecialchars($contactLink['href']); ?>"><?php echo htmlspecialchars($contactLink['label']); ?></a>
+                <a href="#">Contact Us</a>
             </nav>
             <div class="gov-mobile-actions">
                 <a class="btn btn-login js-login-trigger" href="login.php">Login</a>
@@ -663,3 +743,14 @@ $sealSections = [
 </body>
 
 </html>
+
+
+
+
+
+
+
+
+
+
+
