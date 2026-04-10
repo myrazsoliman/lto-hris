@@ -404,6 +404,59 @@ document.addEventListener('DOMContentLoaded',function(){
     }
   }
 
+  function initLogoutConfirmModal(){
+    var modal = document.getElementById('logoutConfirmModal');
+    if(!modal) return;
+
+    var noBtn = document.getElementById('logoutConfirmNo');
+    var yesBtn = document.getElementById('logoutConfirmYes');
+    var cancelTargets = modal.querySelectorAll('[data-logout-cancel]');
+    var triggers = document.querySelectorAll('[data-logout-trigger="true"], a[href="logout.php"]');
+    var lastFocus = null;
+
+    function setOpen(next){
+      var isOpen = !!next;
+      modal.classList.toggle('is-open', isOpen);
+      modal.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
+      document.body.classList.toggle('modal-open', isOpen);
+      if(isOpen){
+        if(noBtn){ noBtn.focus(); }
+      } else if(lastFocus){
+        lastFocus.focus();
+      }
+    }
+
+    triggers.forEach(function(trigger){
+      if(trigger.hasAttribute('data-logout-bound')) return;
+      trigger.setAttribute('data-logout-bound', 'true');
+      trigger.addEventListener('click', function(e){
+        if(trigger.id === 'logoutConfirmYes') return;
+        e.preventDefault();
+        lastFocus = trigger;
+        setOpen(true);
+      });
+    });
+
+    cancelTargets.forEach(function(el){
+      el.addEventListener('click', function(e){
+        e.preventDefault();
+        setOpen(false);
+      });
+    });
+
+    document.addEventListener('keydown', function(e){
+      if(e.key === 'Escape' && modal.classList.contains('is-open')){
+        setOpen(false);
+      }
+    });
+
+    if(yesBtn){
+      yesBtn.addEventListener('click', function(){
+        setOpen(false);
+      });
+    }
+  }
+
   // Tabs switcher
   function initTabs(){
     var buttons = document.querySelectorAll('.tab-button');
@@ -533,6 +586,7 @@ document.addEventListener('DOMContentLoaded',function(){
     if(tourBtn) tourBtn.addEventListener('click', function(){ startTour(); });
   }
 
+  initLogoutConfirmModal();
   initTabs();
   initExpandingCards();
   initTour();

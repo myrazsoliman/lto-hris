@@ -197,68 +197,7 @@ $publicNavItems = [
         </div>
     </header>
 
-        <section class="public-page">
-    <div class="public-wrap">
-        <div class="public-hero">
-            <span class="public-kicker">LTO HRIS Public Information</span>
-            <h2 class="public-title">LTO Accredited</h2>
-            <p class="public-summary">Reference section for accredited entities and categories recognized by LTO-related programs and services.</p>
-
-            <div class="public-grid">
-                <article class="public-card">
-                    <h3>Scope</h3>
-                    <ul class="public-list">
-<li>Provider category references.</li>
-<li>Accreditation-related public guidance.</li>
-<li>Links to supporting subpages for verification.</li>
-                    </ul>
-                </article>
-                <article class="public-card">
-                    <h3>Practical Guidance</h3>
-                    <ul class="public-list">
-<li>Check provider category before engagement.</li>
-<li>Use official listings for validation.</li>
-<li>Report discrepancies through proper channels.</li>
-                    </ul>
-                </article>
-                <article class="public-card">
-                    <h3>Keywords</h3>
-                    <ul class="public-chip-list">
-<li>Accreditation</li>
-<li>Provider</li>
-<li>Verification</li>
-                    </ul>
-                </article>
-            </div>
-
-            <div class="public-note">For clarifications related to LTO Accredited, contact the LTO Pila District Office through official channels.</div>
-
-            <div class="public-table-wrap">
-                <table class="public-table">
-                    <thead>
-                        <tr>
-                            <th>Reference</th>
-                            <th>Status</th>
-                            <th>Last Updated</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>LTO Accredited Information</td>
-                            <td>Active</td>
-                            <td>Current posting cycle</td>
-                        </tr>
-                        <tr>
-                            <td>Public Guidance</td>
-                            <td>Available</td>
-                            <td>Subject to official revision</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-</section>
+        <section class="public-page"><div class="public-wrap"><div class="public-hero"><span class="public-kicker">LTO HRIS Public Information</span><h2 class="public-title">LTO Accredited</h2><p class="public-summary">Accreditation overview by provider type for public reference and validation support.</p><div class="pub-layout"><article class="pub-panel"><h3>Accreditation Summary</h3><table class="pub-provider-table"><thead><tr><th>Category</th><th>Listed</th><th>Status</th></tr></thead><tbody><tr><td>Medical Clinics</td><td>32</td><td>Active</td></tr><tr><td>Driving Schools</td><td>18</td><td>Active</td></tr><tr><td>Instructors</td><td>55</td><td>For Validation</td></tr></tbody></table></article><article class="pub-panel"><h3>Verification Notes</h3><p>Use the corresponding subpages to check category-specific references and updates.</p><div class="pub-alert">Accreditation records are subject to periodic revalidation.</div></article></div></div></div></section>
 
     <footer class="site-footer gov-footer">
         <div class="container footer-inner">
@@ -341,6 +280,7 @@ $publicNavItems = [
     </script>
 </body>
 </html>
+
 
 
 

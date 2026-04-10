@@ -197,68 +197,7 @@ $publicNavItems = [
         </div>
     </header>
 
-        <section class="public-page">
-    <div class="public-wrap">
-        <div class="public-hero">
-            <span class="public-kicker">LTO HRIS Public Information</span>
-            <h2 class="public-title">Road Safety Action Plan</h2>
-            <p class="public-summary">Public overview of road safety priorities, action directions, and policy focus areas.</p>
-
-            <div class="public-grid">
-                <article class="public-card">
-                    <h3>Scope</h3>
-                    <ul class="public-list">
-<li>Safety priorities and direction.</li>
-<li>Program focus for prevention and compliance.</li>
-<li>Coordination and public awareness targets.</li>
-                    </ul>
-                </article>
-                <article class="public-card">
-                    <h3>Practical Guidance</h3>
-                    <ul class="public-list">
-<li>Verify details before submission or attendance.</li>
-<li>Prepare complete supporting documents.</li>
-<li>Use only official pages and contacts.</li>
-                    </ul>
-                </article>
-                <article class="public-card">
-                    <h3>Keywords</h3>
-                    <ul class="public-chip-list">
-<li>Road Safety</li>
-<li>Action Plan</li>
-<li>Policy Direction</li>
-                    </ul>
-                </article>
-            </div>
-
-            <div class="public-note">For clarifications related to Road Safety Action Plan, contact the LTO Pila District Office through official channels.</div>
-
-            <div class="public-table-wrap">
-                <table class="public-table">
-                    <thead>
-                        <tr>
-                            <th>Reference</th>
-                            <th>Status</th>
-                            <th>Last Updated</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>Road Safety Action Plan Information</td>
-                            <td>Active</td>
-                            <td>Current posting cycle</td>
-                        </tr>
-                        <tr>
-                            <td>Public Guidance</td>
-                            <td>Available</td>
-                            <td>Subject to official revision</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-</section>
+        <section class="public-page"><div class="public-wrap"><div class="public-hero"><span class="public-kicker">Safety Program</span><h2 class="public-title">Road Safety Action Plan</h2><p class="public-summary">Program direction focused on prevention, compliance, and informed public participation.</p><div class="pub-layout"><article class="pub-panel"><h3>Priority Actions</h3><div class="pub-process"><div class="pub-step">Strengthen awareness and driver education.</div><div class="pub-step">Improve monitoring and compliance enforcement.</div><div class="pub-step">Enhance data-driven policy and reporting.</div></div></article><article class="pub-panel"><h3>Program Matrix</h3><table class="pub-provider-table"><thead><tr><th>Area</th><th>Target</th><th>Status</th></tr></thead><tbody><tr><td>Education</td><td>Wider coverage</td><td>Ongoing</td></tr><tr><td>Enforcement</td><td>Higher compliance</td><td>Active</td></tr></tbody></table></article></div></div></div></section>
 
     <footer class="site-footer gov-footer">
         <div class="container footer-inner">
@@ -341,6 +280,7 @@ $publicNavItems = [
     </script>
 </body>
 </html>
+
 
 
 

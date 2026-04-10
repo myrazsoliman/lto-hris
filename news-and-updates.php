@@ -198,66 +198,32 @@ $publicNavItems = [
     </header>
 
         <section class="public-page">
-    <div class="public-wrap">
-        <div class="public-hero">
-            <span class="public-kicker">LTO HRIS Public Information</span>
-            <h2 class="public-title">News and Updates</h2>
-            <p class="public-summary">Latest public advisories, office announcements, and operational updates relevant to LTO HRIS users.</p>
-
-            <div class="public-grid">
-                <article class="public-card">
-                    <h3>Scope</h3>
-                    <ul class="public-list">
-<li>Advisories on office schedules and service availability.</li>
-<li>System notices and maintenance announcements.</li>
-<li>Time-sensitive updates for personnel and applicants.</li>
-                    </ul>
-                </article>
-                <article class="public-card">
-                    <h3>Practical Guidance</h3>
-                    <ul class="public-list">
-<li>Check this page before visiting the office.</li>
-<li>Follow posted effective dates on advisories.</li>
-<li>Use linked official documents for reference.</li>
-                    </ul>
-                </article>
-                <article class="public-card">
-                    <h3>Keywords</h3>
-                    <ul class="public-chip-list">
-<li>Advisory</li>
-<li>Schedule Update</li>
-<li>Public Notice</li>
-                    </ul>
-                </article>
-            </div>
-
-            <div class="public-note">Only announcements posted through official LTO channels should be treated as valid and current.</div>
-
-            <div class="public-table-wrap">
-                <table class="public-table">
-                    <thead>
-                        <tr>
-                            <th>Reference</th>
-                            <th>Status</th>
-                            <th>Last Updated</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>News and Updates Information</td>
-                            <td>Active</td>
-                            <td>Current posting cycle</td>
-                        </tr>
-                        <tr>
-                            <td>Public Guidance</td>
-                            <td>Available</td>
-                            <td>Subject to official revision</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
+  <div class="public-wrap">
+    <div class="public-hero">
+      <span class="public-kicker">LTO HRIS Public Information</span>
+      <h2 class="public-title">News and Updates</h2>
+      <p class="public-summary">Track official advisories, service notices, and operational updates relevant to the LTO Pila District Office.</p>
+      <div class="pub-layout">
+        <article class="pub-panel">
+          <h3>Advisory Timeline</h3>
+          <ul class="pub-timeline">
+            <li><strong>April 2026:</strong> Extended support window for HR document verification.</li>
+            <li><strong>March 2026:</strong> Updated guidance for public request routing and processing.</li>
+            <li><strong>February 2026:</strong> Public portal content refresh and link validation.</li>
+          </ul>
+        </article>
+        <article class="pub-panel">
+          <h3>Current Status</h3>
+          <div class="pub-kpi-grid">
+            <div class="pub-kpi"><strong>4</strong><span>Active Advisories</span></div>
+            <div class="pub-kpi"><strong>2</strong><span>Pending Updates</span></div>
+            <div class="pub-kpi"><strong>24h</strong><span>Notice Lead Time</span></div>
+          </div>
+          <div class="pub-alert">Always check advisory effective dates before visiting the office.</div>
+        </article>
+      </div>
     </div>
+  </div>
 </section>
 
     <footer class="site-footer gov-footer">
@@ -341,6 +307,7 @@ $publicNavItems = [
     </script>
 </body>
 </html>
+
 
 
 

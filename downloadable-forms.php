@@ -197,68 +197,7 @@ $publicNavItems = [
         </div>
     </header>
 
-        <section class="public-page">
-    <div class="public-wrap">
-        <div class="public-hero">
-            <span class="public-kicker">LTO HRIS Public Information</span>
-            <h2 class="public-title">Downloadable Forms</h2>
-            <p class="public-summary">Official downloadable form references for public and employee-related transactions.</p>
-
-            <div class="public-grid">
-                <article class="public-card">
-                    <h3>Scope</h3>
-                    <ul class="public-list">
-<li>Published for reference and transparency.</li>
-<li>Content may be updated based on official issuances.</li>
-<li>For transactions, use formal LTO channels.</li>
-                    </ul>
-                </article>
-                <article class="public-card">
-                    <h3>Practical Guidance</h3>
-                    <ul class="public-list">
-<li>Verify details before submission or attendance.</li>
-<li>Prepare complete supporting documents.</li>
-<li>Use only official pages and contacts.</li>
-                    </ul>
-                </article>
-                <article class="public-card">
-                    <h3>Keywords</h3>
-                    <ul class="public-chip-list">
-<li>Forms</li>
-<li>Download</li>
-<li>Official Copy</li>
-                    </ul>
-                </article>
-            </div>
-
-            <div class="public-note">For clarifications related to Downloadable Forms, contact the LTO Pila District Office through official channels.</div>
-
-            <div class="public-table-wrap">
-                <table class="public-table">
-                    <thead>
-                        <tr>
-                            <th>Reference</th>
-                            <th>Status</th>
-                            <th>Last Updated</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>Downloadable Forms Information</td>
-                            <td>Active</td>
-                            <td>Current posting cycle</td>
-                        </tr>
-                        <tr>
-                            <td>Public Guidance</td>
-                            <td>Available</td>
-                            <td>Subject to official revision</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-</section>
+        <section class="public-page"><div class="public-wrap"><div class="public-hero"><span class="public-kicker">LTO HRIS Public Information</span><h2 class="public-title">Downloadable Forms</h2><p class="public-summary">Catalog of form references used for public and internal workflows.</p><div class="pub-layout"><article class="pub-panel"><h3>Form Catalog</h3><table class="pub-provider-table"><thead><tr><th>Form</th><th>Use Case</th><th>Format</th></tr></thead><tbody><tr><td>Employee Information Update</td><td>Record correction</td><td>PDF</td></tr><tr><td>Request Routing Sheet</td><td>Office processing</td><td>DOCX</td></tr><tr><td>Certification Request</td><td>Document issuance</td><td>PDF</td></tr></tbody></table></article><article class="pub-panel"><h3>Submission Reminder</h3><div class="pub-alert">Attach complete supporting documents before filing.</div></article></div></div></div></section>
 
     <footer class="site-footer gov-footer">
         <div class="container footer-inner">
@@ -341,6 +280,7 @@ $publicNavItems = [
     </script>
 </body>
 </html>
+
 
 
 

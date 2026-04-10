@@ -197,68 +197,7 @@ $publicNavItems = [
         </div>
     </header>
 
-        <section class="public-page">
-    <div class="public-wrap">
-        <div class="public-hero">
-            <span class="public-kicker">LTO HRIS Public Information</span>
-            <h2 class="public-title">CitiSend</h2>
-            <p class="public-summary">Public reference page for CitiSend-related affiliate service context and usage guidance.</p>
-
-            <div class="public-grid">
-                <article class="public-card">
-                    <h3>Scope</h3>
-                    <ul class="public-list">
-<li>Published for reference and transparency.</li>
-<li>Content may be updated based on official issuances.</li>
-<li>For transactions, use formal LTO channels.</li>
-                    </ul>
-                </article>
-                <article class="public-card">
-                    <h3>Practical Guidance</h3>
-                    <ul class="public-list">
-<li>Verify details before submission or attendance.</li>
-<li>Prepare complete supporting documents.</li>
-<li>Use only official pages and contacts.</li>
-                    </ul>
-                </article>
-                <article class="public-card">
-                    <h3>Keywords</h3>
-                    <ul class="public-chip-list">
-<li>CitiSend</li>
-<li>Affiliate</li>
-<li>Service Link</li>
-                    </ul>
-                </article>
-            </div>
-
-            <div class="public-note">For clarifications related to CitiSend, contact the LTO Pila District Office through official channels.</div>
-
-            <div class="public-table-wrap">
-                <table class="public-table">
-                    <thead>
-                        <tr>
-                            <th>Reference</th>
-                            <th>Status</th>
-                            <th>Last Updated</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>CitiSend Information</td>
-                            <td>Active</td>
-                            <td>Current posting cycle</td>
-                        </tr>
-                        <tr>
-                            <td>Public Guidance</td>
-                            <td>Available</td>
-                            <td>Subject to official revision</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-</section>
+        <section class="public-page"><div class="public-wrap"><div class="public-hero"><span class="public-kicker">LTO HRIS Public Information</span><h2 class="public-title">CitiSend</h2><p class="public-summary">Affiliate service context for CitiSend-related public references.</p><div class="pub-layout"><article class="pub-panel"><h3>Key Functions</h3><ul class="public-list"><li>User access and verification support</li><li>Transaction and status visibility</li><li>Policy-linked compliance references</li></ul></article><article class="pub-panel"><h3>Access Path</h3><div class="pub-process"><div class="pub-step">Open the official platform link.</div><div class="pub-step">Confirm identity and account context.</div><div class="pub-step">Complete transaction using posted guidance.</div></div></article></div></div></div></section>
 
     <footer class="site-footer gov-footer">
         <div class="container footer-inner">
@@ -341,6 +280,7 @@ $publicNavItems = [
     </script>
 </body>
 </html>
+
 
 
 

@@ -198,66 +198,30 @@ $publicNavItems = [
     </header>
 
         <section class="public-page">
-    <div class="public-wrap">
-        <div class="public-hero">
-            <span class="public-kicker">LTO HRIS Public Information</span>
-            <h2 class="public-title">Careers</h2>
-            <p class="public-summary">Official recruitment page for employment opportunities and hiring announcements in the LTO Pila District Office.</p>
-
-            <div class="public-grid">
-                <article class="public-card">
-                    <h3>Scope</h3>
-                    <ul class="public-list">
-<li>Position titles and qualification standards.</li>
-<li>Application windows and submission instructions.</li>
-<li>Recruitment process reminders and requirements.</li>
-                    </ul>
-                </article>
-                <article class="public-card">
-                    <h3>Practical Guidance</h3>
-                    <ul class="public-list">
-<li>Submit complete and truthful credentials.</li>
-<li>Observe publication deadlines strictly.</li>
-<li>Track updates through authorized announcements.</li>
-                    </ul>
-                </article>
-                <article class="public-card">
-                    <h3>Keywords</h3>
-                    <ul class="public-chip-list">
-<li>Vacancy</li>
-<li>Qualification</li>
-<li>Application</li>
-                    </ul>
-                </article>
-            </div>
-
-            <div class="public-note">Hiring timelines and requirements may vary per position and are subject to official HR directives.</div>
-
-            <div class="public-table-wrap">
-                <table class="public-table">
-                    <thead>
-                        <tr>
-                            <th>Reference</th>
-                            <th>Status</th>
-                            <th>Last Updated</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>Careers Information</td>
-                            <td>Active</td>
-                            <td>Current posting cycle</td>
-                        </tr>
-                        <tr>
-                            <td>Public Guidance</td>
-                            <td>Available</td>
-                            <td>Subject to official revision</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
+  <div class="public-wrap">
+    <div class="public-hero">
+      <span class="public-kicker">LTO HRIS Public Information</span>
+      <h2 class="public-title">Careers</h2>
+      <p class="public-summary">Official hiring information and role requirements for available opportunities.</p>
+      <div class="pub-layout">
+        <article class="pub-panel">
+          <h3>Open Vacancies</h3>
+          <div class="pub-vacancy-grid">
+            <div class="pub-vacancy"><h4>Administrative Aide</h4><ul class="pub-meta"><li>Plantilla</li><li>Deadline: Apr 30</li><li>Entry Level</li></ul></div>
+            <div class="pub-vacancy"><h4>HR Assistant</h4><ul class="pub-meta"><li>Contractual</li><li>Deadline: May 5</li><li>HR Experience</li></ul></div>
+          </div>
+        </article>
+        <article class="pub-panel">
+          <h3>Application Flow</h3>
+          <div class="pub-process">
+            <div class="pub-step">Review qualification standards and checklist.</div>
+            <div class="pub-step">Submit complete application packet.</div>
+            <div class="pub-step">Wait for screening and interview schedule.</div>
+          </div>
+        </article>
+      </div>
     </div>
+  </div>
 </section>
 
     <footer class="site-footer gov-footer">
@@ -341,6 +305,7 @@ $publicNavItems = [
     </script>
 </body>
 </html>
+
 
 
 

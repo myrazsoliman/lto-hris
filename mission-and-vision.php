@@ -197,68 +197,7 @@ $publicNavItems = [
         </div>
     </header>
 
-        <section class="public-page">
-    <div class="public-wrap">
-        <div class="public-hero">
-            <span class="public-kicker">LTO HRIS Public Information</span>
-            <h2 class="public-title">Mission and Vision</h2>
-            <p class="public-summary">Institutional mission and vision statements guiding service delivery and operational priorities.</p>
-
-            <div class="public-grid">
-                <article class="public-card">
-                    <h3>Scope</h3>
-                    <ul class="public-list">
-<li>Long-term organizational direction.</li>
-<li>Core service commitments.</li>
-<li>Public value and governance principles.</li>
-                    </ul>
-                </article>
-                <article class="public-card">
-                    <h3>Practical Guidance</h3>
-                    <ul class="public-list">
-<li>Verify details before submission or attendance.</li>
-<li>Prepare complete supporting documents.</li>
-<li>Use only official pages and contacts.</li>
-                    </ul>
-                </article>
-                <article class="public-card">
-                    <h3>Keywords</h3>
-                    <ul class="public-chip-list">
-<li>Mission</li>
-<li>Vision</li>
-<li>Service Commitment</li>
-                    </ul>
-                </article>
-            </div>
-
-            <div class="public-note">For clarifications related to Mission and Vision, contact the LTO Pila District Office through official channels.</div>
-
-            <div class="public-table-wrap">
-                <table class="public-table">
-                    <thead>
-                        <tr>
-                            <th>Reference</th>
-                            <th>Status</th>
-                            <th>Last Updated</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>Mission and Vision Information</td>
-                            <td>Active</td>
-                            <td>Current posting cycle</td>
-                        </tr>
-                        <tr>
-                            <td>Public Guidance</td>
-                            <td>Available</td>
-                            <td>Subject to official revision</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-</section>
+        <section class="public-page"><div class="public-wrap"><div class="public-hero"><span class="public-kicker">Institutional Direction</span><h2 class="public-title">Mission and Vision</h2><p class="public-summary">Guiding statements that shape LTO service commitments and organizational direction.</p><div class="pub-layout"><article class="pub-panel"><h3>Vision</h3><p>A modern, responsive, and citizen-centered transportation agency anchored on safety and public trust.</p></article><article class="pub-panel"><h3>Mission</h3><p>Deliver reliable transportation services through professional personnel, transparent processes, and digital transformation.</p></article></div></div></div></section>
 
     <footer class="site-footer gov-footer">
         <div class="container footer-inner">
@@ -341,6 +280,7 @@ $publicNavItems = [
     </script>
 </body>
 </html>
+
 
 
 

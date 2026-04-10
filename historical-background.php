@@ -197,68 +197,7 @@ $publicNavItems = [
         </div>
     </header>
 
-        <section class="public-page">
-    <div class="public-wrap">
-        <div class="public-hero">
-            <span class="public-kicker">LTO HRIS Public Information</span>
-            <h2 class="public-title">Historical Background</h2>
-            <p class="public-summary">Institutional background page presenting historical context and development milestones.</p>
-
-            <div class="public-grid">
-                <article class="public-card">
-                    <h3>Scope</h3>
-                    <ul class="public-list">
-<li>Published for reference and transparency.</li>
-<li>Content may be updated based on official issuances.</li>
-<li>For transactions, use formal LTO channels.</li>
-                    </ul>
-                </article>
-                <article class="public-card">
-                    <h3>Practical Guidance</h3>
-                    <ul class="public-list">
-<li>Verify details before submission or attendance.</li>
-<li>Prepare complete supporting documents.</li>
-<li>Use only official pages and contacts.</li>
-                    </ul>
-                </article>
-                <article class="public-card">
-                    <h3>Keywords</h3>
-                    <ul class="public-chip-list">
-<li>History</li>
-<li>Institutional Context</li>
-<li>Milestones</li>
-                    </ul>
-                </article>
-            </div>
-
-            <div class="public-note">For clarifications related to Historical Background, contact the LTO Pila District Office through official channels.</div>
-
-            <div class="public-table-wrap">
-                <table class="public-table">
-                    <thead>
-                        <tr>
-                            <th>Reference</th>
-                            <th>Status</th>
-                            <th>Last Updated</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>Historical Background Information</td>
-                            <td>Active</td>
-                            <td>Current posting cycle</td>
-                        </tr>
-                        <tr>
-                            <td>Public Guidance</td>
-                            <td>Available</td>
-                            <td>Subject to official revision</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-</section>
+        <section class="public-page"><div class="public-wrap"><div class="public-hero"><span class="public-kicker">Institutional Context</span><h2 class="public-title">Historical Background</h2><p class="public-summary">Historical development milestones that shaped service modernization and governance direction.</p><div class="pub-layout"><article class="pub-panel"><h3>Milestones</h3><ul class="pub-timeline"><li>Foundational transport regulation framework established.</li><li>Service expansion and records modernization initiatives launched.</li><li>Digital systems integrated for public transparency and efficiency.</li></ul></article></div></div></div></section>
 
     <footer class="site-footer gov-footer">
         <div class="container footer-inner">
@@ -341,6 +280,7 @@ $publicNavItems = [
     </script>
 </body>
 </html>
+
 
 
 

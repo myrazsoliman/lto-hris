@@ -143,7 +143,7 @@ $navIconMap = [
                                     <i class="fa-regular fa-circle-question" aria-hidden="true"></i>
                                     <span>Help</span>
                                 </a>
-                                <a href="logout.php" class="danger">
+                                <a href="logout.php" class="danger" data-logout-trigger="true">
                                     <i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i>
                                     <span>Logout</span>
                                 </a>
@@ -155,3 +155,77 @@ $navIconMap = [
                     <?php endif; ?>
                 </div>
             </header>
+
+            <?php if (is_logged_in()): ?>
+                <div class="confirm-modal confirm-modal--menu" id="logoutConfirmModal" aria-hidden="true">
+                    <div class="confirm-modal-backdrop" data-logout-cancel></div>
+                    <div class="confirm-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="logoutConfirmTitle">
+                        <h2 id="logoutConfirmTitle">Are you sure you want to logout?</h2>
+                        <div class="confirm-modal-actions">
+                            <button type="button" class="btn btn-outline" id="logoutConfirmNo" data-logout-cancel>No</button>
+                            <a href="logout.php" class="btn btn-danger" id="logoutConfirmYes">Yes</a>
+                        </div>
+                    </div>
+                </div>
+                <script>
+                    (function() {
+                        if (window.__logoutConfirmInlineBound) return;
+                        window.__logoutConfirmInlineBound = true;
+
+                        function bindLogoutConfirm() {
+                            var modal = document.getElementById('logoutConfirmModal');
+                            if (!modal) return;
+
+                            var cancelTargets = modal.querySelectorAll('[data-logout-cancel]');
+                            var yesLink = document.getElementById('logoutConfirmYes');
+                            var noBtn = document.getElementById('logoutConfirmNo');
+                            var lastFocus = null;
+
+                            function setOpen(next) {
+                                var isOpen = !!next;
+                                modal.classList.toggle('is-open', isOpen);
+                                modal.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
+                                document.body.classList.toggle('modal-open', isOpen);
+                                if (isOpen && noBtn) {
+                                    noBtn.focus();
+                                } else if (!isOpen && lastFocus) {
+                                    lastFocus.focus();
+                                }
+                            }
+
+                            document.addEventListener('click', function(e) {
+                                var trigger = e.target.closest('[data-logout-trigger="true"], a[href="logout.php"]');
+                                if (!trigger || trigger.id === 'logoutConfirmYes') return;
+                                e.preventDefault();
+                                lastFocus = trigger;
+                                setOpen(true);
+                            });
+
+                            cancelTargets.forEach(function(el) {
+                                el.addEventListener('click', function(e) {
+                                    e.preventDefault();
+                                    setOpen(false);
+                                });
+                            });
+
+                            document.addEventListener('keydown', function(e) {
+                                if (e.key === 'Escape' && modal.classList.contains('is-open')) {
+                                    setOpen(false);
+                                }
+                            });
+
+                            if (yesLink) {
+                                yesLink.addEventListener('click', function() {
+                                    setOpen(false);
+                                });
+                            }
+                        }
+
+                        if (document.readyState === 'loading') {
+                            document.addEventListener('DOMContentLoaded', bindLogoutConfirm, { once: true });
+                        } else {
+                            bindLogoutConfirm();
+                        }
+                    }());
+                </script>
+            <?php endif; ?>

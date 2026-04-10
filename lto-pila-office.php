@@ -197,68 +197,7 @@ $publicNavItems = [
         </div>
     </header>
 
-    <section class="public-page">
-    <div class="public-wrap">
-        <div class="public-hero">
-            <span class="public-kicker">LTO HRIS Public Information</span>
-            <h2 class="public-title">LTO Pila Office</h2>
-            <p class="public-summary">Official profile page of the LTO Pila District Office, including scope and service commitments.</p>
-
-            <div class="public-grid">
-                <article class="public-card">
-                    <h3>Scope</h3>
-                    <ul class="public-list">
-<li>Office profile and service area context.</li>
-<li>Public support and transaction coordination role.</li>
-<li>Operational standards and service commitments.</li>
-                    </ul>
-                </article>
-                <article class="public-card">
-                    <h3>Practical Guidance</h3>
-                    <ul class="public-list">
-<li>Verify details before submission or attendance.</li>
-<li>Prepare complete supporting documents.</li>
-<li>Use only official pages and contacts.</li>
-                    </ul>
-                </article>
-                <article class="public-card">
-                    <h3>Keywords</h3>
-                    <ul class="public-chip-list">
-<li>District Office</li>
-<li>Public Service</li>
-<li>Laguna</li>
-                    </ul>
-                </article>
-            </div>
-
-            <div class="public-note">For clarifications related to LTO Pila Office, contact the LTO Pila District Office through official channels.</div>
-
-            <div class="public-table-wrap">
-                <table class="public-table">
-                    <thead>
-                        <tr>
-                            <th>Reference</th>
-                            <th>Status</th>
-                            <th>Last Updated</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>LTO Pila Office Information</td>
-                            <td>Active</td>
-                            <td>Current posting cycle</td>
-                        </tr>
-                        <tr>
-                            <td>Public Guidance</td>
-                            <td>Available</td>
-                            <td>Subject to official revision</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-</section>
+    <section class="public-page"><div class="public-wrap"><div class="public-hero"><span class="public-kicker">District Profile</span><h2 class="public-title">LTO Pila Office</h2><p class="public-summary">Official district office information, service commitment, and public contact references.</p><div class="pub-layout"><article class="pub-panel"><h3>Office Profile</h3><ul class="public-list"><li>Address: Brgy. Sta. Clara Sur, Pila, Laguna</li><li>Office Contact: +63 49 250-1712</li><li>Hours: Monday to Friday, 8:00 AM to 5:00 PM</li></ul></article><article class="pub-panel"><h3>Service Commitment</h3><p>Provide timely, professional, and transparent front-line support aligned with LTO standards.</p></article></div></div></div></section>
 
     <footer class="site-footer gov-footer">
         <div class="container footer-inner">
@@ -341,6 +280,7 @@ $publicNavItems = [
     </script>
 </body>
 </html>
+
 
 
 

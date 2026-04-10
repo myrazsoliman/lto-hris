@@ -7,6 +7,9 @@ $showLoginModal = isset($_GET['login']) || isset($_GET['registration_success']);
 $registerError = '';
 $registerSuccess = '';
 $registrationSuccess = isset($_GET['registration_success']);
+$showLoginCaptcha = false;
+$loginCaptchaInput = '';
+$loginCaptchaNonce = '';
 $registerFirstName = '';
 $registerMiddleName = '';
 $registerLastName = '';
@@ -41,6 +44,22 @@ function redirect_to_dashboard_by_roles($roles)
 
     header('Location: employee-dashboard.php');
     exit;
+}
+
+function issue_login_captcha_challenge()
+{
+    $alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    $alphabetLength = strlen($alphabet) - 1;
+    $captchaCode = '';
+
+    for ($i = 0; $i < 5; $i++) {
+        $captchaCode .= $alphabet[random_int(0, $alphabetLength)];
+    }
+
+    $_SESSION['login_modal_captcha_expected'] = $captchaCode;
+    $_SESSION['login_modal_captcha_nonce'] = bin2hex(random_bytes(8));
+
+    return $captchaCode;
 }
 
 if (isset($_GET['cancel_2fa'])) {
@@ -97,6 +116,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form_action'] ?? '') === '
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form_action'] ?? '') === 'login_modal') {
     $loginEmail = isset($_POST['email']) ? trim($_POST['email']) : '';
     $password = isset($_POST['password']) ? (string) $_POST['password'] : '';
+    $loginCaptchaInput = isset($_POST['captcha_answer']) ? trim((string) $_POST['captcha_answer']) : '';
+    $captchaRequired = (int) ($_SESSION['auth_limits']['login']['count'] ?? 0) >= 2;
 
     if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
         $loginError = 'Your session has expired. Please try again.';
@@ -105,30 +126,61 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form_action'] ?? '') === '
     } elseif ($loginEmail === '' || $password === '') {
         $loginError = 'Enter your email and password.';
     } else {
-        $user = authenticate_user($loginEmail, $password);
+        $canProceedLogin = true;
 
-        if ($user) {
-            clear_failed_attempts('login');
-            regenerate_csrf_token();
-
-            $roles = $user['roles'] ?? [];
-            login_user($user);
-            redirect_to_dashboard_by_roles($roles);
+        if ($captchaRequired) {
+            $expectedCaptcha = (string) ($_SESSION['login_modal_captcha_expected'] ?? '');
+            $normalizedCaptchaInput = strtoupper($loginCaptchaInput);
+            if ($normalizedCaptchaInput === '' || $expectedCaptcha === '' || !hash_equals($expectedCaptcha, $normalizedCaptchaInput)) {
+                register_failed_attempt('login');
+                $loginError = 'Security verification failed. Please answer the CAPTCHA correctly.';
+                $canProceedLogin = false;
+            } else {
+                unset($_SESSION['login_modal_captcha_expected'], $_SESSION['login_modal_captcha_nonce']);
+            }
         }
 
-        register_failed_attempt('login');
-        log_auth_event('login_failed', null, $loginEmail);
-        
-        // Check if the email exists to provide more specific error messages
-        $existingUser = fetch_user_record($loginEmail);
-        if ($existingUser) {
-            $loginError = 'The password you entered is incorrect. Please try again.';
-        } else {
-            $loginError = 'No account found with this email address. Please check your email or register for a new account.';
+        if ($canProceedLogin) {
+            $user = authenticate_user($loginEmail, $password);
+
+            if ($user) {
+                clear_failed_attempts('login');
+                unset($_SESSION['login_modal_captcha_expected'], $_SESSION['login_modal_captcha_nonce']);
+                regenerate_csrf_token();
+
+                $roles = $user['roles'] ?? [];
+                login_user($user);
+                redirect_to_dashboard_by_roles($roles);
+            }
+
+            register_failed_attempt('login');
+            log_auth_event('login_failed', null, $loginEmail);
+            
+            // Check if the email exists to provide more specific error messages
+            $existingUser = fetch_user_record($loginEmail);
+            if ($existingUser) {
+                $loginError = 'The password you entered is incorrect. Please try again.';
+            } else {
+                $loginError = 'No account found with this email address. Please check your email or register for a new account.';
+            }
         }
     }
 
+    $showLoginCaptcha = (int) ($_SESSION['auth_limits']['login']['count'] ?? 0) >= 2;
+    if ($showLoginCaptcha) {
+        issue_login_captcha_challenge();
+    }
     $showLoginModal = true;
+}
+
+if (!$showLoginCaptcha) {
+    $showLoginCaptcha = (int) ($_SESSION['auth_limits']['login']['count'] ?? 0) >= 2;
+}
+if ($showLoginCaptcha) {
+    if ((string) ($_SESSION['login_modal_captcha_expected'] ?? '') === '') {
+        issue_login_captcha_challenge();
+    }
+    $loginCaptchaNonce = (string) ($_SESSION['login_modal_captcha_nonce'] ?? '');
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form_action'] ?? '') === 'register_modal') {
@@ -715,6 +767,33 @@ $publicNavItems = [
                                 </span>
                             </button>
                         </div>
+
+                            <?php if ($showLoginCaptcha): ?>
+                                <div class="login-captcha-block">
+                                    <div class="login-captcha-hint">What code is in the image?</div>
+                                    <div class="login-captcha-image-wrap">
+                                        <img
+                                            src="captcha-image.php?context=login_modal&amp;v=<?php echo urlencode($loginCaptchaNonce); ?>"
+                                            alt="CAPTCHA image"
+                                            class="login-captcha-image"
+                                            id="loginCaptchaImage"
+                                        >
+                                        <button type="button" class="login-captcha-refresh" id="loginCaptchaRefresh">Refresh</button>
+                                    </div>
+                                </div>
+                                <div class="login-input-wrap login-input-wrap-modal">
+                                    <div class="login-input-shell">
+                                        <span class="login-input-icon" aria-hidden="true">
+                                            <svg viewBox="0 0 24 24" fill="none">
+                                                <path d="M12 3a9 9 0 1 0 9 9h-2a7 7 0 1 1-7-7V3Z" fill="currentColor" />
+                                                <path d="M12 8v5l3 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                                            </svg>
+                                        </span>
+                                        <input type="text" id="loginModalCaptcha" name="captcha_answer" placeholder=" " value="<?php echo htmlspecialchars($loginCaptchaInput); ?>" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="5" required>
+                                        <label class="login-floating-label" for="loginModalCaptcha">Enter CAPTCHA</label>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
 
                             <div class="login-modal-actions-row login-modal-actions-row-split">
                                 <a href="#" class="login-forgot-link js-forgot-trigger">Forgot password?</a>
@@ -1732,6 +1811,7 @@ $publicNavItems = [
             loginForm.addEventListener('submit', function(e) {
                 const emailField = document.getElementById('loginModalEmail');
                 const passwordField = document.getElementById('loginModalPassword');
+                const captchaField = document.getElementById('loginModalCaptcha');
                 
                 // Clear any previous custom validation messages
                 const existingAlert = loginForm.querySelector('.alert-error');
@@ -1755,6 +1835,9 @@ $publicNavItems = [
                 } else if (passwordField.value.length < 8) {
                     errorMessage = 'Password must be at least 8 characters long.';
                     isValid = false;
+                } else if (captchaField && !captchaField.value.trim()) {
+                    errorMessage = 'Please answer the security check.';
+                    isValid = false;
                 }
 
                 if (!isValid) {
@@ -1774,11 +1857,32 @@ $publicNavItems = [
                     // Focus on the first invalid field
                     if (!emailField.value.trim() || !emailField.validity.valid) {
                         emailField.focus();
-                    } else {
+                    } else if (!passwordField.value.trim() || passwordField.value.length < 8) {
                         passwordField.focus();
+                    } else if (captchaField) {
+                        captchaField.focus();
                     }
                 }
             });
+
+            const captchaField = document.getElementById('loginModalCaptcha');
+            if (captchaField) {
+                captchaField.addEventListener('input', function() {
+                    this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 5);
+                });
+            }
+
+            const captchaRefreshBtn = document.getElementById('loginCaptchaRefresh');
+            const captchaImage = document.getElementById('loginCaptchaImage');
+            if (captchaRefreshBtn && captchaImage) {
+                captchaRefreshBtn.addEventListener('click', function() {
+                    captchaImage.src = 'captcha-image.php?context=login_modal&regen=1&t=' + Date.now();
+                    if (captchaField) {
+                        captchaField.value = '';
+                        captchaField.focus();
+                    }
+                });
+            }
         }());
     </script>
 

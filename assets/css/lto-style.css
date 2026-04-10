@@ -475,6 +475,12 @@ opacity:.9}
 .login-modal-actions-row{display:flex;align-items:center;justify-content:flex-end;gap:16px;margin-top:2px;padding:4px 2px 0}
 .login-forgot-link{color:#184d97;font-size:14px;font-weight:800}
 .login-forgot-link:hover{text-decoration:underline}
+.login-captcha-block{margin:2px 2px 10px}
+.login-captcha-hint{margin:0 0 8px;color:#223b61;font-size:13px;font-weight:700;letter-spacing:.01em}
+.login-captcha-image-wrap{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.login-captcha-image{display:block;width:190px;max-width:100%;height:62px;border:1px solid rgba(36,63,100,.28);border-radius:8px;background:#f4f7fb}
+.login-captcha-refresh{-webkit-appearance:none;appearance:none;display:inline-flex;align-items:center;justify-content:center;min-height:36px;padding:0 14px;border:1px solid rgba(43,95,165,.36);border-radius:8px;background:#fff;color:#1f4d8f;font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;transition:background-color 160ms ease,border-color 160ms ease,color 160ms ease}
+.login-captcha-refresh:hover{background:rgba(43,95,165,.08);border-color:rgba(43,95,165,.5);color:#163f7a}
 .login-submit-btn-modal{display:inline-flex;align-items:center;justify-content:center;width:100%;min-height:60px;margin-top:8px;border-radius:18px;background:linear-gradient(135deg,#163f7a,#2b5fa5);letter-spacing:.16em;box-shadow:0 12px 24px rgba(22,63,122,.18);transition:transform 200ms ease,box-shadow 200ms ease,filter 200ms ease}
 .login-submit-btn-modal:hover{transform:translateY(-1px);box-shadow:0 16px 28px rgba(22,63,122,.24);filter:saturate(1.03)}
 .login-modal-meta{position:relative;z-index:1;display:flex;flex-wrap:wrap;gap:10px 18px;margin-top:18px;padding-top:16px;border-top:1px solid rgba(43,95,165,.14);color:#5f7088;font-size:12px;line-height:1.5}
@@ -708,31 +714,31 @@ opacity:.9}
 .public-timeline li{position:relative;padding:10px 12px 10px 34px;border:1px solid rgba(43,95,165,0.10);border-radius:10px;background:#fff}
 .public-timeline li::before{content:"";position:absolute;left:12px;top:15px;width:10px;height:10px;border-radius:999px;background:var(--public-accent,#2b5fa5)}
 
-/* Per-page visual themes */
-body.public-page-news-and-updates{--public-accent:#2458b5;--public-title:#153764;--public-bg-start:#f4f8ff;--public-hero-end:#eef4ff}
-body.public-page-careers{--public-accent:#6a4f11;--public-title:#4d390b;--public-bg-start:#fff9ef;--public-hero-end:#fff3db;--public-note-accent:#d49a18}
-body.public-page-lto-accredited{--public-accent:#1f5f4b;--public-title:#18493a;--public-bg-start:#f1fbf7;--public-hero-end:#e8f7f1}
-body.public-page-otdc-it-provider{--public-accent:#215f8f;--public-title:#153d5c;--public-bg-start:#f1f8fe;--public-hero-end:#e6f2fb}
-body.public-page-medical-clinics{--public-accent:#2a7a6e;--public-title:#1f5d54;--public-bg-start:#f0fbf8;--public-hero-end:#e4f6f1}
-body.public-page-medical-it-providers{--public-accent:#256c88;--public-title:#1b5166;--public-bg-start:#f0f9fd;--public-hero-end:#e3f2f8}
-body.public-page-lecturers{--public-accent:#5951a8;--public-title:#413b7f;--public-bg-start:#f4f3ff;--public-hero-end:#ebe9ff}
-body.public-page-driving-schools{--public-accent:#8b5f1c;--public-title:#674712;--public-bg-start:#fff8ef;--public-hero-end:#ffefd9}
-body.public-page-driving-school-instructors{--public-accent:#7b4f2e;--public-title:#5f3d21;--public-bg-start:#fff7f2;--public-hero-end:#feeee4}
-body.public-page-drivers-education-center{--public-accent:#4f6e2d;--public-title:#3c5422;--public-bg-start:#f5fbef;--public-hero-end:#edf7e3}
-body.public-page-affiliates{--public-accent:#2f5f99;--public-title:#224773;--public-bg-start:#f2f7fd;--public-hero-end:#e8f1fb}
-body.public-page-ltms-portal{--public-accent:#385ea7;--public-title:#29457c;--public-bg-start:#f2f6ff;--public-hero-end:#e9efff}
-body.public-page-cde-program{--public-accent:#2f7b4d;--public-title:#235c39;--public-bg-start:#f1fbf4;--public-hero-end:#e6f6ea}
-body.public-page-cde-online-exam{--public-accent:#2e6c88;--public-title:#234f66;--public-bg-start:#eff9fd;--public-hero-end:#e3f2f8}
-body.public-page-citisend{--public-accent:#61509a;--public-title:#4a3d75;--public-bg-start:#f6f3ff;--public-hero-end:#ede8ff}
-body.public-page-resources{--public-accent:#265b84;--public-title:#1d4462;--public-bg-start:#f1f8fd;--public-hero-end:#e7f2fa}
-body.public-page-downloadable-forms{--public-accent:#7c5a1f;--public-title:#5d4317;--public-bg-start:#fff8ef;--public-hero-end:#ffefdc}
-body.public-page-hrds-forms{--public-accent:#5e4f9e;--public-title:#483d78;--public-bg-start:#f5f3ff;--public-hero-end:#ece9ff}
-body.public-page-mission-and-vision{--public-accent:#1f6080;--public-title:#184962;--public-bg-start:#eff8fc;--public-hero-end:#e4f2f8}
-body.public-page-mandate-and-functions{--public-accent:#556016;--public-title:#404812;--public-bg-start:#f8fbec;--public-hero-end:#f1f7de}
-body.public-page-historical-background{--public-accent:#785029;--public-title:#5e3f20;--public-bg-start:#fff7f1;--public-hero-end:#fdeee3}
-body.public-page-road-safety-action-plan{--public-accent:#8b2f2f;--public-title:#692323;--public-bg-start:#fff4f4;--public-hero-end:#fde8e8}
+/* Per-page visual themes (LTO-related palette: blue, navy, gold, neutral) */
+body.public-page-news-and-updates{--public-accent:#2b5fa5;--public-title:#173761;--public-bg-start:#f4f8ff;--public-hero-end:#edf3ff}
+body.public-page-careers{--public-accent:#b27a12;--public-title:#6a4a0d;--public-bg-start:#fff9ee;--public-hero-end:#fff2dc;--public-note-accent:#d49a18}
+body.public-page-lto-accredited{--public-accent:#2458b5;--public-title:#153764;--public-bg-start:#f3f8ff;--public-hero-end:#eaf2ff}
+body.public-page-otdc-it-provider{--public-accent:#2b5fa5;--public-title:#173761;--public-bg-start:#f3f8ff;--public-hero-end:#eaf2ff}
+body.public-page-medical-clinics{--public-accent:#3769b0;--public-title:#1e467c;--public-bg-start:#f4f8ff;--public-hero-end:#edf3ff}
+body.public-page-medical-it-providers{--public-accent:#2f639f;--public-title:#1c4873;--public-bg-start:#f3f8ff;--public-hero-end:#ebf3ff}
+body.public-page-lecturers{--public-accent:#4a72b8;--public-title:#2b4f8c;--public-bg-start:#f4f8ff;--public-hero-end:#edf2ff}
+body.public-page-driving-schools{--public-accent:#b27a12;--public-title:#6a4a0d;--public-bg-start:#fff8ee;--public-hero-end:#fff1dc}
+body.public-page-driving-school-instructors{--public-accent:#9f7322;--public-title:#60471a;--public-bg-start:#fff8f1;--public-hero-end:#fff1e3}
+body.public-page-drivers-education-center{--public-accent:#8f6a24;--public-title:#59441b;--public-bg-start:#fff8f0;--public-hero-end:#fff1e2}
+body.public-page-affiliates{--public-accent:#2b5fa5;--public-title:#173761;--public-bg-start:#f3f8ff;--public-hero-end:#eaf2ff}
+body.public-page-ltms-portal{--public-accent:#2f66b2;--public-title:#1f4a84;--public-bg-start:#f3f7ff;--public-hero-end:#eaf1ff}
+body.public-page-cde-program{--public-accent:#3a6db0;--public-title:#224a7c;--public-bg-start:#f4f8ff;--public-hero-end:#edf3ff}
+body.public-page-cde-online-exam{--public-accent:#2d62a7;--public-title:#1d4578;--public-bg-start:#f3f8ff;--public-hero-end:#ebf2ff}
+body.public-page-citisend{--public-accent:#496fa8;--public-title:#2a4d7f;--public-bg-start:#f4f8ff;--public-hero-end:#edf2ff}
+body.public-page-resources{--public-accent:#2458b5;--public-title:#153764;--public-bg-start:#f3f8ff;--public-hero-end:#eaf2ff}
+body.public-page-downloadable-forms{--public-accent:#b27a12;--public-title:#6a4a0d;--public-bg-start:#fff9ee;--public-hero-end:#fff2dd}
+body.public-page-hrds-forms{--public-accent:#9b6f1e;--public-title:#5f4718;--public-bg-start:#fff8f0;--public-hero-end:#fff1e4}
+body.public-page-mission-and-vision{--public-accent:#2b5fa5;--public-title:#173761;--public-bg-start:#f4f8ff;--public-hero-end:#edf3ff}
+body.public-page-mandate-and-functions{--public-accent:#2f639f;--public-title:#1d4870;--public-bg-start:#f3f8ff;--public-hero-end:#ebf3ff}
+body.public-page-historical-background{--public-accent:#8f6a24;--public-title:#59441b;--public-bg-start:#fff8f0;--public-hero-end:#fff1e2}
+body.public-page-road-safety-action-plan{--public-accent:#b27a12;--public-title:#6a4a0d;--public-bg-start:#fff9ef;--public-hero-end:#fff3df}
 body.public-page-lto-pila-office{--public-accent:#2b5fa5;--public-title:#173761;--public-bg-start:#f4f8ff;--public-hero-end:#edf3ff}
-body.public-page-data-privacy-notice{--public-accent:#305f6a;--public-title:#21444c;--public-bg-start:#f3fafb;--public-hero-end:#e7f3f6}
+body.public-page-data-privacy-notice{--public-accent:#305f8a;--public-title:#214764;--public-bg-start:#f3f8fc;--public-hero-end:#e8f1f8}
 
 /* Lifelike public components */
 .pub-layout{display:grid;gap:14px;margin-top:16px}
@@ -792,6 +798,32 @@ body.public-page-data-privacy-notice .pub-layout{grid-template-columns:1fr}
   .pub-kpi-grid,.pub-vacancy-grid,.pub-link-grid{grid-template-columns:1fr}
   .pub-layout{grid-template-columns:1fr !important}
 }
+
+/* Per-page card look differences */
+body.public-page-news-and-updates .pub-panel{border-radius:18px}
+body.public-page-careers .pub-vacancy{border-left:4px solid #6a4f11;background:linear-gradient(180deg,#fffdf7,#fff8ea)}
+body.public-page-lto-accredited .pub-panel{background:linear-gradient(180deg,#ffffff,#f3fbf7)}
+body.public-page-otdc-it-provider .pub-provider-table th{background:#eaf4fb}
+body.public-page-medical-clinics .pub-provider-table th{background:#e9f8f4}
+body.public-page-medical-it-providers .pub-provider-table th{background:#eaf7fb}
+body.public-page-lecturers .pub-panel{border-style:dashed}
+body.public-page-driving-schools .pub-panel{border-left:4px solid #8b5f1c}
+body.public-page-driving-school-instructors .pub-panel{box-shadow:0 10px 18px rgba(123,79,46,0.10)}
+body.public-page-drivers-education-center .pub-panel{background:linear-gradient(180deg,#ffffff,#f6fbeF)}
+body.public-page-affiliates .pub-link-card{border-radius:16px}
+body.public-page-ltms-portal .pub-step{background:#f4f7ff}
+body.public-page-cde-program .pub-step{background:#f2fbf5}
+body.public-page-cde-online-exam .pub-step{background:#f1f9fd}
+body.public-page-citisend .pub-step{background:#f6f3ff}
+body.public-page-resources .pub-link-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+body.public-page-downloadable-forms .pub-provider-table td:first-child{font-weight:700}
+body.public-page-hrds-forms .pub-step::before{background:#5e4f9e}
+body.public-page-mission-and-vision .pub-panel{min-height:190px}
+body.public-page-mandate-and-functions .pub-kpi{background:linear-gradient(145deg,#fbfff1,#f1f7de)}
+body.public-page-historical-background .pub-timeline li{border-left:4px solid #785029}
+body.public-page-road-safety-action-plan .pub-step::before{background:#8b2f2f}
+body.public-page-lto-pila-office .pub-panel{background:linear-gradient(180deg,#ffffff,#eef4ff)}
+body.public-page-data-privacy-notice .pub-kpi{background:linear-gradient(145deg,#f4fbfc,#e7f3f6)}
 
 @media(max-width:980px){
   .public-grid{grid-template-columns:1fr 1fr}

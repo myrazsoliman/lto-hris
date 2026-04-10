@@ -197,68 +197,7 @@ $publicNavItems = [
         </div>
     </header>
 
-        <section class="public-page">
-    <div class="public-wrap">
-        <div class="public-hero">
-            <span class="public-kicker">LTO HRIS Public Information</span>
-            <h2 class="public-title">Affiliates</h2>
-            <p class="public-summary">Directory page for affiliate platforms and partner channels linked to LTO services.</p>
-
-            <div class="public-grid">
-                <article class="public-card">
-                    <h3>Scope</h3>
-                    <ul class="public-list">
-<li>Affiliate systems and service channels.</li>
-<li>Public-facing platform references.</li>
-<li>Navigation entry points for partner services.</li>
-                    </ul>
-                </article>
-                <article class="public-card">
-                    <h3>Practical Guidance</h3>
-                    <ul class="public-list">
-<li>Verify details before submission or attendance.</li>
-<li>Prepare complete supporting documents.</li>
-<li>Use only official pages and contacts.</li>
-                    </ul>
-                </article>
-                <article class="public-card">
-                    <h3>Keywords</h3>
-                    <ul class="public-chip-list">
-<li>Affiliate</li>
-<li>Platform</li>
-<li>Linked Service</li>
-                    </ul>
-                </article>
-            </div>
-
-            <div class="public-note">For clarifications related to Affiliates, contact the LTO Pila District Office through official channels.</div>
-
-            <div class="public-table-wrap">
-                <table class="public-table">
-                    <thead>
-                        <tr>
-                            <th>Reference</th>
-                            <th>Status</th>
-                            <th>Last Updated</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>Affiliates Information</td>
-                            <td>Active</td>
-                            <td>Current posting cycle</td>
-                        </tr>
-                        <tr>
-                            <td>Public Guidance</td>
-                            <td>Available</td>
-                            <td>Subject to official revision</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-</section>
+        <section class="public-page"><div class="public-wrap"><div class="public-hero"><span class="public-kicker">LTO HRIS Public Information</span><h2 class="public-title">Affiliates</h2><p class="public-summary">Official partner platforms and connected service channels.</p><div class="pub-layout"><article class="pub-panel"><h3>Affiliate Platforms</h3><div class="pub-link-grid"><a class="pub-link-card" href="ltms-portal.php">LTMS Portal</a><a class="pub-link-card" href="cde-program.php">CDE Program</a><a class="pub-link-card" href="cde-online-exam.php">CDE Online Exam</a><a class="pub-link-card" href="citisend.php">CitiSend</a></div></article><article class="pub-panel"><h3>Usage Reminder</h3><p>Access affiliate services only through official links and verified pages.</p></article></div></div></div></section>
 
     <footer class="site-footer gov-footer">
         <div class="container footer-inner">
@@ -341,6 +280,7 @@ $publicNavItems = [
     </script>
 </body>
 </html>
+
 
 
 
