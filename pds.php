@@ -6,6 +6,25 @@ require_once 'includes/data.php';
 require_once 'includes/pds-document-render.php';
 require_roles(['employee', 'hr_officer', 'admin', 'superadmin']);
 
+function pds_template_is_fillable_pdf($path)
+{
+    if (!is_file($path)) {
+        return false;
+    }
+
+    $content = @file_get_contents($path);
+    if (!is_string($content) || $content === '') {
+        return false;
+    }
+
+    $hasAcroForm = stripos($content, '/AcroForm') !== false;
+    $hasFields = stripos($content, '/Fields') !== false;
+    $hasWidget = stripos($content, '/Widget') !== false;
+    $hasFieldType = preg_match('/\/FT\s*\/(Tx|Btn|Ch|Sig)/i', $content) === 1;
+
+    return $hasAcroForm && ($hasFields || $hasWidget || $hasFieldType);
+}
+
 // Resolve employee ID from current user by default.
 $currentUser = current_user();
 $userRoles = get_user_roles($currentUser);
@@ -70,18 +89,13 @@ if (is_file($templateMetaPath)) {
 }
 
 $templateAvailable = is_file($officialTemplateFile);
+$templateIsFillable = $templateAvailable ? pds_template_is_fillable_pdf($officialTemplateFile) : false;
 $officialTemplateVersion = $templateAvailable ? (string) filemtime($officialTemplateFile) : (string) time();
 $officialTemplateHref = $templateAvailable
     ? ($officialTemplatePath . '?v=' . rawurlencode($officialTemplateVersion))
     : '#';
 $documentPreviewHref = $officialTemplateHref;
 $documentPreviewLabel = 'Open Official PDF';
-$uploadError = '';
-$uploadSuccess = '';
-
-if (isset($_GET['uploaded']) && (int) $_GET['uploaded'] === 1) {
-    $uploadSuccess = 'Filled PDS PDF uploaded successfully.';
-}
 
 $generatedPdfFile = '';
 if (!empty($generatedPdfPath)) {
@@ -102,72 +116,12 @@ if ($generatedPdfFile !== '') {
     $documentPreviewLabel = 'Open Filled Document';
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['upload_filled_template'])) {
-    if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
-        $uploadError = 'Security token expired. Please refresh and try again.';
-    } else {
-        $upload = $_FILES['filled_pds_pdf'] ?? null;
-        $uploadErrorCode = (int) ($upload['error'] ?? UPLOAD_ERR_NO_FILE);
-
-        if ($uploadErrorCode !== UPLOAD_ERR_OK) {
-            $uploadError = 'Please select a valid filled PDF to upload.';
-        } else {
-            $originalName = (string) ($upload['name'] ?? '');
-            $tmpPath = (string) ($upload['tmp_name'] ?? '');
-            $extension = strtolower((string) pathinfo($originalName, PATHINFO_EXTENSION));
-            $mime = '';
-
-            if (is_uploaded_file($tmpPath) && function_exists('finfo_open')) {
-                $finfo = finfo_open(FILEINFO_MIME_TYPE);
-                if ($finfo) {
-                    $mime = (string) finfo_file($finfo, $tmpPath);
-                    finfo_close($finfo);
-                }
-            }
-
-            $isPdfByExtension = ($extension === 'pdf');
-            $isPdfByMime = in_array($mime, ['application/pdf', 'application/x-pdf', 'application/octet-stream', ''], true);
-
-            if (!is_uploaded_file($tmpPath) || (!$isPdfByExtension && !$isPdfByMime)) {
-                $uploadError = 'Only PDF files are allowed.';
-            } else {
-                $pdsRecordForUpload = get_pds_record($employeeId, $currentYear);
-                if (!$pdsRecordForUpload) {
-                    $createdId = create_pds_record($employeeId, $currentYear);
-                    if ($createdId) {
-                        $pdsRecordForUpload = get_pds_record($employeeId, $currentYear);
-                    }
-                }
-
-                if (!$pdsRecordForUpload) {
-                    $uploadError = 'Unable to prepare PDS record for upload.';
-                } else {
-                    $filledDir = __DIR__ . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . 'pds' . DIRECTORY_SEPARATOR . 'filled';
-                    if (!is_dir($filledDir)) {
-                        @mkdir($filledDir, 0777, true);
-                    }
-
-                    if (!is_dir($filledDir) || !is_writable($filledDir)) {
-                        $uploadError = 'Upload directory is not writable.';
-                    } else {
-                        $fileName = 'pds_filled_emp' . (int) $employeeId . '_' . (int) $currentYear . '_' . date('Ymd_His') . '.pdf';
-                        $targetAbsolute = $filledDir . DIRECTORY_SEPARATOR . $fileName;
-                        $targetRelative = 'uploads/pds/filled/' . $fileName;
-
-                        if (!move_uploaded_file($tmpPath, $targetAbsolute)) {
-                            $uploadError = 'Failed to save uploaded filled PDF.';
-                        } else {
-                            $stmt = db()->prepare("UPDATE pds_records SET generated_pdf_path = ?, status = 'submitted', updated_at = NOW() WHERE id = ?");
-                            $stmt->execute([$targetRelative, (int) $pdsRecordForUpload['id']]);
-                            header('Location: pds.php?uploaded=1');
-                            exit;
-                        }
-                    }
-                }
-            }
-        }
-    }
+if ($templateAvailable && $templateIsFillable) {
+    $documentPreviewHref = $officialTemplateHref;
+    $documentPreviewLabel = 'Open Fillable Document';
+    $hasViewableDocument = true;
 }
+
 $initialPdsFormState = [
     'fields' => [
         'surname' => $pdsContext['personal']['surname'] ?? '',
@@ -363,62 +317,49 @@ require_once 'includes/header.php';
     <?php if ($hasViewableDocument): ?>
         <div class="pds-document-actions" id="pdsDocumentActions" tabindex="-1">
             <div class="pds-document-actions-copy">
-                <div class="pds-document-actions-title">Submitted PDS Document Ready</div>
-                <p>Your accomplished PDS is now available for viewing and printing.</p>
+                <div class="pds-document-actions-title"><?php echo ($templateAvailable && $templateIsFillable) ? 'Fillable PDS Document Ready' : 'Submitted PDS Document Ready'; ?></div>
+                <p>
+                    <?php if ($templateAvailable && $templateIsFillable): ?>
+                        Open the same fillable PDF template to view the actual encoded form values, then print/download from the PDF toolbar.
+                    <?php else: ?>
+                        Your accomplished PDS is now available for viewing and printing.
+                    <?php endif; ?>
+                </p>
             </div>
             <div class="pds-document-actions-buttons">
-                <a href="<?php echo htmlspecialchars($documentPreviewHref); ?>" class="btn btn-primary" target="_blank" rel="noopener" id="pdsViewDocumentBtn">View Document</a>
-                <?php if (!empty($generatedPdfPath)): ?>
+                <a href="<?php echo htmlspecialchars($documentPreviewHref); ?>" class="btn btn-primary" target="_blank" rel="noopener" id="pdsViewDocumentBtn"><?php echo htmlspecialchars($documentPreviewLabel); ?></a>
+                <?php if (!empty($generatedPdfPath) && !($templateAvailable && $templateIsFillable)): ?>
                     <a href="<?php echo htmlspecialchars($generatedPdfPath); ?>" class="btn btn-outline" target="_blank" rel="noopener">Print PDF</a>
                 <?php endif; ?>
             </div>
         </div>
     <?php endif; ?>
 
-    <section class="card" style="margin-top: 14px; border: 1px solid #d7e0ea; background: linear-gradient(180deg, #ffffff, #f8fbff);">
-        <div style="padding: 16px 18px; border-bottom: 1px solid #dbe5ef;">
-            <h3 style="margin: 0; font-size: 18px; color: #183247;">Fill and Submit Using the Template</h3>
-            <p style="margin: 8px 0 0; color: #5f7286;">Open the admin template, fill it out, then upload your completed PDF here.</p>
-        </div>
-        <div style="padding: 16px 18px;">
-            <?php if ($uploadError !== ''): ?>
-                <div class="alert alert-danger" style="margin-bottom: 12px;"><?php echo htmlspecialchars($uploadError); ?></div>
-            <?php endif; ?>
-            <?php if ($uploadSuccess !== ''): ?>
-                <div class="alert alert-success" style="margin-bottom: 12px;"><?php echo htmlspecialchars($uploadSuccess); ?></div>
-            <?php endif; ?>
-            <form method="post" enctype="multipart/form-data" style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token()); ?>">
-                <input type="hidden" name="upload_filled_template" value="1">
-                <input type="file" name="filled_pds_pdf" accept=".pdf,application/pdf" required>
-                <button type="submit" class="btn btn-primary">Submit Filled PDF</button>
-                <?php if (!empty($generatedPdfPath)): ?>
-                    <a href="<?php echo htmlspecialchars($generatedPdfPath); ?>" class="btn btn-outline" target="_blank" rel="noopener">Preview / Print Filled PDF</a>
-                <?php endif; ?>
-            </form>
-        </div>
-    </section>
-
     <section class="card" style="margin-top: 18px; border: 1px solid #d7e0ea; overflow: hidden;">
         <div style="padding: 18px 20px; border-bottom: 1px solid #d7e0ea; background: linear-gradient(135deg, #f7fafc, #eef4f8); display: flex; justify-content: space-between; gap: 12px; align-items: center; flex-wrap: wrap;">
             <div>
-                <div style="font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: #0f4c81;">Template Preview</div>
-                <h3 style="margin: 6px 0 0; font-size: 20px; color: #183247;">Admin Uploaded PDS Template Preview</h3>
-                <p style="margin: 6px 0 0; color: #5f7286;">The admin-uploaded PDF template is displayed below. Current template: <strong><?php echo htmlspecialchars($officialTemplateDisplayName); ?></strong>.</p>
+                <div style="font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: #0f4c81;">Fillable Template</div>
+                <h3 style="margin: 6px 0 0; font-size: 20px; color: #183247;">Answer Directly In The Admin Template</h3>
+                <p style="margin: 6px 0 0; color: #5f7286;">Current template: <strong><?php echo htmlspecialchars($officialTemplateDisplayName); ?></strong>. Fill the fields directly in the PDF viewer, then use print/download from the viewer toolbar.</p>
             </div>
             <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                <?php if ($templateAvailable): ?>
-                    <a href="<?php echo htmlspecialchars($officialTemplateHref); ?>" class="btn btn-outline" target="_blank" rel="noopener">Open Admin Template</a>
-                    <a href="<?php echo htmlspecialchars($documentPreviewHref); ?>" class="btn btn-primary" target="_blank" rel="noopener"><?php echo htmlspecialchars($documentPreviewLabel); ?></a>
+                <?php if ($templateAvailable && $templateIsFillable): ?>
+                    <a href="<?php echo htmlspecialchars($officialTemplateHref); ?>" class="btn btn-primary" target="_blank" rel="noopener">Open Fillable Template</a>
+                    <button type="button" class="btn btn-outline" onclick="window.print()">Print Current View</button>
                 <?php endif; ?>
             </div>
         </div>
+        <?php if ($templateAvailable && !$templateIsFillable): ?>
+            <div class="alert alert-danger" style="margin: 16px 20px 0;">
+                The active admin template is not fillable. Please ask admin to upload a fillable PDF template with editable fields.
+            </div>
+        <?php endif; ?>
         <div style="background: #eef3f8;">
             <div style="background: #eef3f8;">
                 <?php if ($templateAvailable): ?>
                     <iframe
                         id="pdsTemplateIframe"
-                        src="<?php echo htmlspecialchars($officialTemplateHref); ?>#page=1&toolbar=0&navpanes=0&scrollbar=1"
+                        src="<?php echo htmlspecialchars($officialTemplateHref); ?>#page=1&toolbar=1&navpanes=0&scrollbar=1"
                         title="<?php echo htmlspecialchars($officialTemplateDisplayName); ?>"
                         style="width: 100%; height: min(1700px, calc(100vh - 90px)); min-height: 1200px; border: 0; background: #eef3f8;"
                     ></iframe>
@@ -1085,7 +1026,7 @@ function syncTemplatePreviewPage(pageNum) {
     if (!iframe || !templatePdfBaseHref) return;
 
     const safePage = Math.max(1, Math.min(totalPages, Number(pageNum) || 1));
-    iframe.src = `${templatePdfBaseHref}#page=${safePage}&toolbar=0&navpanes=0&scrollbar=1`;
+    iframe.src = `${templatePdfBaseHref}#page=${safePage}&toolbar=1&navpanes=0&scrollbar=1`;
 }
 
 function showPage(pageNum) {

@@ -64,6 +64,26 @@ function pds_template_save_json_array($path, array $payload)
     @file_put_contents($path, json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 }
 
+function pds_template_is_fillable_pdf($path)
+{
+    if (!is_file($path)) {
+        return false;
+    }
+
+    $content = @file_get_contents($path);
+    if (!is_string($content) || $content === '') {
+        return false;
+    }
+
+    // Basic AcroForm detection for fillable PDFs.
+    $hasAcroForm = stripos($content, '/AcroForm') !== false;
+    $hasFields = stripos($content, '/Fields') !== false;
+    $hasWidget = stripos($content, '/Widget') !== false;
+    $hasFieldType = preg_match('/\/FT\s*\/(Tx|Btn|Ch|Sig)/i', $content) === 1;
+
+    return $hasAcroForm && ($hasFields || $hasWidget || $hasFieldType);
+}
+
 $currentTemplateMeta = pds_template_load_json_array($templateMetaPath);
 $currentTemplateOriginalName = 'PH GSIS CS 212 2017-2026.pdf';
 if (!empty($currentTemplateMeta['original_name']) && is_string($currentTemplateMeta['original_name'])) {
@@ -146,6 +166,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['pds_template_file'])
                     if (!move_uploaded_file($tmpPath, $stagedPath)) {
                         $error = 'Failed to move uploaded file to server storage.';
                     } else {
+                        if (!pds_template_is_fillable_pdf($stagedPath)) {
+                            @unlink($stagedPath);
+                            $error = 'Only fillable PDF templates are allowed. Upload a PDF with editable form fields (AcroForm).';
+                        }
+                    }
+
+                    if ($error === '' && is_file($stagedPath)) {
                         if (is_file($templateAbsolutePath)) {
                             if (!is_dir($archiveDir)) {
                                 @mkdir($archiveDir, 0777, true);
@@ -209,11 +236,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['pds_template_file'])
                             $metaPayload = [
                                 'original_name' => $safeOriginalName !== '' ? $safeOriginalName : 'PH GSIS CS 212 2017-2026.pdf',
                                 'updated_at' => date('c'),
+                                'is_fillable' => true,
                             ];
                             @file_put_contents($templateMetaPath, json_encode($metaPayload, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
                             clearstatcache(true, $templateAbsolutePath);
                             clearstatcache(true, $templateMetaPath);
-                            $success = 'PDS template updated successfully.';
+                            $success = 'Fillable PDS template updated successfully.';
                         } elseif (is_file($stagedPath)) {
                             @unlink($stagedPath);
                         }
@@ -358,7 +386,7 @@ require_once 'includes/header.php';
 
         <div class="pds-template-admin-card">
             <h4>Upload New Template</h4>
-            <p class="pds-template-help">This will replace the template used by employees in <code>pds.php</code>.</p>
+            <p class="pds-template-help">This will replace the template used by employees in <code>pds.php</code>. Only fillable PDF files (with form fields) are accepted.</p>
             <form method="post" enctype="multipart/form-data" class="pds-template-upload-form">
                 <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token()); ?>">
 
