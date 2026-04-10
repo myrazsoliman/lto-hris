@@ -7,12 +7,37 @@ require_once 'includes/header.php';
 require_once 'includes/template-helper.php';
 require_once 'includes/data.php';
 
+// Handle success/error messages
+$success = '';
+$error = '';
+
+if (isset($_GET['success']) && $_GET['success'] === 'submitted') {
+    $success = 'Your CSC form has been submitted successfully!';
+}
+
+if (isset($_SESSION['error'])) {
+    $error = $_SESSION['error'];
+    unset($_SESSION['error']);
+}
+
 // Get employee data for auto-fill
 $employee_data = [];
 if (isset($_SESSION['user']['id'])) {
-    $employee_data = getEmployeeData($_SESSION['user']['id']);
+    $employee_data = getEmployeePDSData($_SESSION['user']['id']);
 }
 ?>
+
+<?php if (!empty($success)): ?>
+    <div class="alert alert-success" style="background: #d4edda; color: #155724; padding: 12px; border-radius: 6px; margin-bottom: 20px; border: 1px solid #c3e6cb;">
+        <i class="fas fa-check-circle"></i> <?php echo htmlspecialchars($success); ?>
+    </div>
+<?php endif; ?>
+
+<?php if (!empty($error)): ?>
+    <div class="alert alert-danger" style="background: #f8d7da; color: #721c24; padding: 12px; border-radius: 6px; margin-bottom: 20px; border: 1px solid #f5c6cb;">
+        <i class="fas fa-exclamation-triangle"></i> <?php echo htmlspecialchars($error); ?>
+    </div>
+<?php endif; ?>
 
 <section class="card">
     <div class="section-head">

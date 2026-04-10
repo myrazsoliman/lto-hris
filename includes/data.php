@@ -269,6 +269,125 @@ function getEmployeeData($employee_id) {
     return $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
 }
 
+/**
+ * Get comprehensive PDS data for form autofill
+ */
+function getEmployeePDSData($employee_id) {
+    global $pdo;
+    
+    // Get the most recent PDS record
+    $pds_record = get_pds_record($employee_id);
+    if (!$pds_record) {
+        // Fallback to basic employee data if no PDS exists
+        return getEmployeeData($employee_id);
+    }
+    
+    $pds_id = $pds_record['id'];
+    
+    // Get personal information
+    $personal = get_pds_personal_info($pds_id) ?: [];
+    
+    // Get family background
+    $family = get_pds_family_background($pds_id) ?: [];
+    
+    // Get children
+    $children = get_pds_children($pds_id);
+    
+    // Get work experience (most recent)
+    $work_experience = get_pds_work_experience($pds_id);
+    $current_position = null;
+    if (!empty($work_experience)) {
+        // Sort by most recent and get the first one
+        usort($work_experience, function($a, $b) {
+            return strtotime($b['inclusive_dates_to'] ?: '9999-12-31') <=> strtotime($a['inclusive_dates_to'] ?: '9999-12-31');
+        });
+        $current_position = $work_experience[0];
+    }
+    
+    // Get civil service eligibility
+    $eligibility = get_pds_civil_service_eligibility($pds_id);
+    
+    // Get education (highest level)
+    $education = get_pds_education($pds_id);
+    $highest_education = null;
+    if (!empty($education)) {
+        $level_order = [
+            'Elementary' => 1,
+            'High School' => 2, 
+            'College' => 3,
+            'Vocational/Trade Course' => 4,
+            'Graduate Studies' => 5
+        ];
+        usort($education, function($a, $b) use ($level_order) {
+            $a_level = $level_order[$a['level']] ?? 0;
+            $b_level = $level_order[$b['level']] ?? 0;
+            return $b_level <=> $a_level;
+        });
+        $highest_education = $education[0];
+    }
+    
+    // Build comprehensive data array
+    $data = [
+        // Basic employee info
+        'employee_number' => $personal['agency_employee_no'] ?? '',
+        'full_name' => trim(($personal['first_name'] ?? '') . ' ' . ($personal['middle_name'] ?? '') . ' ' . ($personal['last_name'] ?? '') . ' ' . ($personal['name_extension'] ?? '')),
+        'first_name' => $personal['first_name'] ?? '',
+        'middle_name' => $personal['middle_name'] ?? '',
+        'last_name' => $personal['last_name'] ?? '',
+        'name_extension' => $personal['name_extension'] ?? '',
+        
+        // Personal details
+        'birthdate' => $personal['date_of_birth'] ?? '',
+        'place_of_birth' => $personal['place_of_birth'] ?? '',
+        'gender' => $personal['sex'] ?? '',
+        'civil_status' => $personal['civil_status'] ?? '',
+        'citizenship' => $personal['citizenship'] ?? '',
+        'height' => $personal['height_m'] ?? '',
+        'weight' => $personal['weight_kg'] ?? '',
+        'blood_type' => $personal['blood_type'] ?? '',
+        
+        // Contact information
+        'residential_address' => $personal['residential_address'] ?? '',
+        'residential_zip' => $personal['residential_zip_code'] ?? '',
+        'residential_telephone' => $personal['residential_telephone'] ?? '',
+        'permanent_address' => $personal['permanent_address'] ?? '',
+        'permanent_zip' => $personal['permanent_zip_code'] ?? '',
+        'permanent_telephone' => $personal['permanent_telephone'] ?? '',
+        'email' => $personal['email_address'] ?? '',
+        'mobile' => $personal['mobile_number'] ?? '',
+        
+        // Government IDs
+        'gsis_id' => $personal['gsis_id'] ?? '',
+        'pagibig_id' => $personal['pagibig_id'] ?? '',
+        'philhealth_id' => $personal['philhealth_id'] ?? '',
+        'sss_id' => $personal['sss_id'] ?? '',
+        'tin_id' => $personal['tin_id'] ?? '',
+        
+        // Family background
+        'spouse_name' => trim(($family['spouse_first_name'] ?? '') . ' ' . ($family['spouse_middle_name'] ?? '') . ' ' . ($family['spouse_last_name'] ?? '') . ' ' . ($family['spouse_name_extension'] ?? '')),
+        'spouse_occupation' => $family['spouse_occupation'] ?? '',
+        'father_name' => trim(($family['father_first_name'] ?? '') . ' ' . ($family['father_middle_name'] ?? '') . ' ' . ($family['father_last_name'] ?? '') . ' ' . ($family['father_name_extension'] ?? '')),
+        'mother_name' => trim(($family['mother_maiden_surname'] ?? '') . ' ' . ($family['mother_first_name'] ?? '') . ' ' . ($family['mother_middle_name'] ?? '')),
+        
+        // Position and department (from work experience or fallback to employees table)
+        'position' => $current_position['position_title'] ?? '',
+        'department' => $current_position['department_agency_office'] ?? '',
+        'monthly_salary' => $current_position['monthly_salary'] ?? '',
+        'salary_grade' => $current_position['salary_grade'] ?? '',
+        
+        // Education
+        'highest_education' => $highest_education ? $highest_education['level'] . ' - ' . $highest_education['school_name'] : '',
+        
+        // Civil service eligibility
+        'civil_service_eligibility' => !empty($eligibility) ? implode(', ', array_column($eligibility, 'career_service')) : '',
+        
+        // Children
+        'children' => $children
+    ];
+    
+    return $data;
+}
+
 function resolve_employee_id_for_user($userId) {
     global $pdo;
 

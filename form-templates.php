@@ -77,6 +77,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['template_file'])) {
     }
 }
 
+// Handle AJAX template activation
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'activate_template') {
+    header('Content-Type: application/json');
+    
+    $template_id = $_POST['template_id'] ?? null;
+    $form_type = $_POST['form_type'] ?? null;
+    
+    if (!$template_id || !$form_type) {
+        echo json_encode(['success' => false, 'message' => 'Invalid parameters']);
+        exit;
+    }
+    
+    try {
+        // Start transaction
+        $pdo->beginTransaction();
+        
+        // Deactivate all templates of this type
+        $deactivate_sql = "UPDATE form_templates SET is_active = FALSE WHERE form_type = ?";
+        $deactivate_stmt = $pdo->prepare($deactivate_sql);
+        $deactivate_stmt->execute([$form_type]);
+        
+        // Activate the selected template
+        $activate_sql = "UPDATE form_templates SET is_active = TRUE WHERE id = ? AND form_type = ?";
+        $activate_stmt = $pdo->prepare($activate_sql);
+        $activate_stmt->execute([$template_id, $form_type]);
+        
+        $pdo->commit();
+        
+        echo json_encode(['success' => true, 'message' => 'Template activated successfully']);
+    } catch (PDOException $e) {
+        $pdo->rollBack();
+        echo json_encode(['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);
+    }
+    exit;
+}
+
 // Get current templates
 $saln_templates = $pdo->prepare("SELECT * FROM form_templates WHERE form_type = 'saln' ORDER BY uploaded_at DESC");
 $saln_templates->execute();
