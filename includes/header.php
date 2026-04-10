@@ -160,10 +160,19 @@ $navIconMap = [
                 <div class="confirm-modal confirm-modal--menu" id="logoutConfirmModal" aria-hidden="true">
                     <div class="confirm-modal-backdrop" data-logout-cancel></div>
                     <div class="confirm-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="logoutConfirmTitle">
-                        <h2 id="logoutConfirmTitle">Are you sure you want to logout?</h2>
+                        <div class="confirm-modal-head">
+                            <span class="confirm-modal-icon" aria-hidden="true">
+                                <i class="fa-solid fa-right-from-bracket"></i>
+                            </span>
+                            <div class="confirm-modal-copy">
+                                <h2 id="logoutConfirmTitle">Are you sure you want to logout?</h2>
+                                <p class="confirm-modal-text">You will need to sign in again to access your account.</p>
+                            </div>
+                        </div>
+                        <div class="confirm-modal-divider" aria-hidden="true"></div>
                         <div class="confirm-modal-actions">
-                            <button type="button" class="btn btn-outline" id="logoutConfirmNo" data-logout-cancel>No</button>
-                            <a href="logout.php" class="btn btn-danger" id="logoutConfirmYes">Yes</a>
+                            <button type="button" class="btn btn-outline confirm-btn-cancel" id="logoutConfirmNo" data-logout-cancel>Stay Signed In</button>
+                            <a href="logout.php" class="btn btn-danger confirm-btn-logout" id="logoutConfirmYes">Logout</a>
                         </div>
                     </div>
                 </div>
