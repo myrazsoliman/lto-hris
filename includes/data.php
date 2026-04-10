@@ -22,13 +22,13 @@ function get_nav_items($userRoles = []) {
             'account.php' => 'My Account',
             'admin-accounts.php' => 'Admin Accounts',
             'employees.php' => 'User Management',
-            'pds.php' => 'System PDS',
+            'pds.php' => 'PDS',
             'csc-forms.php' => 'CSC Forms',
             'saln.php' => 'SALN Monitoring',
             'form-templates.php' => 'Form Templates',
-            'reports.php' => 'System Reports',
+            'reports.php' => 'Reports',
             'activity-logs.php' => 'Activity Logs',
-            'system-settings.php' => 'System Settings',
+            'system-settings.php' => 'Settings',
         ];
     }
 
@@ -38,11 +38,12 @@ function get_nav_items($userRoles = []) {
             'account.php' => 'My Account',
             'employees.php' => 'Employees',
             'leave-request.php' => 'Leave Requests',
-            'pds.php' => 'PDS',
+            'pds-template-admin.php' => 'PDS Template',
             'csc-forms.php' => 'CSC Forms',
-            'saln.php' => 'SALN',
+            'saln.php' => 'SALN Monitoring',
             'reports.php' => 'Reports',
             'documents.php' => 'Employee Files',
+            'activity-logs.php' => 'Activity Logs',
         ];
     }
 

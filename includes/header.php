@@ -30,6 +30,7 @@ $navIconMap = [
     'User Management' => 'fa-solid fa-user-shield',
     'PDS' => 'fa-solid fa-id-card',
     'My PDS' => 'fa-solid fa-id-card',
+    'PDS Template' => 'fa-solid fa-file-arrow-up',
     'System PDS' => 'fa-solid fa-address-card',
     'CSC Forms' => 'fa-solid fa-file-lines',
     'Forms' => 'fa-solid fa-file-lines',

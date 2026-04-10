@@ -5,7 +5,6 @@ require_once 'includes/auth.php';
 require_once 'includes/data.php';
 require_once 'includes/pds-document-render.php';
 require_roles(['employee', 'hr_officer', 'admin', 'superadmin']);
-require_once 'includes/header.php';
 
 // Resolve employee ID from current user by default.
 $currentUser = current_user();
@@ -28,8 +27,147 @@ $generatedPdfPath = $pdsExists ? ($pdsRecord['generated_pdf_path'] ?? '') : '';
 $pdsStatus = $pdsExists ? ($pdsRecord['status'] ?? 'draft') : 'draft';
 $submittedNow = isset($_GET['submitted']) && (int) $_GET['submitted'] === 1;
 $hasViewableDocument = ($pdsExists && in_array($pdsStatus, ['submitted', 'for_review', 'approved'], true)) || $submittedNow || !empty($generatedPdfPath);
-$officialTemplateHref = 'uploads/form_templates/PH GSIS CS 212 2017-2026.pdf';
+$templateRootDir = __DIR__ . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . 'form_templates';
+$templateMetaPath = $templateRootDir . DIRECTORY_SEPARATOR . 'pds_template_meta.json';
+$defaultTemplatePath = 'uploads/form_templates/PH GSIS CS 212 2017-2026.pdf';
+$officialTemplatePath = $defaultTemplatePath;
+$officialTemplateFile = __DIR__ . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $officialTemplatePath);
+$officialTemplateDisplayName = 'PH GSIS CS 212 2017-2026.pdf';
+
+if (!is_file($officialTemplateFile) && is_dir($templateRootDir)) {
+    $candidates = glob($templateRootDir . DIRECTORY_SEPARATOR . '*.pdf') ?: [];
+    $bestPath = '';
+    $bestTime = 0;
+    foreach ($candidates as $candidatePath) {
+        $base = strtolower((string) basename($candidatePath));
+        if (strpos($base, 'saln') !== false) {
+            continue;
+        }
+        if (!preg_match('/(212|pds|cs form|gsis)/i', $base)) {
+            continue;
+        }
+        $mtime = (int) @filemtime($candidatePath);
+        if ($mtime > $bestTime) {
+            $bestTime = $mtime;
+            $bestPath = $candidatePath;
+        }
+    }
+
+    if ($bestPath !== '' && is_file($bestPath)) {
+        $relative = str_replace('\\', '/', str_replace(__DIR__ . DIRECTORY_SEPARATOR, '', $bestPath));
+        $officialTemplatePath = $relative;
+        $officialTemplateFile = $bestPath;
+        $officialTemplateDisplayName = basename($bestPath);
+    }
+}
+
+if (is_file($templateMetaPath)) {
+    $metaRaw = (string) @file_get_contents($templateMetaPath);
+    $metaData = json_decode($metaRaw, true);
+    if (is_array($metaData) && !empty($metaData['original_name']) && is_string($metaData['original_name'])) {
+        $officialTemplateDisplayName = basename($metaData['original_name']);
+    }
+}
+
+$templateAvailable = is_file($officialTemplateFile);
+$officialTemplateVersion = $templateAvailable ? (string) filemtime($officialTemplateFile) : (string) time();
+$officialTemplateHref = $templateAvailable
+    ? ($officialTemplatePath . '?v=' . rawurlencode($officialTemplateVersion))
+    : '#';
 $documentPreviewHref = $officialTemplateHref;
+$documentPreviewLabel = 'Open Official PDF';
+$uploadError = '';
+$uploadSuccess = '';
+
+if (isset($_GET['uploaded']) && (int) $_GET['uploaded'] === 1) {
+    $uploadSuccess = 'Filled PDS PDF uploaded successfully.';
+}
+
+$generatedPdfFile = '';
+if (!empty($generatedPdfPath)) {
+    $generatedPdfRelative = ltrim(str_replace('\\', '/', (string) $generatedPdfPath), '/');
+    $generatedPdfCandidate = __DIR__ . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $generatedPdfRelative);
+    if (is_file($generatedPdfCandidate)) {
+        $generatedPdfFile = $generatedPdfCandidate;
+    }
+}
+
+if ($generatedPdfFile !== '') {
+    $generatedPdfVersion = (string) filemtime($generatedPdfFile);
+    $documentPreviewHref = ltrim(str_replace('\\', '/', (string) $generatedPdfPath), '/') . '?v=' . rawurlencode($generatedPdfVersion);
+    $documentPreviewLabel = 'Open Filled PDF';
+} else {
+    $renderedDocVersion = $pdsExists ? (string) strtotime((string) ($pdsRecord['updated_at'] ?? 'now')) : (string) time();
+    $documentPreviewHref = 'pds-document.php?employee_id=' . (int) $employeeId . '&year=' . (int) $currentYear . '&v=' . rawurlencode($renderedDocVersion);
+    $documentPreviewLabel = 'Open Filled Document';
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['upload_filled_template'])) {
+    if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
+        $uploadError = 'Security token expired. Please refresh and try again.';
+    } else {
+        $upload = $_FILES['filled_pds_pdf'] ?? null;
+        $uploadErrorCode = (int) ($upload['error'] ?? UPLOAD_ERR_NO_FILE);
+
+        if ($uploadErrorCode !== UPLOAD_ERR_OK) {
+            $uploadError = 'Please select a valid filled PDF to upload.';
+        } else {
+            $originalName = (string) ($upload['name'] ?? '');
+            $tmpPath = (string) ($upload['tmp_name'] ?? '');
+            $extension = strtolower((string) pathinfo($originalName, PATHINFO_EXTENSION));
+            $mime = '';
+
+            if (is_uploaded_file($tmpPath) && function_exists('finfo_open')) {
+                $finfo = finfo_open(FILEINFO_MIME_TYPE);
+                if ($finfo) {
+                    $mime = (string) finfo_file($finfo, $tmpPath);
+                    finfo_close($finfo);
+                }
+            }
+
+            $isPdfByExtension = ($extension === 'pdf');
+            $isPdfByMime = in_array($mime, ['application/pdf', 'application/x-pdf', 'application/octet-stream', ''], true);
+
+            if (!is_uploaded_file($tmpPath) || (!$isPdfByExtension && !$isPdfByMime)) {
+                $uploadError = 'Only PDF files are allowed.';
+            } else {
+                $pdsRecordForUpload = get_pds_record($employeeId, $currentYear);
+                if (!$pdsRecordForUpload) {
+                    $createdId = create_pds_record($employeeId, $currentYear);
+                    if ($createdId) {
+                        $pdsRecordForUpload = get_pds_record($employeeId, $currentYear);
+                    }
+                }
+
+                if (!$pdsRecordForUpload) {
+                    $uploadError = 'Unable to prepare PDS record for upload.';
+                } else {
+                    $filledDir = __DIR__ . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . 'pds' . DIRECTORY_SEPARATOR . 'filled';
+                    if (!is_dir($filledDir)) {
+                        @mkdir($filledDir, 0777, true);
+                    }
+
+                    if (!is_dir($filledDir) || !is_writable($filledDir)) {
+                        $uploadError = 'Upload directory is not writable.';
+                    } else {
+                        $fileName = 'pds_filled_emp' . (int) $employeeId . '_' . (int) $currentYear . '_' . date('Ymd_His') . '.pdf';
+                        $targetAbsolute = $filledDir . DIRECTORY_SEPARATOR . $fileName;
+                        $targetRelative = 'uploads/pds/filled/' . $fileName;
+
+                        if (!move_uploaded_file($tmpPath, $targetAbsolute)) {
+                            $uploadError = 'Failed to save uploaded filled PDF.';
+                        } else {
+                            $stmt = db()->prepare("UPDATE pds_records SET generated_pdf_path = ?, status = 'submitted', updated_at = NOW() WHERE id = ?");
+                            $stmt->execute([$targetRelative, (int) $pdsRecordForUpload['id']]);
+                            header('Location: pds.php?uploaded=1');
+                            exit;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
 $initialPdsFormState = [
     'fields' => [
         'surname' => $pdsContext['personal']['surname'] ?? '',
@@ -171,6 +309,7 @@ $initialPdsFormState = [
         'thumbmark_preview' => $pdsContext['signature']['thumbmark'] ?? '',
     ],
 ];
+require_once 'includes/header.php';
 ?>
 <section class="card pds-container">
     <div class="pds-header">
@@ -212,7 +351,11 @@ $initialPdsFormState = [
             <div class="pds-info-icon"><i class="fa-solid fa-book-open-reader" aria-hidden="true"></i></div>
             <div class="pds-info-copy">
                 <div class="pds-document-note-title">Official form guide</div>
-                <p>Review the CSC Form 212 guide before completing this form. <a href="<?php echo htmlspecialchars($officialTemplateHref); ?>" target="_blank" rel="noopener">Open blank CSC PDF</a></p>
+                <?php if ($templateAvailable): ?>
+                    <p>Review the CSC Form 212 guide before completing this form. <a href="<?php echo htmlspecialchars($officialTemplateHref); ?>" target="_blank" rel="noopener">Open blank CSC PDF</a></p>
+                <?php else: ?>
+                    <p>The admin-uploaded PDS template is not available yet. Please contact HR/Admin to upload one.</p>
+                <?php endif; ?>
             </div>
         </div>
     </div>
@@ -232,94 +375,68 @@ $initialPdsFormState = [
         </div>
     <?php endif; ?>
 
+    <section class="card" style="margin-top: 14px; border: 1px solid #d7e0ea; background: linear-gradient(180deg, #ffffff, #f8fbff);">
+        <div style="padding: 16px 18px; border-bottom: 1px solid #dbe5ef;">
+            <h3 style="margin: 0; font-size: 18px; color: #183247;">Fill and Submit Using the Template</h3>
+            <p style="margin: 8px 0 0; color: #5f7286;">Open the admin template, fill it out, then upload your completed PDF here.</p>
+        </div>
+        <div style="padding: 16px 18px;">
+            <?php if ($uploadError !== ''): ?>
+                <div class="alert alert-danger" style="margin-bottom: 12px;"><?php echo htmlspecialchars($uploadError); ?></div>
+            <?php endif; ?>
+            <?php if ($uploadSuccess !== ''): ?>
+                <div class="alert alert-success" style="margin-bottom: 12px;"><?php echo htmlspecialchars($uploadSuccess); ?></div>
+            <?php endif; ?>
+            <form method="post" enctype="multipart/form-data" style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token()); ?>">
+                <input type="hidden" name="upload_filled_template" value="1">
+                <input type="file" name="filled_pds_pdf" accept=".pdf,application/pdf" required>
+                <button type="submit" class="btn btn-primary">Submit Filled PDF</button>
+                <?php if (!empty($generatedPdfPath)): ?>
+                    <a href="<?php echo htmlspecialchars($generatedPdfPath); ?>" class="btn btn-outline" target="_blank" rel="noopener">Preview / Print Filled PDF</a>
+                <?php endif; ?>
+            </form>
+        </div>
+    </section>
+
     <section class="card" style="margin-top: 18px; border: 1px solid #d7e0ea; overflow: hidden;">
         <div style="padding: 18px 20px; border-bottom: 1px solid #d7e0ea; background: linear-gradient(135deg, #f7fafc, #eef4f8); display: flex; justify-content: space-between; gap: 12px; align-items: center; flex-wrap: wrap;">
             <div>
                 <div style="font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: #0f4c81;">Template Preview</div>
-                <h3 style="margin: 6px 0 0; font-size: 20px; color: #183247;">CSC Form 212 Template With Live Review</h3>
-                <p style="margin: 6px 0 0; color: #5f7286;">The official PDF template is displayed on the left side of this page. The right side shows the current values entered by the user.</p>
+                <h3 style="margin: 6px 0 0; font-size: 20px; color: #183247;">Admin Uploaded PDS Template Preview</h3>
+                <p style="margin: 6px 0 0; color: #5f7286;">The admin-uploaded PDF template is displayed below. Current template: <strong><?php echo htmlspecialchars($officialTemplateDisplayName); ?></strong>.</p>
             </div>
             <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                <a href="<?php echo htmlspecialchars($officialTemplateHref); ?>" class="btn btn-outline" target="_blank" rel="noopener">Open Official PDF</a>
-                <a href="<?php echo htmlspecialchars($documentPreviewHref); ?>" class="btn btn-primary" target="_blank" rel="noopener">Open Printable Preview</a>
+                <?php if ($templateAvailable): ?>
+                    <a href="<?php echo htmlspecialchars($officialTemplateHref); ?>" class="btn btn-outline" target="_blank" rel="noopener">Open Admin Template</a>
+                    <a href="<?php echo htmlspecialchars($documentPreviewHref); ?>" class="btn btn-primary" target="_blank" rel="noopener"><?php echo htmlspecialchars($documentPreviewLabel); ?></a>
+                <?php endif; ?>
             </div>
         </div>
-        <div style="display: grid; grid-template-columns: minmax(320px, 1fr) minmax(340px, 1.1fr); gap: 0; align-items: stretch;">
-            <div style="min-height: 840px; border-right: 1px solid #d7e0ea; background: #eef3f8;">
-                <iframe
-                    src="<?php echo htmlspecialchars($officialTemplateHref); ?>#toolbar=0&navpanes=0&scrollbar=1"
-                    title="PH GSIS CS 212 2017-2026 PDF"
-                    style="width: 100%; height: 100%; min-height: 840px; border: 0; background: #eef3f8;"
-                ></iframe>
-            </div>
-            <div style="min-height: 840px; background: #fff;">
-                <div style="padding: 16px 18px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; gap: 10px; align-items: center; flex-wrap: wrap;">
-                    <div>
-                        <div style="font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: #0f4c81;">Live Data Review</div>
-                        <div style="margin-top: 4px; color: #5f7286;">This preview follows the values currently entered in `pds.php`.</div>
+        <div style="background: #eef3f8;">
+            <div style="background: #eef3f8;">
+                <?php if ($templateAvailable): ?>
+                    <iframe
+                        id="pdsTemplateIframe"
+                        src="<?php echo htmlspecialchars($officialTemplateHref); ?>#page=1&toolbar=0&navpanes=0&scrollbar=1"
+                        title="<?php echo htmlspecialchars($officialTemplateDisplayName); ?>"
+                        style="width: 100%; height: min(1700px, calc(100vh - 90px)); min-height: 1200px; border: 0; background: #eef3f8;"
+                    ></iframe>
+                <?php else: ?>
+                    <div style="padding: 20px; color: #4f6782; font-weight: 600;">
+                        No active PDS template available. Ask admin to upload a template in <code>PDS Template</code>.
                     </div>
-                    <button type="button" class="btn btn-outline" onclick="renderLivePdsPreview()">Refresh Preview</button>
-                </div>
-                <div id="pdsLivePreviewContent" style="padding: 18px; max-height: 840px; overflow: auto; background: linear-gradient(180deg, #ffffff, #f9fbfd);"></div>
+                <?php endif; ?>
             </div>
         </div>
     </section>
 
-    <div class="pds-form-intro">
-        <div class="pds-form-intro-main">
-            <div class="pds-intro-header">
-                <div>
-                    <div class="pds-intro-title">Record Preparation</div>
-                    <div class="pds-intro-caption">Complete entries exactly as they appear on official documents.</div>
-                </div>
-            </div>
-            <div class="form-group">
-                <label>1. CS ID NO. <span class="pds-csc-note">(Do not fill up. For CSC use only)</span></label>
-                <input type="text" name="cs_id_no_display" form="pdsForm" readonly placeholder="Reserved for CSC use only">
-            </div>
-            <div class="pds-intro-note">
-                <i class="fa-solid fa-folder-open" aria-hidden="true"></i>
-                <span>Prepare IDs, employment history, eligibility, and training records.</span>
-            </div>
-        </div>
-        <div class="pds-photo-box" aria-label="Passport photo placeholder">
-            <div class="pds-photo-box-icon"><i class="fa-solid fa-camera" aria-hidden="true"></i></div>
-            <div class="pds-photo-box-title">Photo Requirement</div>
-            <p>Insert 4.5 cm x 3.5 cm passport-size photograph if required.</p>
-            <label class="pds-upload-button" for="applicant_photo">Upload Photo</label>
-            <input type="file" name="applicant_photo" id="applicant_photo" class="pds-file-input" accept="image/png,image/jpeg">
-            <div class="pds-upload-preview pds-photo-preview" id="applicant_photo_preview" hidden></div>
-        </div>
-    </div>
-
-    <div class="pds-nav" role="tablist" aria-label="PDS pages">
-        <button type="button" class="pds-nav-item active" data-page="1" id="pdsTab1" aria-controls="page1" aria-selected="true">
-            <span class="pds-step-num" aria-hidden="true">1</span>
-            <span class="pds-step-text"><strong>Page 1</strong><span>Personal &amp; Family</span></span>
-        </button>
-        <button type="button" class="pds-nav-item" data-page="2" id="pdsTab2" aria-controls="page2" aria-selected="false">
-            <span class="pds-step-num" aria-hidden="true">2</span>
-            <span class="pds-step-text"><strong>Page 2</strong><span>Education &amp; Eligibility</span></span>
-        </button>
-        <button type="button" class="pds-nav-item" data-page="3" id="pdsTab3" aria-controls="page3" aria-selected="false">
-            <span class="pds-step-num" aria-hidden="true">3</span>
-            <span class="pds-step-text"><strong>Page 3</strong><span>Work &amp; Training</span></span>
-        </button>
-        <button type="button" class="pds-nav-item" data-page="4" id="pdsTab4" aria-controls="page4" aria-selected="false">
-            <span class="pds-step-num" aria-hidden="true">4</span>
-            <span class="pds-step-text"><strong>Page 4</strong><span>Legal &amp; References</span></span>
-        </button>
-        <div class="pds-progress" aria-hidden="true"><div id="pdsProgressBar"></div></div>
-    </div>
-
+    <?php $showInlinePdsForm = false; ?>
+    <?php if ($showInlinePdsForm): ?>
     <form id="pdsForm" method="POST" action="pds_process.php" enctype="multipart/form-data">
         <input type="hidden" name="employee_id" value="<?php echo $employeeId; ?>">
         <input type="hidden" name="year" value="<?php echo $currentYear; ?>">
         <input type="hidden" name="action" id="pdsAction" value="submit">
-        <div id="pdsAlert" class="pds-alert" role="alert" hidden>
-            <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
-            <div>Please complete the required fields on this page before continuing.</div>
-        </div>
         
         <!-- PAGE 1: Personal & Family Background -->
         <div id="page1" class="pds-page active">
@@ -923,7 +1040,6 @@ $initialPdsFormState = [
 
         <div class="pds-actions">
             <div class="pds-actions-left">
-                <div class="pds-step-indicator" id="pdsStepIndicator" aria-live="polite">Step 1 of 4</div>
                 <a href="<?php echo htmlspecialchars($documentPreviewHref); ?>" class="btn btn-outline" target="_blank" rel="noopener">Preview Document</a>
                 <?php if (!empty($generatedPdfPath)): ?>
                     <a href="<?php echo htmlspecialchars($generatedPdfPath); ?>" class="btn btn-outline" target="_blank" rel="noopener">Open Saved PDF</a>
@@ -943,6 +1059,7 @@ $initialPdsFormState = [
 let currentPage = 1;
 const totalPages = 4;
 const existingPdsData = <?php echo json_encode($initialPdsFormState, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>;
+const templatePdfBaseHref = <?php echo json_encode($templateAvailable ? $officialTemplateHref : '', JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>;
 
 function setAlertVisible(isVisible) {
     const alertEl = document.getElementById('pdsAlert');
@@ -961,6 +1078,14 @@ function updateProgress() {
     if (indicator) {
         indicator.textContent = `Step ${currentPage} of ${totalPages}`;
     }
+}
+
+function syncTemplatePreviewPage(pageNum) {
+    const iframe = document.getElementById('pdsTemplateIframe');
+    if (!iframe || !templatePdfBaseHref) return;
+
+    const safePage = Math.max(1, Math.min(totalPages, Number(pageNum) || 1));
+    iframe.src = `${templatePdfBaseHref}#page=${safePage}&toolbar=0&navpanes=0&scrollbar=1`;
 }
 
 function showPage(pageNum) {
@@ -987,6 +1112,7 @@ function showPage(pageNum) {
     });
     
     currentPage = pageNum;
+    syncTemplatePreviewPage(pageNum);
     updateButtons();
     updateProgress();
 }
@@ -1696,18 +1822,15 @@ function addTraining() {
 
 // Initialize
 hydratePdsForm();
-bindImagePreview('applicant_photo', 'applicant_photo_preview');
 bindImagePreview('applicant_signature', 'applicant_signature_preview');
 bindImagePreview('thumbmark', 'thumbmark_preview');
 renderLiveTemplatePreview();
-renderLivePdsPreview();
+syncTemplatePreviewPage(currentPage);
 document.getElementById('pdsForm')?.addEventListener('input', () => {
     renderLiveTemplatePreview();
-    renderLivePdsPreview();
 });
 document.getElementById('pdsForm')?.addEventListener('change', () => {
     renderLiveTemplatePreview();
-    renderLivePdsPreview();
 });
 document.getElementById('pdsForm')?.addEventListener('submit', () => {
     const actionInput = document.getElementById('pdsAction');
@@ -1735,6 +1858,7 @@ if (shouldFocusDocumentPanel) {
     });
 }
 </script>
+<?php endif; ?>
 
 <?php require_once 'includes/footer.php'; ?>
 
