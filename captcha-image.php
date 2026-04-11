@@ -11,21 +11,30 @@ if ($context !== 'login_modal') {
 
 function generate_login_captcha_code()
 {
-    // Mixed-case CAPTCHA (avoid ambiguous chars like I, l, O, o).
-    $upper = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
-    $lower = 'abcdefghjkmnpqrstuvwxyz';
-    $captchaCode = '';
+    // 5-char CAPTCHA with exactly 2 digits (avoid ambiguous chars like I, l, O, o, 0, 1),
+    // and no repeated letters/digits (case-insensitive for letters).
+    $letterBases = str_split('ABCDEFGHJKLMNPQRSTUVWXYZ'); // base letters (no I/O)
+    $digits = str_split('23456789'); // no 0/1
 
-    // Ensure at least 1 uppercase + 1 lowercase in a 5-char code.
-    $captchaCode .= $upper[random_int(0, strlen($upper) - 1)];
-    $captchaCode .= $lower[random_int(0, strlen($lower) - 1)];
+    // Pick 3 unique base letters.
+    shuffle($letterBases);
+    $pickedLetters = array_slice($letterBases, 0, 3);
 
-    $all = $upper . $lower;
-    for ($i = 0; $i < 3; $i++) {
-        $captchaCode .= $all[random_int(0, strlen($all) - 1)];
-    }
+    // Force at least 1 upper + 1 lower in the letters.
+    $letters = [
+        strtoupper($pickedLetters[0]),
+        strtolower($pickedLetters[1]),
+        (random_int(0, 1) === 1) ? strtoupper($pickedLetters[2]) : strtolower($pickedLetters[2]),
+    ];
 
-    $captchaCode = str_shuffle($captchaCode);
+    // Pick 2 unique digits.
+    shuffle($digits);
+    $pickedDigits = array_slice($digits, 0, 2);
+
+    // Combine and shuffle (still unique by construction).
+    $captchaChars = array_merge($letters, $pickedDigits);
+    shuffle($captchaChars);
+    $captchaCode = implode('', $captchaChars);
 
     $_SESSION['login_modal_captcha_expected'] = $captchaCode;
     $_SESSION['login_modal_captcha_nonce'] = bin2hex(random_bytes(8));
@@ -47,12 +56,22 @@ $safeCaptchaCode = htmlspecialchars($captchaCode, ENT_QUOTES, 'UTF-8');
 $captchaChars = str_split($captchaCode);
 $captchaLen = max(1, count($captchaChars));
 
+$logoDataUri = '';
+$logoPath = __DIR__ . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'img' . DIRECTORY_SEPARATOR . 'captcha-logo.png';
+if (is_file($logoPath)) {
+    $logoBytes = @file_get_contents($logoPath);
+    if ($logoBytes !== false && $logoBytes !== '') {
+        $logoDataUri = 'data:image/png;base64,' . base64_encode($logoBytes);
+    }
+}
+
 // Center the characters horizontally in the 190px wide canvas.
 $canvasW = 190;
+$canvasH = 62;
 $centerX = (int) round($canvasW / 2);
 $charSpacing = 32; // close to the old spacing, but centered
 $firstX = (int) round($centerX - (($captchaLen - 1) / 2) * $charSpacing);
-$baseY = 46;
+$baseY = 44; // slightly higher baseline to avoid descenders being cropped
 
 $textRotate = [-10, 8, -6, 9, -8];
 $textColor = ['#13273a', '#1d364b', '#2f2b1f', '#152a3d', '#2c2c2c'];
@@ -61,8 +80,11 @@ $textColor = ['#13273a', '#1d364b', '#2f2b1f', '#152a3d', '#2c2c2c'];
 $noiseSeed = random_int(1, 9999);
 $bfX = random_int(10, 20) / 1000; // 0.010 - 0.020 (less distortion, clearer)
 $bfY = random_int(14, 28) / 1000; // 0.014 - 0.028
-$warpScale = random_int(5, 8);
-$blurStd = random_int(48, 74) / 100; // 0.48 - 0.74 (blurrier + still readable)
+$warpScale = random_int(8, 11); // wavy but less likely to clip
+$blurStd = random_int(32, 58) / 100; // 0.32 - 0.58 (keep readable even with stronger warp)
+$waveAmp = random_int(4, 7); // px (kept readable; avoids vertical cropping)
+$waveCycles = random_int(1, 2);
+$wavePhase = random_int(0, 628) / 100; // 0..6.28
 $fontFamilies = [
     "Georgia, 'Times New Roman', serif",
     "Cambria, 'Times New Roman', serif",
@@ -77,9 +99,12 @@ $glyphs = [];
 foreach ($captchaChars as $idx => $rawChar) {
     $baseX = $firstX + ($idx * $charSpacing);
     $x = $baseX + random_int(-3, 3);
-    $y = $baseY + random_int(-2, 2);
+    $pos = ($captchaLen <= 1) ? 0.0 : ($idx / ($captchaLen - 1));
+    $angle = ($pos * (2 * pi()) * $waveCycles) + $wavePhase;
+    $waveOffset = (int) round(sin($angle) * $waveAmp);
+    $y = $baseY + random_int(-1, 1) + $waveOffset;
     $rot = (int) (($textRotate[$idx] ?? 0) + random_int(-4, 4));
-    $fontSize = random_int(42, 50);
+    $fontSize = random_int(40, 46);
     $family = $fontFamilies[random_int(0, count($fontFamilies) - 1)];
     $skx = random_int(-4, 4);
     $sky = random_int(-2, 2);
@@ -98,6 +123,51 @@ foreach ($captchaChars as $idx => $rawChar) {
         'weight' => (int) $weight,
         'color' => $color,
     ];
+}
+
+// Keep the whole CAPTCHA text visually centered even with per-character jitter/waves.
+// (Recenter by average glyph position; avoids "drifting" left/right/up/down between regenerations.)
+if (count($glyphs) > 0) {
+    $sumX = 0;
+    $sumY = 0;
+    foreach ($glyphs as $g) {
+        $sumX += (int) $g['x'];
+        $sumY += (int) $g['y'];
+    }
+
+    $meanX = $sumX / count($glyphs);
+    $meanY = $sumY / count($glyphs);
+    $shiftX = $centerX - $meanX;
+    $shiftY = $baseY - $meanY;
+
+    foreach ($glyphs as &$g) {
+        $g['x'] = (int) round($g['x'] + $shiftX);
+        $g['y'] = (int) round($g['y'] + $shiftY);
+    }
+    unset($g);
+}
+
+// Clamp glyphs inside the visible canvas so letters don't get cropped,
+// even with rotation/skew/wave baseline.
+if (count($glyphs) > 0) {
+    $pad = 8;
+    foreach ($glyphs as &$g) {
+        $size = (int) $g['size'];
+
+        // Rough text extents for typical fonts: ascent ~0.86em, descent ~0.18em.
+        // The SVG `y` is the baseline.
+        $minBaseline = $pad + (int) round($size * 0.86);
+        $maxBaseline = $canvasH - $pad - (int) round($size * 0.18);
+
+        // Extra horizontal padding (rotation can push edges).
+        $hPad = $pad + (int) round($size * 0.35);
+        $minX = $hPad;
+        $maxX = $canvasW - $hPad;
+
+        $g['x'] = (int) max($minX, min($maxX, (int) $g['x']));
+        $g['y'] = (int) max($minBaseline, min($maxBaseline, (int) $g['y']));
+    }
+    unset($g);
 }
 ?>
 <svg xmlns="http://www.w3.org/2000/svg" width="190" height="62" viewBox="0 0 190 62" role="img" aria-label="Security captcha">
@@ -179,6 +249,20 @@ foreach ($captchaChars as $idx => $rawChar) {
     </mask>
   </defs>
   <rect x="0" y="0" width="190" height="62" fill="url(#bg)" rx="6" />
+
+  <?php if ($logoDataUri !== ''): ?>
+    <!-- Logo watermark (embedded data URI so it loads inside <img>-rendered SVG). -->
+    <image
+      href="<?php echo htmlspecialchars($logoDataUri, ENT_QUOTES, 'UTF-8'); ?>"
+      x="10"
+      y="8"
+      width="22"
+      height="22"
+      opacity="0.16"
+      filter="url(#glass2)"
+      preserveAspectRatio="xMidYMid meet"
+    />
+  <?php endif; ?>
 
   <!-- Distortion overlay (subtle) -->
   <rect x="0" y="0" width="190" height="62" rx="6" fill="#ffffff" opacity="0.08" filter="url(#glass)"/>

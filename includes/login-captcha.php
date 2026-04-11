@@ -4,22 +4,30 @@
 
 function login_captcha_issue_challenge(): string
 {
-    // Mixed-case CAPTCHA (avoid ambiguous chars like I, l, O, o).
-    $upper = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
-    $lower = 'abcdefghjkmnpqrstuvwxyz';
-    $captchaCode = '';
+    // 5-char CAPTCHA with exactly 2 digits (avoid ambiguous chars like I, l, O, o, 0, 1),
+    // and no repeated letters/digits (case-insensitive for letters).
+    $letterBases = str_split('ABCDEFGHJKLMNPQRSTUVWXYZ'); // base letters (no I/O)
+    $digits = str_split('23456789'); // no 0/1
 
-    // Ensure at least 1 uppercase + 1 lowercase in a 5-char code.
-    $captchaCode .= $upper[random_int(0, strlen($upper) - 1)];
-    $captchaCode .= $lower[random_int(0, strlen($lower) - 1)];
+    // Pick 3 unique base letters.
+    shuffle($letterBases);
+    $pickedLetters = array_slice($letterBases, 0, 3);
 
-    $all = $upper . $lower;
-    for ($i = 0; $i < 3; $i++) {
-        $captchaCode .= $all[random_int(0, strlen($all) - 1)];
-    }
+    // Force at least 1 upper + 1 lower in the letters.
+    $letters = [
+        strtoupper($pickedLetters[0]),
+        strtolower($pickedLetters[1]),
+        (random_int(0, 1) === 1) ? strtoupper($pickedLetters[2]) : strtolower($pickedLetters[2]),
+    ];
 
-    // Shuffle.
-    $captchaCode = str_shuffle($captchaCode);
+    // Pick 2 unique digits.
+    shuffle($digits);
+    $pickedDigits = array_slice($digits, 0, 2);
+
+    // Combine and shuffle (still unique by construction).
+    $captchaChars = array_merge($letters, $pickedDigits);
+    shuffle($captchaChars);
+    $captchaCode = implode('', $captchaChars);
 
     $_SESSION['login_modal_captcha_expected'] = $captchaCode;
     $_SESSION['login_modal_captcha_nonce'] = bin2hex(random_bytes(8));

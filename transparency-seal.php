@@ -505,10 +505,7 @@ $sealSections = [
                             <div class="login-input-wrap login-input-wrap-modal">
                                 <div class="login-input-shell">
                                     <span class="login-input-icon" aria-hidden="true">
-                                        <svg viewBox="0 0 24 24" fill="none">
-                                            <path d="M12 3a9 9 0 1 0 9 9h-2a7 7 0 1 1-7-7V3Z" fill="currentColor" />
-                                            <path d="M12 8v5l3 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-                                        </svg>
+                                        <img src="assets/img/captcha-logo.png" alt="" width="26" height="26" loading="lazy" decoding="async">
                                     </span>
                                     <input type="text" id="loginModalCaptcha" name="captcha_answer" placeholder=" " value="<?php echo htmlspecialchars($loginCaptchaInput); ?>" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="5" required>
                                     <label class="login-floating-label" for="loginModalCaptcha">Enter CAPTCHA</label>
