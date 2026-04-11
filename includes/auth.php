@@ -86,7 +86,33 @@ function ensure_auth_schema()
 
 function client_ip()
 {
-    return $_SERVER['REMOTE_ADDR'] ?? '';
+    $remote = (string) ($_SERVER['REMOTE_ADDR'] ?? '');
+
+    $isTrustedProxy = TRUST_PROXY_HEADERS
+        && $remote !== ''
+        && is_array(TRUSTED_PROXY_IPS)
+        && in_array($remote, TRUSTED_PROXY_IPS, true);
+
+    if ($isTrustedProxy) {
+        $xff = (string) ($_SERVER['HTTP_X_FORWARDED_FOR'] ?? '');
+        if ($xff !== '') {
+            // XFF can be a comma-separated list. We want the left-most client IP.
+            $parts = array_values(array_filter(array_map('trim', explode(',', $xff)), 'strlen'));
+            if (!empty($parts)) {
+                $candidate = $parts[0];
+                if (filter_var($candidate, FILTER_VALIDATE_IP)) {
+                    return $candidate;
+                }
+            }
+        }
+
+        $realIp = (string) ($_SERVER['HTTP_X_REAL_IP'] ?? '');
+        if ($realIp !== '' && filter_var($realIp, FILTER_VALIDATE_IP)) {
+            return $realIp;
+        }
+    }
+
+    return $remote;
 }
 
 function ensure_auth_activity_table()

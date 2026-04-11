@@ -88,7 +88,9 @@ $publicNavItems = [
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Forms and Downloads | LTO HRIS</title>
-    <link rel="stylesheet" href="assets/css/styles.css">
+    
+    <?php require_once __DIR__ . '/includes/favicon-links.php'; ?>
+<link rel="stylesheet" href="assets/css/styles.css">
     <link rel="stylesheet" href="assets/css/lto-style.css">
 </head>
 <body class="landing-page">
@@ -301,6 +303,7 @@ $publicNavItems = [
     </script>
 </body>
 </html>
+
 
 
 

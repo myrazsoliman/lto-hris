@@ -28,3 +28,15 @@ if (!defined('SMTP_FROM_NAME')) {
     define('SMTP_FROM_NAME', (string) (getenv('SMTP_FROM_NAME') ?: 'LTO HRIS'));
 }
 
+// Reverse proxy support (only enable when you control/ trust the proxy).
+// Example env:
+// TRUST_PROXY_HEADERS=1
+// TRUSTED_PROXY_IPS=127.0.0.1,::1
+if (!defined('TRUST_PROXY_HEADERS')) {
+    define('TRUST_PROXY_HEADERS', (bool) (getenv('TRUST_PROXY_HEADERS') ?: false));
+}
+if (!defined('TRUSTED_PROXY_IPS')) {
+    $raw = (string) (getenv('TRUSTED_PROXY_IPS') ?: '');
+    $ips = array_values(array_filter(array_map('trim', explode(',', $raw)), 'strlen'));
+    define('TRUSTED_PROXY_IPS', $ips);
+}

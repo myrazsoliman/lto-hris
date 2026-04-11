@@ -44,7 +44,6 @@ $navIconMap = [
     'Activity Logs' => 'fa-solid fa-clipboard-list',
     'Leave Request' => 'fa-solid fa-calendar-check',
     'Leave Requests' => 'fa-solid fa-calendar-check',
-    'Employee Files' => 'fa-solid fa-folder-open',
     'My Documents' => 'fa-solid fa-folder-open'
 ];
 ?>
@@ -55,6 +54,7 @@ $navIconMap = [
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo htmlspecialchars($pageTitle); ?> | <?php echo htmlspecialchars($systemName); ?></title>
+    <?php require_once __DIR__ . '/favicon-links.php'; ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="assets/css/styles.css">
 </head>

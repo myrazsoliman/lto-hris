@@ -1476,6 +1476,8 @@ function generatePDFFormWithAutofill($template, $employee_data, $form_type) {
  * Generate HTML SALN form with auto-fill
  */
 function generateHTMLSALNForm($template, $employee_data) {
+    ob_start();
+    ?>
         <div class="template-header">
             <h3>Statement of Assets, Liabilities and Net Worth (SALN)</h3>
             <p class="template-info">Template: <?php echo htmlspecialchars($template['template_name']); ?> (Version: <?php echo htmlspecialchars($template['version']); ?>)</p>
@@ -2272,116 +2274,3 @@ function generateHTMLCSCForm($template, $employee_data) {
     <?php
     return ob_get_clean();
 }
-    
-    <style>
-    .csc-template-container {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 20px;
-    }
-    
-    .template-header {
-        text-align: center;
-        margin-bottom: 30px;
-        padding-bottom: 20px;
-        border-bottom: 2px solid #2c3e50;
-    }
-    
-    .template-header h3 {
-        color: #2c3e50;
-        font-size: 28px;
-        margin: 0 0 10px 0;
-    }
-    
-    .template-info {
-        color: #7f8c8d;
-        font-size: 14px;
-        margin: 0;
-    }
-    
-    .employee-info-section {
-        background: #f8f9fa;
-        padding: 20px;
-        border-radius: 8px;
-        margin-bottom: 30px;
-    }
-    
-    .employee-info-section h4 {
-        color: #2c3e50;
-        margin: 0 0 15px 0;
-    }
-    
-    .info-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 15px;
-    }
-    
-    .info-item {
-        display: flex;
-        flex-direction: column;
-    }
-    
-    .info-item label {
-        font-weight: 600;
-        color: #495057;
-        margin-bottom: 5px;
-    }
-    
-    .info-item span {
-        color: #2c3e50;
-        font-size: 15px;
-    }
-    
-    .template-display {
-        margin-bottom: 30px;
-    }
-    
-    .template-toolbar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 15px;
-        background: #e9ecef;
-        border-radius: 8px 8px 0 0;
-        border: 1px solid #dee2e6;
-        border-bottom: none;
-    }
-    
-    .template-label {
-        font-weight: 600;
-        color: #495057;
-    }
-    
-    .toolbar-right {
-        display: flex;
-        gap: 10px;
-    }
-    
-    .template-viewer {
-        border: 1px solid #dee2e6;
-        border-radius: 0 0 8px 8px;
-        background: white;
-    }
-    
-    .word-document-container {
-        padding: 40px;
-        text-align: center;
-    }
-    
-    .doc-preview h4 {
-        color: #2c3e50;
-        margin: 20px 0 10px 0;
-    }
-    
-    .doc-actions {
-        margin-top: 20px;
-        display: flex;
-        gap: 10px;
-        justify-content: center;
-    }
-    </style>
-    <?php
-    return ob_get_clean();
-}
-?>

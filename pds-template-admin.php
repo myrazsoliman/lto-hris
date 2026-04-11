@@ -263,7 +263,9 @@ if (!empty($currentTemplateMetaDisplay['original_name']) && is_string($currentTe
     $templateDisplayName = basename($currentTemplateMetaDisplay['original_name']);
 }
 $templateHistory = [];
-$historyPerPage = 10;
+$historyPerPage = isset($_GET['history_per_page']) ? (int) $_GET['history_per_page'] : 10;
+$historyPerPage = in_array($historyPerPage, [10, 25, 50], true) ? $historyPerPage : 10;
+$historyQuery = trim((string) ($_GET['history_q'] ?? ''));
 $historyPage = 1;
 $historyTotalPages = 1;
 $historyTotalCount = 0;
@@ -304,6 +306,15 @@ if ($canViewVersionHistory && is_dir($archiveDir)) {
         return ($b['updated_at'] ?? 0) <=> ($a['updated_at'] ?? 0);
     });
 
+    if ($historyQuery !== '') {
+        $needle = strtolower($historyQuery);
+        $templateHistory = array_values(array_filter($templateHistory, static function ($row) use ($needle) {
+            $display = strtolower((string) ($row['display_name'] ?? ''));
+            $name = strtolower((string) ($row['name'] ?? ''));
+            return str_contains($display, $needle) || str_contains($name, $needle);
+        }));
+    }
+
     $historyTotalCount = count($templateHistory);
     if ($historyTotalCount > 0) {
         $historyTotalPages = max(1, (int) ceil($historyTotalCount / $historyPerPage));
@@ -322,6 +333,14 @@ if ($canViewVersionHistory && is_dir($archiveDir)) {
 
 if (isset($_GET['history_json']) && (int) $_GET['history_json'] === 1) {
     header('Content-Type: application/json; charset=utf-8');
+    $signaturePayload = array_map(static function ($row) {
+        return [
+            'name' => (string) ($row['name'] ?? ''),
+            'updated_at' => (int) ($row['updated_at'] ?? 0),
+            'size' => (int) ($row['size'] ?? 0),
+        ];
+    }, $templateHistoryVisible);
+    $historySignature = hash('sha256', json_encode($signaturePayload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
     echo json_encode([
         'ok' => true,
         'current_template' => [
@@ -332,6 +351,11 @@ if (isset($_GET['history_json']) && (int) $_GET['history_json'] === 1) {
             'display_name' => $templateDisplayName,
         ],
         'history_total_count' => $historyTotalCount,
+        'history_page' => $historyPage,
+        'history_per_page' => $historyPerPage,
+        'history_total_pages' => $historyTotalPages,
+        'history_query' => $historyQuery,
+        'history_signature' => $historySignature,
         'history' => array_map(static function ($row) {
             return [
                 'name' => $row['name'] ?? '',
@@ -417,6 +441,27 @@ require_once 'includes/header.php';
                 <p>Only visible to admin roles.</p>
             </div>
 
+            <form class="pds-dt-controls" method="get" action="pds-template-admin.php" autocomplete="off" id="pdsHistoryControls">
+                <div class="pds-dt-toolbar" role="group" aria-label="Template history controls">
+                    <div class="pds-dt-length">
+                        <label for="history_per_page">Show</label>
+                        <select id="history_per_page" name="history_per_page" aria-label="Rows per page">
+                            <?php foreach ([10, 25, 50] as $n): ?>
+                                <option value="<?php echo (int) $n; ?>"<?php echo $historyPerPage === (int) $n ? ' selected' : ''; ?>><?php echo (int) $n; ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                        <span>entries</span>
+                    </div>
+
+                    <div class="pds-dt-search">
+                        <label for="history_q">Search:</label>
+                        <input id="history_q" name="history_q" type="search" value="<?php echo htmlspecialchars($historyQuery); ?>" inputmode="search">
+                    </div>
+                </div>
+
+                <input type="hidden" id="history_page" name="history_page" value="<?php echo (int) $historyPage; ?>">
+            </form>
+
             <?php if (!empty($templateHistoryVisible)): ?>
                 <div class="pds-template-history-table-wrap">
                     <table class="pds-template-history-table">
@@ -458,32 +503,55 @@ require_once 'includes/header.php';
                         </tbody>
                     </table>
                 </div>
-                <div class="pds-template-pagination">
+            <?php else: ?>
+                <div class="pds-template-history-empty">No archived template versions yet.</div>
+            <?php endif; ?>
+        </div>
+
+        <?php if (!empty($templateHistoryVisible)): ?>
+            <div class="pds-history-pagination">
+                <div class="pds-history-pagination-meta">
+                    <?php if ($historyTotalCount <= 0): ?>
+                        Showing 0 to 0 of 0 entries
+                    <?php else: ?>
+                        <?php
+                            $historyStart = min($historyTotalCount, $historyOffset + 1);
+                            $historyEnd = min($historyTotalCount, $historyOffset + count($templateHistoryVisible));
+                        ?>
+                        Showing <?php echo (int) $historyStart; ?> to <?php echo (int) $historyEnd; ?> of <?php echo (int) $historyTotalCount; ?> entries
+                    <?php endif; ?>
+                </div>
+                <div class="pds-template-pagination" role="navigation" aria-label="Template history pagination">
                     <?php
                     $prevPage = max(1, $historyPage - 1);
                     $nextPage = min($historyTotalPages, $historyPage + 1);
                     $pageWindowSize = 10;
                     $windowStart = (int) (floor(($historyPage - 1) / $pageWindowSize) * $pageWindowSize) + 1;
                     $windowEnd = min($historyTotalPages, $windowStart + $pageWindowSize - 1);
+
+                    $historyBase = [
+                        'history_q' => $historyQuery,
+                        'history_per_page' => $historyPerPage,
+                    ];
+                    $historyBaseQuery = http_build_query(array_filter($historyBase, static fn($v) => $v !== '' && $v !== null));
+                    $historyBaseHref = 'pds-template-admin.php' . ($historyBaseQuery !== '' ? ('?' . $historyBaseQuery . '&') : '?');
                     ?>
-                    <a class="pds-page-link<?php echo $historyPage <= 1 ? ' is-disabled' : ''; ?>" href="<?php echo $historyPage <= 1 ? '#' : ('?history_page=' . $prevPage . '#templateHistory'); ?>">Prev</a>
+                    <a class="pds-page-link<?php echo $historyPage <= 1 ? ' is-disabled' : ''; ?>" data-preserve-scroll="1" href="<?php echo $historyPage <= 1 ? '#' : htmlspecialchars($historyBaseHref . 'history_page=' . $prevPage . '#templateHistory'); ?>">Previous</a>
                     <?php if ($windowStart > 1): ?>
-                        <a class="pds-page-link" href="<?php echo '?history_page=1#templateHistory'; ?>">1</a>
+                        <a class="pds-page-link" data-preserve-scroll="1" href="<?php echo htmlspecialchars($historyBaseHref . 'history_page=1#templateHistory'); ?>">1</a>
                         <span class="pds-page-ellipsis">...</span>
                     <?php endif; ?>
                     <?php for ($i = $windowStart; $i <= $windowEnd; $i++): ?>
-                        <a class="pds-page-link<?php echo $i === $historyPage ? ' is-active' : ''; ?>" href="<?php echo '?history_page=' . $i . '#templateHistory'; ?>"><?php echo $i; ?></a>
+                        <a class="pds-page-link<?php echo $i === $historyPage ? ' is-active' : ''; ?>" data-preserve-scroll="1" href="<?php echo htmlspecialchars($historyBaseHref . 'history_page=' . $i . '#templateHistory'); ?>"><?php echo $i; ?></a>
                     <?php endfor; ?>
                     <?php if ($windowEnd < $historyTotalPages): ?>
                         <span class="pds-page-ellipsis">...</span>
-                        <a class="pds-page-link" href="<?php echo '?history_page=' . $historyTotalPages . '#templateHistory'; ?>"><?php echo $historyTotalPages; ?></a>
+                        <a class="pds-page-link" data-preserve-scroll="1" href="<?php echo htmlspecialchars($historyBaseHref . 'history_page=' . $historyTotalPages . '#templateHistory'); ?>"><?php echo $historyTotalPages; ?></a>
                     <?php endif; ?>
-                    <a class="pds-page-link<?php echo $historyPage >= $historyTotalPages ? ' is-disabled' : ''; ?>" href="<?php echo $historyPage >= $historyTotalPages ? '#' : ('?history_page=' . $nextPage . '#templateHistory'); ?>">Next</a>
+                    <a class="pds-page-link<?php echo $historyPage >= $historyTotalPages ? ' is-disabled' : ''; ?>" data-preserve-scroll="1" href="<?php echo $historyPage >= $historyTotalPages ? '#' : htmlspecialchars($historyBaseHref . 'history_page=' . $nextPage . '#templateHistory'); ?>">Next</a>
                 </div>
-            <?php else: ?>
-                <div class="pds-template-history-empty">No archived template versions yet.</div>
-            <?php endif; ?>
-        </div>
+            </div>
+        <?php endif; ?>
     <?php endif; ?>
 
     <div class="confirm-modal confirm-modal--menu" id="historyDeleteConfirmModal" aria-hidden="true">
@@ -521,6 +589,22 @@ require_once 'includes/header.php';
             <div class="confirm-modal-divider" aria-hidden="true"></div>
             <div class="confirm-modal-actions">
                 <button type="button" class="btn btn-primary" id="historyDeleteSuccessOk" data-delete-success-close>OK</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="confirm-modal confirm-modal--menu" id="historyEntriesModal" aria-hidden="true">
+        <div class="confirm-modal-backdrop" data-entries-close></div>
+        <div class="confirm-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="historyEntriesTitle">
+            <div class="confirm-modal-head">
+                <div class="confirm-modal-copy">
+                    <h2 id="historyEntriesTitle">Entries Not Available</h2>
+                    <p class="confirm-modal-text" id="historyEntriesText">Not enough entries to show that many rows.</p>
+                </div>
+            </div>
+            <div class="confirm-modal-divider" aria-hidden="true"></div>
+            <div class="confirm-modal-actions">
+                <button type="button" class="btn btn-primary" id="historyEntriesOk" data-entries-close>OK</button>
             </div>
         </div>
     </div>
@@ -651,16 +735,16 @@ require_once 'includes/header.php';
 
 .pds-template-history {
     margin-top: 20px;
-    border: 1px solid #d3e1f0;
-    border-radius: 16px;
-    background: linear-gradient(180deg, #ffffff, #f8fbff);
-    overflow: hidden;
+    border: 1px solid #dee2e6;
+    border-radius: 0;
+    background: #fff;
+    overflow: visible;
 }
 
 .pds-template-history-head {
     padding: 16px 18px;
-    border-bottom: 1px solid #dde7f3;
-    background: linear-gradient(180deg, #f7fbff, #eef5fd);
+    border-bottom: 1px solid #dee2e6;
+    background: #fff;
 }
 
 .pds-template-history-head h4 {
@@ -672,6 +756,44 @@ require_once 'includes/header.php';
     margin: 6px 0 0;
     color: #5d728b;
     font-size: 13px;
+}
+
+.pds-dt-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-bottom: 1px solid #dde7f3;
+    background: #fff;
+}
+
+.pds-dt-length,
+.pds-dt-search {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #4f6178;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.pds-dt-length select {
+    height: 32px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    padding: 0 8px;
+    background: #fff;
+}
+
+.pds-dt-search input {
+    height: 32px;
+    width: 220px;
+    max-width: 100%;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    padding: 0 10px;
+    background: #fff;
 }
 
 .pds-template-history-table-wrap {
@@ -692,11 +814,30 @@ require_once 'includes/header.php';
 }
 
 .pds-template-history-table th {
-    font-size: 11px;
-    color: #4f6782;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    background: #f6faff;
+    font-size: 14px;
+    font-weight: 800;
+    color: #2c3e50;
+    background: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+    border-right: 1px solid #e9ecef;
+}
+
+.pds-template-history-table th:last-child {
+    border-right: none;
+}
+
+.pds-template-history-table td {
+    border-top: 1px solid #e9ecef;
+    border-bottom: none;
+    background: #fff;
+}
+
+.pds-template-history-table tr:nth-child(even) td {
+    background: #f9f9f9;
+}
+
+.pds-template-history-table tr:hover td {
+    background: #f1f6ff;
 }
 
 .pds-template-history-delete-form {
@@ -757,13 +898,31 @@ require_once 'includes/header.php';
     color: #5d728b;
 }
 
+.pds-history-pagination {
+    margin-top: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+}
+
+.pds-history-pagination-meta {
+    color: #6f86a3;
+    font-weight: 600;
+}
+
 .pds-template-pagination {
     display: flex;
     align-items: center;
-    gap: 6px;
-    padding: 12px 14px;
-    border-top: 1px solid #e7edf6;
-    background: #fbfdff;
+    gap: 0;
+    justify-content: flex-end;
+    padding: 0;
+    border-top: 0;
+    background: transparent;
     flex-wrap: wrap;
 }
 
@@ -774,24 +933,27 @@ require_once 'includes/header.php';
     min-width: 34px;
     height: 34px;
     padding: 0 10px;
-    border-radius: 10px;
-    border: 1px solid #ccdaea;
+    border-radius: 0;
+    border: 1px solid #dee2e6;
     background: #fff;
-    color: #20476f;
+    color: #0f4c81;
     text-decoration: none;
     font-size: 13px;
     font-weight: 700;
+    margin-left: -1px;
 }
 
 .pds-page-link:hover {
-    border-color: #9fb8d5;
-    background: #f4f9ff;
+    background: #e9ecef;
+    border-color: #dee2e6;
+    z-index: 1;
 }
 
 .pds-page-link.is-active {
     background: #0f4c81;
     border-color: #0f4c81;
     color: #fff;
+    z-index: 2;
 }
 
 .pds-page-link.is-disabled {
@@ -801,13 +963,34 @@ require_once 'includes/header.php';
 
 .pds-page-ellipsis {
     color: #6a7d94;
-    font-weight: 700;
+    font-weight: 800;
     padding-inline: 2px;
+}
+
+.pds-page-link:first-child {
+    border-top-left-radius: 6px;
+    border-bottom-left-radius: 6px;
+    margin-left: 0;
+}
+
+.pds-page-link:last-child {
+    border-top-right-radius: 6px;
+    border-bottom-right-radius: 6px;
 }
 
 @media (max-width: 900px) {
     .pds-template-admin-grid {
         grid-template-columns: 1fr;
+    }
+
+    .pds-history-pagination {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .pds-dt-toolbar {
+        flex-direction: column;
+        align-items: flex-start;
     }
 
     .pds-template-meta-row {
@@ -986,16 +1169,118 @@ require_once 'includes/header.php';
     if (window.__pdsLiveSizeBound) return;
     window.__pdsLiveSizeBound = true;
 
-    var currentPage = <?php echo (int) $historyPage; ?>;
-    var endpoint = 'pds-template-admin.php?history_json=1&history_page=' + currentPage;
+    var lastSignature = '';
+    var lastTotal = <?php echo (int) $historyTotalCount; ?>;
+    var pendingPerPage = null;
+    var modalOpen = false;
 
     function formatKb(bytes) {
         var value = Number(bytes || 0) / 1024;
         return value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' KB';
     }
 
+    function openEntriesModal(message) {
+        var modal = document.getElementById('historyEntriesModal');
+        var text = document.getElementById('historyEntriesText');
+        if (!modal) return;
+        if (text) text.textContent = message || 'Not enough entries to show that many rows.';
+        modalOpen = true;
+        modal.classList.add('is-open');
+        modal.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('modal-open');
+        var ok = document.getElementById('historyEntriesOk');
+        if (ok) ok.focus();
+    }
+
+    function closeEntriesModal() {
+        var modal = document.getElementById('historyEntriesModal');
+        if (!modal) return;
+        modalOpen = false;
+        modal.classList.remove('is-open');
+        modal.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('modal-open');
+    }
+
+    function bindEntriesModal() {
+        var modal = document.getElementById('historyEntriesModal');
+        if (!modal) return;
+        var okBtn = document.getElementById('historyEntriesOk');
+        var closeTargets = modal.querySelectorAll('[data-entries-close]');
+
+        if (okBtn) {
+            okBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                closeEntriesModal();
+
+                var select = document.getElementById('history_per_page');
+                var page = document.getElementById('history_page');
+                var form = document.getElementById('pdsHistoryControls');
+                if (!select || !form || pendingPerPage === null) return;
+
+                select.value = String(pendingPerPage);
+                pendingPerPage = null;
+                if (page) page.value = '1';
+                form.submit();
+            });
+        }
+
+        closeTargets.forEach(function (el) {
+            if (okBtn && el === okBtn) return;
+            el.addEventListener('click', function (e) {
+                e.preventDefault();
+                pendingPerPage = null;
+                closeEntriesModal();
+            });
+        });
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && modal.classList.contains('is-open')) {
+                pendingPerPage = null;
+                closeEntriesModal();
+            }
+        });
+    }
+
+    function bestPerPage(total) {
+        if (total >= 50) return 50;
+        if (total >= 25) return 25;
+        return 10;
+    }
+
+    function enforcePerPage(total) {
+        var select = document.getElementById('history_per_page');
+        var page = document.getElementById('history_page');
+        var form = document.getElementById('pdsHistoryControls');
+        if (!select || !form) return;
+
+        var selected = parseInt(select.value || '10', 10) || 10;
+
+        // If user tries 50 but there aren't 50 items, show modal and downgrade.
+        if (selected === 50 && total < 50) {
+            if (modalOpen) return;
+            var next = bestPerPage(total);
+            pendingPerPage = next;
+            // Keep current selection until user confirms, so modal doesn't flash on navigation.
+            openEntriesModal('Only ' + total + ' entries available. Switch to ' + next + ' entries?');
+            return;
+        }
+    }
+
+    // Immediately enforce on load (covers existing low counts).
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function () {
+            bindEntriesModal();
+            enforcePerPage(lastTotal);
+        }, { once: true });
+    } else {
+        bindEntriesModal();
+        enforcePerPage(lastTotal);
+    }
+
     function refreshTemplateData() {
-        fetch(endpoint, { cache: 'no-store' })
+        // Keep polling with current URL params so results match filters/per-page/page.
+        var url = new URL(window.location.href);
+        url.searchParams.set('history_json', '1');
+        fetch(url.toString(), { cache: 'no-store' })
             .then(function (res) { return res.ok ? res.json() : null; })
             .then(function (data) {
                 if (!data || !data.ok) return;
@@ -1010,6 +1295,23 @@ require_once 'includes/header.php';
                     if (currentUpdated && data.current_template.updated_at_formatted) {
                         currentUpdated.textContent = data.current_template.updated_at_formatted;
                     }
+                }
+
+                if (typeof data.history_total_count === 'number') {
+                    lastTotal = data.history_total_count;
+                    enforcePerPage(lastTotal);
+                }
+
+                if (data.history_signature && lastSignature && data.history_signature !== lastSignature) {
+                    // New versions added/removed: reload so the table rows and actions are correct.
+                    try {
+                        sessionStorage.setItem('pds_template_history_scroll_y', String(window.scrollY || 0));
+                    } catch (err) {}
+                    window.location.reload();
+                    return;
+                }
+                if (data.history_signature && !lastSignature) {
+                    lastSignature = data.history_signature;
                 }
 
                 if (Array.isArray(data.history)) {
@@ -1051,6 +1353,69 @@ require_once 'includes/header.php';
         refreshTemplateData();
         setInterval(refreshTemplateData, 5000);
     }
+}());
+
+(function () {
+    const KEY = 'pds_template_history_scroll_y';
+
+    document.addEventListener('click', function (e) {
+        const a = e.target.closest('a[data-preserve-scroll="1"]');
+        if (!a) return;
+        const href = a.getAttribute('href') || '';
+        if (href === '' || href === '#') return;
+        try {
+            sessionStorage.setItem(KEY, String(window.scrollY || 0));
+        } catch (err) {
+            // ignore
+        }
+    });
+
+    function restore() {
+        let y = null;
+        try {
+            y = sessionStorage.getItem(KEY);
+            sessionStorage.removeItem(KEY);
+        } catch (err) {
+            y = null;
+        }
+        if (y === null) return;
+        const n = parseInt(y, 10);
+        if (!Number.isFinite(n)) return;
+
+        if ('scrollRestoration' in history) {
+            history.scrollRestoration = 'manual';
+        }
+        requestAnimationFrame(() => window.scrollTo(0, n));
+        setTimeout(() => window.scrollTo(0, n), 0);
+        setTimeout(() => window.scrollTo(0, n), 50);
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', restore, { once: true });
+    } else {
+        restore();
+    }
+}());
+
+(function () {
+    const form = document.getElementById('pdsHistoryControls');
+    if (!form) return;
+    const page = document.getElementById('history_page');
+    const q = document.getElementById('history_q');
+    const per = document.getElementById('history_per_page');
+
+    let t = null;
+    function submitSoon(delayMs) {
+        if (page) page.value = '1';
+        if (t) clearTimeout(t);
+        t = setTimeout(() => form.submit(), delayMs);
+    }
+
+    if (q) q.addEventListener('input', () => submitSoon(450));
+    if (per) per.addEventListener('change', () => {
+        if (page) page.value = '1';
+        form.submit();
+    });
 }());
 </script>
 

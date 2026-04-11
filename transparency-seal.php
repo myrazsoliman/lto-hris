@@ -1,10 +1,14 @@
 <?php
 require_once 'includes/auth.php';
 require_once 'includes/data.php';
+require_once __DIR__ . '/includes/login-captcha.php';
 
 $loginError = '';
 $loginUsername = '';
 $showLoginModal = isset($_GET['login']);
+$showLoginCaptcha = true;
+$loginCaptchaInput = '';
+$loginCaptchaNonce = '';
 $registerError = '';
 $registerSuccess = '';
 $registerFullName = '';
@@ -16,6 +20,7 @@ $csrfToken = csrf_token();
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form_action'] ?? '') === 'login_modal') {
     $loginUsername = isset($_POST['username']) ? trim($_POST['username']) : '';
     $password = isset($_POST['password']) ? (string) $_POST['password'] : '';
+    $loginCaptchaInput = isset($_POST['captcha_answer']) ? trim((string) $_POST['captcha_answer']) : '';
 
     if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
         $loginError = 'Your session has expired. Please try again.';
@@ -23,6 +28,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form_action'] ?? '') === '
         $loginError = 'Too many login attempts. Please wait a few minutes before trying again.';
     } elseif ($loginUsername === '' || $password === '') {
         $loginError = 'Enter your username and password.';
+    } elseif (!login_captcha_verify_answer($loginCaptchaInput)) {
+        register_failed_attempt('login');
+        $loginError = 'Security verification failed. Please answer the CAPTCHA correctly.';
     } else {
         $user = authenticate_user($loginUsername, $password);
 
@@ -38,7 +46,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form_action'] ?? '') === '
         $loginError = 'Invalid credentials or unauthorized account.';
     }
 
+    // Always re-issue a fresh CAPTCHA after a POST so the next attempt has a new image.
+    $loginCaptchaNonce = login_captcha_issue_challenge();
     $showLoginModal = true;
+}
+
+if ($showLoginCaptcha) {
+    $loginCaptchaNonce = login_captcha_ensure_nonce();
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form_action'] ?? '') === 'register_modal') {
@@ -218,7 +232,9 @@ $sealSections = [
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title><?php echo htmlspecialchars($pageTitle); ?> | <?php echo htmlspecialchars($systemName); ?></title>
-    <link rel="stylesheet" href="assets/css/styles.css">
+    
+    <?php require_once __DIR__ . '/includes/favicon-links.php'; ?>
+<link rel="stylesheet" href="assets/css/styles.css">
     <link rel="stylesheet" href="assets/css/lto-style.css">
 </head>
 
@@ -472,6 +488,31 @@ $sealSections = [
                                         </svg>
                                     </span>
                                 </button>
+                            </div>
+
+                            <div class="login-captcha-block">
+                                <div class="login-captcha-hint">What code is in the image?</div>
+                                <div class="login-captcha-image-wrap">
+                                    <img
+                                        src="captcha-image.php?context=login_modal&amp;v=<?php echo urlencode($loginCaptchaNonce); ?>"
+                                        alt="CAPTCHA image"
+                                        class="login-captcha-image"
+                                        id="loginCaptchaImage"
+                                    >
+                                    <button type="button" class="login-captcha-refresh" id="loginCaptchaRefresh">Refresh</button>
+                                </div>
+                            </div>
+                            <div class="login-input-wrap login-input-wrap-modal">
+                                <div class="login-input-shell">
+                                    <span class="login-input-icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none">
+                                            <path d="M12 3a9 9 0 1 0 9 9h-2a7 7 0 1 1-7-7V3Z" fill="currentColor" />
+                                            <path d="M12 8v5l3 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                                        </svg>
+                                    </span>
+                                    <input type="text" id="loginModalCaptcha" name="captcha_answer" placeholder=" " value="<?php echo htmlspecialchars($loginCaptchaInput); ?>" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="5" required>
+                                    <label class="login-floating-label" for="loginModalCaptcha">Enter CAPTCHA</label>
+                                </div>
                             </div>
 
                             <div class="login-modal-actions-row login-modal-actions-row-split">
@@ -739,10 +780,26 @@ $sealSections = [
             updateClock();
             setInterval(updateClock, 1000);
         }());
+
+        (function() {
+            const captchaRefreshBtn = document.getElementById('loginCaptchaRefresh');
+            const captchaImage = document.getElementById('loginCaptchaImage');
+            const captchaField = document.getElementById('loginModalCaptcha');
+            if (!captchaRefreshBtn || !captchaImage) return;
+
+            captchaRefreshBtn.addEventListener('click', function() {
+                captchaImage.src = 'captcha-image.php?context=login_modal&regen=1&t=' + Date.now();
+                if (captchaField) {
+                    captchaField.value = '';
+                    captchaField.focus();
+                }
+            });
+        }());
     </script>
 </body>
 
 </html>
+
 
 
 

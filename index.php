@@ -1,5 +1,6 @@
 <?php
 require_once 'includes/auth.php';
+require_once __DIR__ . '/includes/login-captcha.php';
 
 $loginError = '';
 $loginEmail = '';
@@ -7,7 +8,7 @@ $showLoginModal = isset($_GET['login']) || isset($_GET['registration_success']);
 $registerError = '';
 $registerSuccess = '';
 $registrationSuccess = isset($_GET['registration_success']);
-$showLoginCaptcha = false;
+$showLoginCaptcha = true;
 $loginCaptchaInput = '';
 $loginCaptchaNonce = '';
 $registerFirstName = '';
@@ -44,22 +45,6 @@ function redirect_to_dashboard_by_roles($roles)
 
     header('Location: employee-dashboard.php');
     exit;
-}
-
-function issue_login_captcha_challenge()
-{
-    $alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-    $alphabetLength = strlen($alphabet) - 1;
-    $captchaCode = '';
-
-    for ($i = 0; $i < 5; $i++) {
-        $captchaCode .= $alphabet[random_int(0, $alphabetLength)];
-    }
-
-    $_SESSION['login_modal_captcha_expected'] = $captchaCode;
-    $_SESSION['login_modal_captcha_nonce'] = bin2hex(random_bytes(8));
-
-    return $captchaCode;
 }
 
 if (isset($_GET['cancel_2fa'])) {
@@ -117,7 +102,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form_action'] ?? '') === '
     $loginEmail = isset($_POST['email']) ? trim($_POST['email']) : '';
     $password = isset($_POST['password']) ? (string) $_POST['password'] : '';
     $loginCaptchaInput = isset($_POST['captcha_answer']) ? trim((string) $_POST['captcha_answer']) : '';
-    $captchaRequired = (int) ($_SESSION['auth_limits']['login']['count'] ?? 0) >= 2;
+    $captchaRequired = true;
 
     if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
         $loginError = 'Your session has expired. Please try again.';
@@ -129,14 +114,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form_action'] ?? '') === '
         $canProceedLogin = true;
 
         if ($captchaRequired) {
-            $expectedCaptcha = (string) ($_SESSION['login_modal_captcha_expected'] ?? '');
-            $normalizedCaptchaInput = strtoupper($loginCaptchaInput);
-            if ($normalizedCaptchaInput === '' || $expectedCaptcha === '' || !hash_equals($expectedCaptcha, $normalizedCaptchaInput)) {
+            if (!login_captcha_verify_answer($loginCaptchaInput)) {
                 register_failed_attempt('login');
                 $loginError = 'Security verification failed. Please answer the CAPTCHA correctly.';
                 $canProceedLogin = false;
-            } else {
-                unset($_SESSION['login_modal_captcha_expected'], $_SESSION['login_modal_captcha_nonce']);
             }
         }
 
@@ -166,21 +147,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form_action'] ?? '') === '
         }
     }
 
-    $showLoginCaptcha = (int) ($_SESSION['auth_limits']['login']['count'] ?? 0) >= 2;
-    if ($showLoginCaptcha) {
-        issue_login_captcha_challenge();
-    }
+    // Always re-issue a fresh CAPTCHA after a POST so the next attempt has a new image.
+    $loginCaptchaNonce = login_captcha_issue_challenge();
     $showLoginModal = true;
 }
 
-if (!$showLoginCaptcha) {
-    $showLoginCaptcha = (int) ($_SESSION['auth_limits']['login']['count'] ?? 0) >= 2;
-}
 if ($showLoginCaptcha) {
-    if ((string) ($_SESSION['login_modal_captcha_expected'] ?? '') === '') {
-        issue_login_captcha_challenge();
-    }
-    $loginCaptchaNonce = (string) ($_SESSION['login_modal_captcha_nonce'] ?? '');
+    $loginCaptchaNonce = login_captcha_ensure_nonce();
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form_action'] ?? '') === 'register_modal') {
@@ -362,7 +335,9 @@ $publicNavItems = [
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>LTO-HRIS</title>
-    <link rel="stylesheet" href="assets/css/styles.css">
+    
+    <?php require_once __DIR__ . '/includes/favicon-links.php'; ?>
+<link rel="stylesheet" href="assets/css/styles.css">
     <link rel="stylesheet" href="assets/css/lto-style.css">
     <style>
         #twoFaModal .verification-form .verification-otp-row {
@@ -768,7 +743,6 @@ $publicNavItems = [
                             </button>
                         </div>
 
-                            <?php if ($showLoginCaptcha): ?>
                                 <div class="login-captcha-block">
                                     <div class="login-captcha-hint">What code is in the image?</div>
                                     <div class="login-captcha-image-wrap">
@@ -789,11 +763,11 @@ $publicNavItems = [
                                                 <path d="M12 8v5l3 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
                                             </svg>
                                         </span>
-                                        <input type="text" id="loginModalCaptcha" name="captcha_answer" placeholder=" " value="<?php echo htmlspecialchars($loginCaptchaInput); ?>" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="5" required>
+                                        <input type="text" id="loginModalCaptcha" name="captcha_answer" placeholder=" " value="<?php echo htmlspecialchars($loginCaptchaInput); ?>" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="5" required>
                                         <label class="login-floating-label" for="loginModalCaptcha">Enter CAPTCHA</label>
                                     </div>
                                 </div>
-                            <?php endif; ?>
+
 
                             <div class="login-modal-actions-row login-modal-actions-row-split">
                                 <a href="#" class="login-forgot-link js-forgot-trigger">Forgot password?</a>
@@ -1889,6 +1863,7 @@ $publicNavItems = [
 </body>
 
 </html>
+
 
 
 

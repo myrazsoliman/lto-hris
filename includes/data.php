@@ -42,7 +42,6 @@ function get_nav_items($userRoles = []) {
             'csc-forms.php' => 'CSC Forms',
             'saln.php' => 'SALN Monitoring',
             'reports.php' => 'Reports',
-            'documents.php' => 'Employee Files',
             'activity-logs.php' => 'Activity Logs',
         ];
     }

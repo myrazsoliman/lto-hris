@@ -114,11 +114,51 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 }
 
 // Get current templates
-$saln_templates = $pdo->prepare("SELECT * FROM form_templates WHERE form_type = 'saln' ORDER BY uploaded_at DESC");
-$saln_templates->execute();
+$perPage = 10;
+$salnPageRequest = max(1, (int) ($_GET['saln_page'] ?? 1));
+$cscPageRequest = max(1, (int) ($_GET['csc_page'] ?? 1));
 
-$csc_templates = $pdo->prepare("SELECT * FROM form_templates WHERE form_type = 'csc' ORDER BY uploaded_at DESC");
-$csc_templates->execute();
+$salnTotal = 0;
+$cscTotal = 0;
+$salnTotalPages = 1;
+$cscTotalPages = 1;
+$salnPage = 1;
+$cscPage = 1;
+$salnOffset = 0;
+$cscOffset = 0;
+$salnTemplates = [];
+$cscTemplates = [];
+
+try {
+    $countStmt = $pdo->prepare('SELECT COUNT(*) FROM form_templates WHERE form_type = ?');
+
+    $countStmt->execute(['saln']);
+    $salnTotal = (int) $countStmt->fetchColumn();
+    $salnTotalPages = $salnTotal > 0 ? max(1, (int) ceil($salnTotal / $perPage)) : 1;
+    $salnPage = min($salnPageRequest, $salnTotalPages);
+    $salnOffset = ($salnPage - 1) * $perPage;
+
+    $countStmt->execute(['csc']);
+    $cscTotal = (int) $countStmt->fetchColumn();
+    $cscTotalPages = $cscTotal > 0 ? max(1, (int) ceil($cscTotal / $perPage)) : 1;
+    $cscPage = min($cscPageRequest, $cscTotalPages);
+    $cscOffset = ($cscPage - 1) * $perPage;
+
+    // Keep active template on the first page even if it is an older version.
+    $salnSql = "SELECT * FROM form_templates WHERE form_type = 'saln' ORDER BY is_active DESC, uploaded_at DESC LIMIT {$perPage} OFFSET {$salnOffset}";
+    $cscSql = "SELECT * FROM form_templates WHERE form_type = 'csc' ORDER BY is_active DESC, uploaded_at DESC LIMIT {$perPage} OFFSET {$cscOffset}";
+
+    $saln_templates = $pdo->query($salnSql);
+    $salnTemplates = $saln_templates ? $saln_templates->fetchAll(PDO::FETCH_ASSOC) : [];
+
+    $csc_templates = $pdo->query($cscSql);
+    $cscTemplates = $csc_templates ? $csc_templates->fetchAll(PDO::FETCH_ASSOC) : [];
+} catch (Throwable $e) {
+    // Keep the page usable even if template list queries fail.
+    if ($error === '') {
+        $error = 'Unable to load template history. Please check database connection.';
+    }
+}
 ?>
 
 <?php require_once 'includes/header.php'; ?>
@@ -186,7 +226,7 @@ $csc_templates->execute();
 
     <!-- Current Templates -->
     <div class="templates-grid">
-        <div class="template-section">
+        <div class="template-section" id="salnTemplates">
             <div class="section-header">
                 <h4><i class="fas fa-file-alt"></i> SALN Templates</h4>
                 <button class="btn btn-sm btn-info" onclick="viewActiveForm('saln')">
@@ -195,10 +235,9 @@ $csc_templates->execute();
             </div>
             <div class="template-list">
                 <?php 
-                $saln_templates->execute(); // Reset pointer
                 $has_saln_templates = false;
                 $active_found = false;
-                while ($template = $saln_templates->fetch()): 
+                foreach ($salnTemplates as $template): 
                     $has_saln_templates = true;
                     $is_active = $template['is_active'];
                     if ($is_active) $active_found = true;
@@ -227,7 +266,7 @@ $csc_templates->execute();
                             <?php endif; ?>
                         </div>
                     </div>
-                <?php endwhile; ?>
+                <?php endforeach; ?>
                 
                 <?php if (!$has_saln_templates): ?>
                     <div class="empty-state">
@@ -239,9 +278,75 @@ $csc_templates->execute();
                     </div>
                 <?php endif; ?>
             </div>
+
+            <?php if ($salnTotal > $perPage): ?>
+                <?php
+                    $base = $_GET;
+                    $base['csc_page'] = $cscPage;
+                    $base['saln_page'] = $salnPage;
+                    $prev = max(1, $salnPage - 1);
+                    $next = min($salnTotalPages, $salnPage + 1);
+
+                    $basePrev = $base;
+                    $basePrev['saln_page'] = $prev;
+                    $baseNext = $base;
+                    $baseNext['saln_page'] = $next;
+
+                    $hrefPrev = 'form-templates.php?' . http_build_query($basePrev) . '#salnTemplates';
+                    $hrefNext = 'form-templates.php?' . http_build_query($baseNext) . '#salnTemplates';
+
+                    $pageWindowSize = 5;
+                    $windowStart = max(1, $salnPage - 2);
+                    $windowEnd = min($salnTotalPages, $windowStart + $pageWindowSize - 1);
+                    $windowStart = max(1, $windowEnd - $pageWindowSize + 1);
+                ?>
+                <div class="template-footer" aria-label="SALN pagination">
+                    <div class="template-pagination-meta">
+                        <?php if ($salnTotal <= 0): ?>
+                            Showing 0 to 0 of 0 entries
+                        <?php else: ?>
+                            <?php
+                                $start = min($salnTotal, $salnOffset + 1);
+                                $end = min($salnTotal, $salnOffset + count($salnTemplates));
+                            ?>
+                            Showing <?php echo (int) $start; ?> to <?php echo (int) $end; ?> of <?php echo (int) $salnTotal; ?> entries
+                        <?php endif; ?>
+                    </div>
+                    <div class="template-pagination">
+                    <a class="template-page-link<?php echo $salnPage <= 1 ? ' is-disabled' : ''; ?>" href="<?php echo $salnPage <= 1 ? '#' : htmlspecialchars($hrefPrev); ?>">Previous</a>
+
+                    <?php if ($windowStart > 1): ?>
+                        <?php $baseFirst = $base; $baseFirst['saln_page'] = 1; ?>
+                        <a class="template-page-link" href="<?php echo htmlspecialchars('form-templates.php?' . http_build_query($baseFirst) . '#salnTemplates'); ?>">1</a>
+                        <?php if ($windowStart > 2): ?>
+                            <span class="template-page-ellipsis" aria-hidden="true">…</span>
+                        <?php endif; ?>
+                    <?php endif; ?>
+
+                    <?php for ($i = $windowStart; $i <= $windowEnd; $i++): ?>
+                        <?php if ($i === $salnPage): ?>
+                            <span class="template-page-link is-active" aria-current="page"><?php echo (int) $i; ?></span>
+                        <?php else: ?>
+                            <?php $baseI = $base; $baseI['saln_page'] = $i; ?>
+                            <a class="template-page-link" href="<?php echo htmlspecialchars('form-templates.php?' . http_build_query($baseI) . '#salnTemplates'); ?>"><?php echo (int) $i; ?></a>
+                        <?php endif; ?>
+                    <?php endfor; ?>
+
+                    <?php if ($windowEnd < $salnTotalPages): ?>
+                        <?php if ($windowEnd < $salnTotalPages - 1): ?>
+                            <span class="template-page-ellipsis" aria-hidden="true">…</span>
+                        <?php endif; ?>
+                        <?php $baseLast = $base; $baseLast['saln_page'] = $salnTotalPages; ?>
+                        <a class="template-page-link" href="<?php echo htmlspecialchars('form-templates.php?' . http_build_query($baseLast) . '#salnTemplates'); ?>"><?php echo (int) $salnTotalPages; ?></a>
+                    <?php endif; ?>
+
+                    <a class="template-page-link<?php echo $salnPage >= $salnTotalPages ? ' is-disabled' : ''; ?>" href="<?php echo $salnPage >= $salnTotalPages ? '#' : htmlspecialchars($hrefNext); ?>">Next</a>
+                    </div>
+                </div>
+            <?php endif; ?>
         </div>
 
-        <div class="template-section">
+        <div class="template-section" id="cscTemplates">
             <div class="section-header">
                 <h4><i class="fas fa-file-contract"></i> CSC Templates</h4>
                 <button class="btn btn-sm btn-info" onclick="viewActiveForm('csc')">
@@ -250,10 +355,9 @@ $csc_templates->execute();
             </div>
             <div class="template-list">
                 <?php 
-                $csc_templates->execute(); // Reset pointer
                 $has_csc_templates = false;
                 $active_found = false;
-                while ($template = $csc_templates->fetch()): 
+                foreach ($cscTemplates as $template): 
                     $has_csc_templates = true;
                     $is_active = $template['is_active'];
                     if ($is_active) $active_found = true;
@@ -282,7 +386,7 @@ $csc_templates->execute();
                             <?php endif; ?>
                         </div>
                     </div>
-                <?php endwhile; ?>
+                <?php endforeach; ?>
                 
                 <?php if (!$has_csc_templates): ?>
                     <div class="empty-state">
@@ -294,6 +398,72 @@ $csc_templates->execute();
                     </div>
                 <?php endif; ?>
             </div>
+
+            <?php if ($cscTotal > $perPage): ?>
+                <?php
+                    $base = $_GET;
+                    $base['saln_page'] = $salnPage;
+                    $base['csc_page'] = $cscPage;
+                    $prev = max(1, $cscPage - 1);
+                    $next = min($cscTotalPages, $cscPage + 1);
+
+                    $basePrev = $base;
+                    $basePrev['csc_page'] = $prev;
+                    $baseNext = $base;
+                    $baseNext['csc_page'] = $next;
+
+                    $hrefPrev = 'form-templates.php?' . http_build_query($basePrev) . '#cscTemplates';
+                    $hrefNext = 'form-templates.php?' . http_build_query($baseNext) . '#cscTemplates';
+
+                    $pageWindowSize = 5;
+                    $windowStart = max(1, $cscPage - 2);
+                    $windowEnd = min($cscTotalPages, $windowStart + $pageWindowSize - 1);
+                    $windowStart = max(1, $windowEnd - $pageWindowSize + 1);
+                ?>
+                <div class="template-footer" aria-label="CSC pagination">
+                    <div class="template-pagination-meta">
+                        <?php if ($cscTotal <= 0): ?>
+                            Showing 0 to 0 of 0 entries
+                        <?php else: ?>
+                            <?php
+                                $start = min($cscTotal, $cscOffset + 1);
+                                $end = min($cscTotal, $cscOffset + count($cscTemplates));
+                            ?>
+                            Showing <?php echo (int) $start; ?> to <?php echo (int) $end; ?> of <?php echo (int) $cscTotal; ?> entries
+                        <?php endif; ?>
+                    </div>
+                    <div class="template-pagination">
+                    <a class="template-page-link<?php echo $cscPage <= 1 ? ' is-disabled' : ''; ?>" href="<?php echo $cscPage <= 1 ? '#' : htmlspecialchars($hrefPrev); ?>">Previous</a>
+
+                    <?php if ($windowStart > 1): ?>
+                        <?php $baseFirst = $base; $baseFirst['csc_page'] = 1; ?>
+                        <a class="template-page-link" href="<?php echo htmlspecialchars('form-templates.php?' . http_build_query($baseFirst) . '#cscTemplates'); ?>">1</a>
+                        <?php if ($windowStart > 2): ?>
+                            <span class="template-page-ellipsis" aria-hidden="true">…</span>
+                        <?php endif; ?>
+                    <?php endif; ?>
+
+                    <?php for ($i = $windowStart; $i <= $windowEnd; $i++): ?>
+                        <?php if ($i === $cscPage): ?>
+                            <span class="template-page-link is-active" aria-current="page"><?php echo (int) $i; ?></span>
+                        <?php else: ?>
+                            <?php $baseI = $base; $baseI['csc_page'] = $i; ?>
+                            <a class="template-page-link" href="<?php echo htmlspecialchars('form-templates.php?' . http_build_query($baseI) . '#cscTemplates'); ?>"><?php echo (int) $i; ?></a>
+                        <?php endif; ?>
+                    <?php endfor; ?>
+
+                    <?php if ($windowEnd < $cscTotalPages): ?>
+                        <?php if ($windowEnd < $cscTotalPages - 1): ?>
+                            <span class="template-page-ellipsis" aria-hidden="true">…</span>
+                        <?php endif; ?>
+                        <?php $baseLast = $base; $baseLast['csc_page'] = $cscTotalPages; ?>
+                        <a class="template-page-link" href="<?php echo htmlspecialchars('form-templates.php?' . http_build_query($baseLast) . '#cscTemplates'); ?>"><?php echo (int) $cscTotalPages; ?></a>
+                    <?php endif; ?>
+
+                    <a class="template-page-link<?php echo $cscPage >= $cscTotalPages ? ' is-disabled' : ''; ?>" href="<?php echo $cscPage >= $cscTotalPages ? '#' : htmlspecialchars($hrefNext); ?>">Next</a>
+                    </div>
+                </div>
+            <?php endif; ?>
         </div>
     </div>
 
@@ -359,25 +529,44 @@ $csc_templates->execute();
     margin-top: 20px;
 }
 
+.template-section {
+    border: 1px solid #d6e2f0;
+    border-radius: 14px;
+    background: #fff;
+    overflow: hidden;
+}
+
+.template-section .section-header {
+    padding: 14px 16px;
+    border-bottom: 1px solid #e7edf6;
+    background: #f6faff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
 .template-section h4 {
-    margin-bottom: 15px;
+    margin: 0;
     color: #333;
 }
 
 .template-list {
     display: flex;
     flex-direction: column;
-    gap: 10px;
 }
 
 .template-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 15px;
-    border: 1px solid #ddd;
-    border-radius: 6px;
+    padding: 15px 16px;
+    border-bottom: 1px solid #e7edf6;
     background: white;
+}
+
+.template-item:last-child {
+    border-bottom: none;
 }
 
 .template-item.active {
@@ -404,6 +593,89 @@ $csc_templates->execute();
     display: flex;
     align-items: center;
     gap: 10px;
+}
+
+.template-footer {
+    margin-top: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    border-top: 1px solid #e7edf6;
+    background: #fbfdff;
+    border-radius: 0 0 10px 10px;
+}
+
+.template-pagination-meta {
+    color: #6f86a3;
+    font-weight: 600;
+}
+
+.template-pagination {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.template-page-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 32px;
+    padding: 0 12px;
+    border-radius: 0;
+    border: 1px solid #dee2e6;
+    background: #fff;
+    color: #0f4c81;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 700;
+    margin-left: -1px;
+}
+
+.template-page-link.is-active {
+    background: #0f4c81;
+    border-color: #0f4c81;
+    color: #fff;
+    z-index: 2;
+}
+
+.template-page-link:hover {
+    background: #e9ecef;
+    border-color: #dee2e6;
+    z-index: 1;
+}
+
+.template-page-link.is-disabled {
+    opacity: 0.45;
+    pointer-events: none;
+}
+
+.template-page-ellipsis {
+    color: #6a7d94;
+    font-weight: 800;
+    padding-inline: 2px;
+}
+
+.template-page-link:first-child {
+    border-top-left-radius: 6px;
+    border-bottom-left-radius: 6px;
+    margin-left: 0;
+}
+
+.template-page-link:last-child {
+    border-top-right-radius: 6px;
+    border-bottom-right-radius: 6px;
+}
+
+@media (max-width: 900px) {
+    .template-footer {
+        flex-direction: column;
+        align-items: flex-start;
+    }
 }
 
 .badge {
