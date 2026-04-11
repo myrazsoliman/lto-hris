@@ -489,31 +489,39 @@ $sealSections = [
                                     </span>
                                 </button>
                             </div>
+                            <div class="login-forgot-under-password">
+                                <a href="#" class="login-forgot-link">Forgot password?</a>
+                            </div>
 
                             <div class="login-captcha-block">
-                                <div class="login-captcha-hint">What code is in the image?</div>
-                                <div class="login-captcha-image-wrap">
-                                    <img
-                                        src="captcha-image.php?context=login_modal&amp;v=<?php echo urlencode($loginCaptchaNonce); ?>"
-                                        alt="CAPTCHA image"
-                                        class="login-captcha-image"
-                                        id="loginCaptchaImage"
-                                    >
-                                    <button type="button" class="login-captcha-refresh" id="loginCaptchaRefresh">Refresh</button>
+                                <div class="login-captcha-hint-row">
+                                    <div class="login-captcha-hint">What code is in the image?</div>
                                 </div>
-                            </div>
-                            <div class="login-input-wrap login-input-wrap-modal">
-                                <div class="login-input-shell">
-                                    <span class="login-input-icon" aria-hidden="true">
-                                        <img src="assets/img/captcha-logo.png" alt="" width="26" height="26" loading="lazy" decoding="async">
-                                    </span>
-                                    <input type="text" id="loginModalCaptcha" name="captcha_answer" placeholder=" " value="<?php echo htmlspecialchars($loginCaptchaInput); ?>" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="5" required>
-                                    <label class="login-floating-label" for="loginModalCaptcha">Enter CAPTCHA</label>
-                                </div>
-                            </div>
+                                <div class="login-captcha-row">
+                                    <div class="login-captcha-image-wrap">
+                                        <div class="login-captcha-image-frame">
+                                            <img
+                                                src="captcha-image.php?context=login_modal&amp;v=<?php echo urlencode($loginCaptchaNonce); ?>"
+                                                alt="CAPTCHA image"
+                                                class="login-captcha-image"
+                                                id="loginCaptchaImage"
+                                            >
+                                        </div>
+                                        <button type="button" class="login-captcha-refresh" id="loginCaptchaRefresh" aria-label="Refresh captcha">
+                                            <img src="assets/img/captcha-refresh.png" alt="" width="18" height="18" loading="lazy" decoding="async">
+                                        </button>
+                                    </div>
 
-                            <div class="login-modal-actions-row login-modal-actions-row-split">
-                                <a href="#" class="login-forgot-link">Forgot password?</a>
+                                    <div class="login-input-wrap login-input-wrap-modal login-captcha-input-wrap">
+                                        <div class="login-input-shell">
+                                            <span class="login-input-icon" aria-hidden="true">
+                                                <img src="assets/img/captcha-logo.png" alt="" width="26" height="26" loading="lazy" decoding="async">
+                                            </span>
+                                            <input type="text" id="loginModalCaptcha" name="captcha_answer" placeholder=" " value="<?php echo htmlspecialchars($loginCaptchaInput); ?>" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="5" required>
+                                            <label class="login-floating-label" for="loginModalCaptcha">Enter CAPTCHA</label>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
                             <button type="submit" class="login-submit-btn login-submit-btn-modal login-submit-btn-modal-split">
@@ -635,6 +643,11 @@ $sealSections = [
                                 </div>
                             </div>
 
+                            <div class="register-login-row">
+                                <span>Already have an account?</span>
+                                <a href="login.php" class="register-login-link js-login-trigger">Login</a>
+                            </div>
+
                             <button type="submit" class="login-submit-btn login-submit-btn-modal login-submit-btn-modal-split register-submit-btn-modal">
                                 <span>Register</span>
                             </button>
@@ -645,28 +658,7 @@ $sealSections = [
         </div>
     </div>
 
-    <footer class="site-footer gov-footer">
-        <div class="container footer-inner">
-            <div class="footer-seal">
-                <img src="assets/img/rph.png" alt="Republic of the Philippines">
-            </div>
-            <div class="footer-col">
-                <h4>LTO - PILA DISTRICT OFFICE</h4>
-                <p>Land Transportation Office (LTO)</p>
-                <p>Brgy. Sta. Clara Sur, Pila, Laguna</p>
-                <p><a href="tel:+63492501712">+63 49 250-1712</a></p>
-            </div>
-            <div class="footer-col">
-                <h4>About GOVPH</h4>
-                <p>Learn more about the Philippine government, its structure, how government works and the people behind it.</p>
-                <ul class="flat-links">
-                    <li><a href="https://portal.gov.ph/" target="_blank" rel="noopener noreferrer">GOV.PH</a></li>
-                    <li><a href="https://open.gov.ph/" target="_blank" rel="noopener noreferrer">Open Data Portal</a></li>
-                    <li><a href="https://www.officialgazette.gov.ph/" target="_blank" rel="noopener noreferrer">Official Gazette</a></li>
-                </ul>
-            </div>
-        </div>
-    </footer>
+    <?php include __DIR__ . '/includes/public-footer.php'; ?>
 
     <script>
         (function() {
@@ -783,6 +775,12 @@ $sealSections = [
             const captchaImage = document.getElementById('loginCaptchaImage');
             const captchaField = document.getElementById('loginModalCaptcha');
             if (!captchaRefreshBtn || !captchaImage) return;
+
+            if (captchaField) {
+                captchaField.addEventListener('input', function() {
+                    this.value = this.value.replace(/[^A-Za-z0-9]/g, '').slice(0, 5);
+                });
+            }
 
             captchaRefreshBtn.addEventListener('click', function() {
                 captchaImage.src = 'captcha-image.php?context=login_modal&regen=1&t=' + Date.now();

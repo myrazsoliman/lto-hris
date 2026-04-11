@@ -13,7 +13,7 @@ function generate_login_captcha_code()
 {
     // 5-char CAPTCHA with exactly 2 digits (avoid ambiguous chars like I, l, O, o, 0, 1),
     // and no repeated letters/digits (case-insensitive for letters).
-    $letterBases = str_split('ABCDEFGHJKLMNPQRSTUVWXYZ'); // base letters (no I/O)
+    $letterBases = str_split('ABCDEFGHJKLMNPQRSTUVWXYZ'); // no I/O
     $digits = str_split('23456789'); // no 0/1
 
     // Pick 3 unique base letters.

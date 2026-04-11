@@ -6,7 +6,7 @@ function login_captcha_issue_challenge(): string
 {
     // 5-char CAPTCHA with exactly 2 digits (avoid ambiguous chars like I, l, O, o, 0, 1),
     // and no repeated letters/digits (case-insensitive for letters).
-    $letterBases = str_split('ABCDEFGHJKLMNPQRSTUVWXYZ'); // base letters (no I/O)
+    $letterBases = str_split('ABCDEFGHJKLMNPQRSTUVWXYZ'); // no I/O
     $digits = str_split('23456789'); // no 0/1
 
     // Pick 3 unique base letters.
@@ -54,7 +54,7 @@ function login_captcha_verify_answer(string $input): bool
     if ($normalized === '' || $expected === '') {
         return false;
     }
-    // Case-sensitive verification (because the code contains upper + lower case).
+    // Case-sensitive verification (the code contains both upper + lower case).
     $ok = hash_equals($expected, $normalized);
     if ($ok) {
         unset($_SESSION['login_modal_captcha_expected'], $_SESSION['login_modal_captcha_nonce']);

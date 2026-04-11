@@ -366,11 +366,11 @@ body{font-family:Arial,Helvetica,sans-serif;margin:0;color:#111;background:var(-
 .login-modal.is-open::before,
 .login-modal.is-open::after{opacity:1;transform:scale(1)}
 .login-modal-backdrop{position:absolute;inset:0;background:rgba(11,30,54,0.78)}
-.login-modal-dialog{position:relative;z-index:1;width:min(100%,1080px);max-height:calc(100vh - 48px);overflow-y:auto;overflow-x:hidden;scrollbar-width:none;-ms-overflow-style:none;border-radius:34px;background:linear-gradient(135deg,#163f7a 0%,#2b5fa5 55%,#6f95c9 100%);transform:translateY(28px) scale(.97);opacity:0;transition:transform 320ms cubic-bezier(.2,.8,.2,1),opacity 320ms ease}
+.login-modal-dialog{position:relative;z-index:1;width:min(100%,1080px);max-height:calc(100vh - 48px);overflow:hidden;scrollbar-width:none;-ms-overflow-style:none;border-radius:34px;background:linear-gradient(135deg,#163f7a 0%,#2b5fa5 55%,#6f95c9 100%);transform:translateY(28px) scale(.97);opacity:0;transition:transform 320ms cubic-bezier(.2,.8,.2,1),opacity 320ms ease}
 .login-modal-dialog::-webkit-scrollbar{width:0;height:0}
 .login-modal.is-open .login-modal-dialog{transform:translateY(0) scale(1);opacity:1}
 .login-card-modal{display:block;width:100%;padding:0;border-radius:34px;overflow:hidden;background:transparent;box-shadow:none;border:0}
-.login-card-modal-split{position:relative;display:grid;grid-template-columns:.88fr 1.12fr;width:100%;min-height:540px;border-radius:34px;overflow:hidden;background:#fff;box-shadow:0 28px 70px rgba(32,43,78,.18)}
+.login-card-modal-split{position:relative;display:grid;grid-template-columns:.88fr 1.12fr;width:100%;min-height:auto;border-radius:34px;overflow:hidden;background:#fff;box-shadow:0 28px 70px rgba(32,43,78,.18)}
 #loginModal .login-card-modal-split{margin-top:-4px}
 .login-card-modal-split::after{display:none}
 .login-card-modal-split::before{display:none}
@@ -474,14 +474,22 @@ opacity:.9}
 .login-password-toggle.is-active .login-password-icon-show{display:none}
 .login-password-toggle.is-active .login-password-icon-hide{display:inline-flex}
 .login-modal-actions-row{display:flex;align-items:center;justify-content:flex-end;gap:16px;margin-top:2px;padding:4px 2px 0}
+.login-forgot-under-password{display:flex;justify-content:flex-end;margin-top:0;padding:6px 2px}
 .login-forgot-link{color:#184d97;font-size:14px;font-weight:800}
 .login-forgot-link:hover{text-decoration:underline}
 .login-captcha-block{margin:2px 2px 10px}
-.login-captcha-hint{margin:0 0 8px;color:#223b61;font-size:13px;font-weight:700;letter-spacing:.01em}
-.login-captcha-image-wrap{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.login-captcha-hint-row{display:block;margin:0 0 8px}
+.login-captcha-hint{margin:0;color:#223b61;font-size:13px;font-weight:700;letter-spacing:.01em}
+.login-captcha-row{display:flex;align-items:stretch;gap:14px}
+.login-captcha-image-wrap{display:flex;flex:1;align-items:center;gap:10px;flex-wrap:nowrap}
+.login-captcha-image-frame{flex:1;display:flex;justify-content:center;align-items:center}
+.login-captcha-input-wrap{flex:1;min-width:0}
+.login-captcha-input-wrap .login-input-shell{min-height:62px}
 .login-captcha-image{display:block;width:190px;max-width:100%;height:62px;border:1px solid rgba(36,63,100,.28);border-radius:8px;background:#f4f7fb}
-.login-captcha-refresh{-webkit-appearance:none;appearance:none;display:inline-flex;align-items:center;justify-content:center;min-height:36px;padding:0 14px;border:1px solid rgba(43,95,165,.36);border-radius:8px;background:#fff;color:#1f4d8f;font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;transition:background-color 160ms ease,border-color 160ms ease,color 160ms ease}
+.login-captcha-refresh{-webkit-appearance:none;appearance:none;display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;padding:0;border:1px solid rgba(43,95,165,.36);border-radius:10px;background:#fff;color:#1f4d8f;cursor:pointer;transition:background-color 160ms ease,border-color 160ms ease,color 160ms ease,transform 160ms ease}
+.login-captcha-refresh img{display:block;width:18px;height:18px}
 .login-captcha-refresh:hover{background:rgba(43,95,165,.08);border-color:rgba(43,95,165,.5);color:#163f7a}
+.login-captcha-refresh:active{transform:translateY(1px)}
 .login-submit-btn-modal{display:inline-flex;align-items:center;justify-content:center;width:100%;min-height:60px;margin-top:8px;border-radius:18px;background:linear-gradient(135deg,#163f7a,#2b5fa5);letter-spacing:.16em;box-shadow:0 12px 24px rgba(22,63,122,.18);transition:transform 200ms ease,box-shadow 200ms ease,filter 200ms ease}
 .login-submit-btn-modal:hover{transform:translateY(-1px);box-shadow:0 16px 28px rgba(22,63,122,.24);filter:saturate(1.03)}
 .login-modal-meta{position:relative;z-index:1;display:flex;flex-wrap:wrap;gap:10px 18px;margin-top:18px;padding-top:16px;border-top:1px solid rgba(43,95,165,.14);color:#5f7088;font-size:12px;line-height:1.5}
@@ -537,12 +545,14 @@ opacity:.9}
 .register-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .register-form-modal > .register-honeypot,
 .register-form-modal > .password-validation-indicator,
-.register-form-modal > .register-submit-btn-modal{grid-column:1/-1}
+.register-form-modal > .register-submit-btn-modal,
+.register-form-modal > .register-login-row{grid-column:1/-1}
 .register-form-modal > .alert{grid-column:1/-1}
 .register-form-modal > .register-input-wrap:has(#registerModalPassword){order:5}
 .register-form-modal > .register-input-wrap:has(#registerModalConfirmPassword){order:6}
-.register-form-modal > .password-validation-indicator{order:7}
-.register-form-modal > .register-submit-btn-modal{order:8}
+.register-form-modal > .register-login-row{order:7}
+.register-form-modal > .password-validation-indicator{order:8}
+.register-form-modal > .register-submit-btn-modal{order:9}
 .register-input-wrap .login-input-shell{min-height:62px;padding:14px 18px;border-radius:16px}
 .register-input-wrap input{min-height:24px;padding:13px 0 0;font-size:14px}
 .register-input-wrap .login-floating-label{left:56px}
@@ -582,16 +592,23 @@ opacity:.9}
 .register-form-modal .password-validation-item.is-valid .validation-text{color:#6fbe7b;font-weight:700}
 .register-submit-btn-modal{background:linear-gradient(135deg,#0f4c81,#2b5fa5);box-shadow:0 12px 24px rgba(15,76,129,.18)}
 .register-submit-btn-modal:hover{box-shadow:0 16px 28px rgba(15,76,129,.24)}
+.register-login-row{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:4px;font-size:13px;font-weight:700;color:#6c7d93}
+.register-login-link{color:#184d97;font-weight:900;text-decoration:none}
+.register-login-link:hover{text-decoration:underline}
 .register-honeypot{position:absolute !important;left:-9999px !important;top:auto !important;width:1px !important;height:1px !important;overflow:hidden !important}
 
 @media(max-width:640px){
   .login-modal{padding:16px}
-  .login-modal-dialog{width:100%;max-height:calc(100vh - 32px);border-radius:24px}
+  .login-modal-dialog{width:100%;max-height:calc(100vh - 32px);overflow:hidden;border-radius:24px}
   .login-card-modal{border-radius:24px}
   .login-modal-header{padding:22px 22px 20px}
   .login-modal-header h2{font-size:36px}
   .login-modal-body{padding:22px 22px 24px}
   .login-modal-actions-row{justify-content:flex-start}
+  .login-captcha-hint-row{justify-content:center}
+  .login-captcha-row{flex-direction:column;align-items:stretch}
+  .login-captcha-image-wrap{justify-content:center;flex-wrap:wrap}
+  .login-captcha-input-wrap{min-width:0}
   .login-modal-agency-mark{gap:10px;margin-bottom:12px}
   .login-modal-agency-mark img{width:48px;height:48px}
   .login-modal-agency-copy strong{font-size:13px}

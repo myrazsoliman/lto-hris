@@ -201,26 +201,7 @@ $publicNavItems = [
 
         <section class="public-page"><div class="public-wrap"><div class="public-hero"><span class="public-kicker">LTO HRIS Public Information</span><h2 class="public-title">Medical Clinics</h2><p class="public-summary">Category-focused reference page for Medical Clinic under accreditation-linked services.</p><div class="pub-layout"><article class="pub-panel"><h3>Reference Entries</h3><table class="pub-provider-table"><thead><tr><th>Name</th><th>Location</th><th>Status</th></tr></thead><tbody><tr><td>Medical Clinic Alpha</td><td>Laguna</td><td>Active</td></tr><tr><td>Medical Clinic Beta</td><td>Region IV-A</td><td>Active</td></tr><tr><td>Medical Clinic Gamma</td><td>National</td><td>Under Review</td></tr></tbody></table></article><article class="pub-panel"><h3>Compliance Checklist</h3><ul class="public-list"><li>Valid accreditation reference number</li><li>Updated compliance documents</li><li>Published contact and service scope</li></ul></article></div></div></div></section>
 
-    <footer class="site-footer gov-footer">
-        <div class="container footer-inner">
-            <div class="footer-seal"><img src="assets/img/rph.png" alt="Republic of the Philippines"></div>
-            <div class="footer-col">
-                <h4>LTO - PILA DISTRICT OFFICE</h4>
-                <p>Land Transportation Office (LTO)</p>
-                <p>Brgy. Sta. Clara Sur, Pila, Laguna</p>
-                <p><a href="tel:+63492501712">+63 49 250-1712</a></p>
-            </div>
-            <div class="footer-col">
-                <h4>About GOVPH</h4>
-                <p>Learn more about the Philippine government, its structure, how government works and the people behind it.</p>
-                <ul class="flat-links">
-                    <li><a href="https://portal.gov.ph/" target="_blank" rel="noopener noreferrer">GOV.PH</a></li>
-                    <li><a href="https://open.gov.ph/" target="_blank" rel="noopener noreferrer">Open Data Portal</a></li>
-                    <li><a href="https://www.officialgazette.gov.ph/" target="_blank" rel="noopener noreferrer">Official Gazette</a></li>
-                </ul>
-            </div>
-        </div>
-    </footer>
+    <?php include __DIR__ . '/includes/public-footer.php'; ?>
 
     <script>
         (function() {

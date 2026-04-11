@@ -201,26 +201,7 @@ $publicNavItems = [
 
         <section class="public-page"><div class="public-wrap"><div class="public-hero"><span class="public-kicker">LTO HRIS Public Information</span><h2 class="public-title">Resources</h2><p class="public-summary">Central hub for forms, references, and supporting materials.</p><div class="pub-layout"><article class="pub-panel"><h3>Resource Categories</h3><div class="pub-link-grid"><a class="pub-link-card" href="downloadable-forms.php">Downloadable Forms</a><a class="pub-link-card" href="hrds-forms.php">HRDS Forms</a><a class="pub-link-card" href="data-privacy-notice.php">Policies</a><a class="pub-link-card" href="news-and-updates.php">Advisories</a></div></article><article class="pub-panel"><h3>Publishing Standard</h3><p>Only the latest posted resource versions should be used for official submissions.</p></article></div></div></div></section>
 
-    <footer class="site-footer gov-footer">
-        <div class="container footer-inner">
-            <div class="footer-seal"><img src="assets/img/rph.png" alt="Republic of the Philippines"></div>
-            <div class="footer-col">
-                <h4>LTO - PILA DISTRICT OFFICE</h4>
-                <p>Land Transportation Office (LTO)</p>
-                <p>Brgy. Sta. Clara Sur, Pila, Laguna</p>
-                <p><a href="tel:+63492501712">+63 49 250-1712</a></p>
-            </div>
-            <div class="footer-col">
-                <h4>About GOVPH</h4>
-                <p>Learn more about the Philippine government, its structure, how government works and the people behind it.</p>
-                <ul class="flat-links">
-                    <li><a href="https://portal.gov.ph/" target="_blank" rel="noopener noreferrer">GOV.PH</a></li>
-                    <li><a href="https://open.gov.ph/" target="_blank" rel="noopener noreferrer">Open Data Portal</a></li>
-                    <li><a href="https://www.officialgazette.gov.ph/" target="_blank" rel="noopener noreferrer">Official Gazette</a></li>
-                </ul>
-            </div>
-        </div>
-    </footer>
+    <?php include __DIR__ . '/includes/public-footer.php'; ?>
 
     <script>
         (function() {

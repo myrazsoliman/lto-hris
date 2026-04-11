@@ -201,26 +201,7 @@ $publicNavItems = [
 
         <section class="public-page"><div class="public-wrap"><div class="public-hero"><span class="public-kicker">LTO HRIS Public Information</span><h2 class="public-title">LTO Accredited</h2><p class="public-summary">Accreditation overview by provider type for public reference and validation support.</p><div class="pub-layout"><article class="pub-panel"><h3>Accreditation Summary</h3><table class="pub-provider-table"><thead><tr><th>Category</th><th>Listed</th><th>Status</th></tr></thead><tbody><tr><td>Medical Clinics</td><td>32</td><td>Active</td></tr><tr><td>Driving Schools</td><td>18</td><td>Active</td></tr><tr><td>Instructors</td><td>55</td><td>For Validation</td></tr></tbody></table></article><article class="pub-panel"><h3>Verification Notes</h3><p>Use the corresponding subpages to check category-specific references and updates.</p><div class="pub-alert">Accreditation records are subject to periodic revalidation.</div></article></div></div></div></section>
 
-    <footer class="site-footer gov-footer">
-        <div class="container footer-inner">
-            <div class="footer-seal"><img src="assets/img/rph.png" alt="Republic of the Philippines"></div>
-            <div class="footer-col">
-                <h4>LTO - PILA DISTRICT OFFICE</h4>
-                <p>Land Transportation Office (LTO)</p>
-                <p>Brgy. Sta. Clara Sur, Pila, Laguna</p>
-                <p><a href="tel:+63492501712">+63 49 250-1712</a></p>
-            </div>
-            <div class="footer-col">
-                <h4>About GOVPH</h4>
-                <p>Learn more about the Philippine government, its structure, how government works and the people behind it.</p>
-                <ul class="flat-links">
-                    <li><a href="https://portal.gov.ph/" target="_blank" rel="noopener noreferrer">GOV.PH</a></li>
-                    <li><a href="https://open.gov.ph/" target="_blank" rel="noopener noreferrer">Open Data Portal</a></li>
-                    <li><a href="https://www.officialgazette.gov.ph/" target="_blank" rel="noopener noreferrer">Official Gazette</a></li>
-                </ul>
-            </div>
-        </div>
-    </footer>
+    <?php include __DIR__ . '/includes/public-footer.php'; ?>
 
     <script>
         (function() {
