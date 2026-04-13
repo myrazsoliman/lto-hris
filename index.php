@@ -15,6 +15,8 @@ $registerFirstName = '';
 $registerMiddleName = '';
 $registerLastName = '';
 $registerEmail = '';
+$registerVerificationCode = '';
+$showRegisterVerificationStep = isset($_SESSION['pending_register_verification']);
 $showRegisterModal = isset($_GET['register']);
 $forgotError = '';
 $forgotSuccess = '';
@@ -161,59 +163,139 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form_action'] ?? '') === '
     $registerMiddleName = isset($_POST['middle_name']) ? trim($_POST['middle_name']) : '';
     $registerLastName = isset($_POST['last_name']) ? trim($_POST['last_name']) : '';
     $registerEmail = isset($_POST['email']) ? trim($_POST['email']) : '';
+    $registerVerificationCode = isset($_POST['register_verification_code']) ? preg_replace('/\D+/', '', (string) $_POST['register_verification_code']) : '';
     $password = isset($_POST['register_password']) ? (string) $_POST['register_password'] : '';
     $confirmPassword = isset($_POST['register_confirm_password']) ? (string) $_POST['register_confirm_password'] : '';
+    $registerVerificationAction = isset($_POST['register_verification_action']) ? trim((string) $_POST['register_verification_action']) : 'send_code';
     $registerHoneypot = isset($_POST['website']) ? trim($_POST['website']) : '';
+    $pendingRegister = $_SESSION['pending_register_verification'] ?? null;
 
     if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
         $registerError = 'Your session has expired. Please try again.';
     } elseif (is_rate_limited('register')) {
         $registerError = 'Too many registration attempts. Please wait a few minutes before trying again.';
-    } elseif ($registerFirstName === '' || $registerLastName === '' || $registerEmail === '' || $password === '' || $confirmPassword === '') {
-        $registerError = 'Please complete all required registration fields.';
-    } elseif (!filter_var($registerEmail, FILTER_VALIDATE_EMAIL)) {
-        $registerError = 'Please enter a valid email address.';
-    } elseif ($password !== $confirmPassword) {
-        $registerError = 'Password and confirm password do not match.';
     } else {
-        $policyErrors = password_policy_errors($password, '', $registerEmail);
-
-        if ($policyErrors) {
-            $registerError = $policyErrors[0];
-        } elseif (user_exists($registerEmail)) {
-            $registerError = 'An account with this email already exists.';
-        } else {
-            // Create user directly
-            $userId = create_user_directly($registerFirstName, $registerMiddleName, $registerLastName, $registerEmail, $password);
-            
-            if ($userId) {
-                clear_failed_attempts('register');
-                regenerate_csrf_token();
-
-                // After successful registration, proceed directly to verification modal.
-                $newUser = fetch_user_record($registerEmail);
-                if ($newUser && is_array($newUser)) {
-                    start_2fa_challenge($newUser);
-                    header('Location: index.php?2fa=1');
-                } else {
-                    header('Location: index.php?login=1&registration_success=1');
-                }
-                exit;
+        if ($registerVerificationAction === 'verify_code') {
+            if (!is_array($pendingRegister)) {
+                $registerError = 'No pending email verification found. Please request a new verification code.';
+            } elseif (($pendingRegister['expires_at'] ?? 0) < time()) {
+                unset($_SESSION['pending_register_verification']);
+                $registerError = 'Verification code has expired. Please request a new code.';
+            } elseif ($registerVerificationCode === '' || strlen($registerVerificationCode) !== 6) {
+                $registerError = 'Enter the 6-digit verification code sent to your email.';
+            } elseif (!password_verify($registerVerificationCode, (string) ($pendingRegister['code_hash'] ?? ''))) {
+                $registerError = 'Invalid verification code. Please try again.';
+            } elseif (user_exists((string) ($pendingRegister['email'] ?? ''))) {
+                unset($_SESSION['pending_register_verification']);
+                $registerError = 'An account with this email already exists.';
             } else {
+                $userId = create_user_directly_with_hash(
+                    (string) ($pendingRegister['first_name'] ?? ''),
+                    (string) ($pendingRegister['middle_name'] ?? ''),
+                    (string) ($pendingRegister['last_name'] ?? ''),
+                    (string) ($pendingRegister['email'] ?? ''),
+                    (string) ($pendingRegister['password_hash'] ?? '')
+                );
+
+                if ($userId) {
+                    unset($_SESSION['pending_register_verification']);
+                    clear_failed_attempts('register');
+                    regenerate_csrf_token();
+                    header('Location: index.php?login=1&registration_success=1');
+                    exit;
+                }
+
                 $registerError = 'Registration failed. Please try again.';
+            }
+        } elseif ($registerVerificationAction === 'resend_code') {
+            if (!is_array($pendingRegister)) {
+                $registerError = 'No pending email verification found. Please register again.';
+            } else {
+                $lastSentAt = (int) ($pendingRegister['sent_at'] ?? 0);
+                if ($lastSentAt > 0 && (time() - $lastSentAt) < 30) {
+                    $registerError = 'Please wait a few seconds before requesting another code.';
+                } else {
+                    $verificationCode = (string) random_int(100000, 999999);
+                    $pendingRegister['code_hash'] = password_hash($verificationCode, PASSWORD_DEFAULT);
+                    $pendingRegister['expires_at'] = time() + 600;
+                    $pendingRegister['sent_at'] = time();
+                    $_SESSION['pending_register_verification'] = $pendingRegister;
+
+                    $subject = 'LTO HRIS Email Verification Code';
+                    $message = "Your LTO HRIS registration verification code is: {$verificationCode}\n\nThis code expires in 10 minutes.";
+                    $sent = send_email_message((string) $pendingRegister['email'], $subject, $message);
+
+                    if ($sent) {
+                        $registerSuccess = 'A new verification code has been sent to your email.';
+                    } else {
+                        $registerError = 'Unable to send verification code right now. Please try again later.';
+                    }
+                }
+            }
+        } else {
+            if ($registerFirstName === '' || $registerLastName === '' || $registerEmail === '' || $password === '' || $confirmPassword === '') {
+                $registerError = 'Please complete all required registration fields.';
+            } elseif (!filter_var($registerEmail, FILTER_VALIDATE_EMAIL)) {
+                $registerError = 'Please enter a valid email address.';
+            } elseif ($password !== $confirmPassword) {
+                $registerError = 'Password and confirm password do not match.';
+            } else {
+                $policyErrors = password_policy_errors($password, '', $registerEmail);
+
+                if ($policyErrors) {
+                    $registerError = $policyErrors[0];
+                } elseif (user_exists($registerEmail)) {
+                    $registerError = 'An account with this email already exists.';
+                } else {
+                    $verificationCode = (string) random_int(100000, 999999);
+                    $_SESSION['pending_register_verification'] = [
+                        'first_name' => $registerFirstName,
+                        'middle_name' => $registerMiddleName,
+                        'last_name' => $registerLastName,
+                        'email' => normalize_identifier($registerEmail),
+                        'password_hash' => password_hash($password, PASSWORD_DEFAULT),
+                        'code_hash' => password_hash($verificationCode, PASSWORD_DEFAULT),
+                        'expires_at' => time() + 600,
+                        'sent_at' => time(),
+                    ];
+
+                    $subject = 'LTO HRIS Email Verification Code';
+                    $message = "Your LTO HRIS registration verification code is: {$verificationCode}\n\nThis code expires in 10 minutes.";
+                    $sent = send_email_message($registerEmail, $subject, $message);
+
+                    if ($sent) {
+                        $registerSuccess = 'A verification code has been sent to your email. Enter the code to complete registration.';
+                    } else {
+                        unset($_SESSION['pending_register_verification']);
+                        $registerError = 'Unable to send verification code right now. Please try again later.';
+                    }
+                }
             }
         }
     }
 
     if ($registerError !== '') {
         register_failed_attempt('register');
-    } else {
-        $showRegisterModal = true;
     }
 
-    if ($registerError !== '' || $registerSuccess !== '') {
-        $showRegisterModal = true;
+    $showRegisterModal = true;
+}
+
+if (isset($_SESSION['pending_register_verification']) && is_array($_SESSION['pending_register_verification'])) {
+    $pendingRegister = $_SESSION['pending_register_verification'];
+    if ($registerFirstName === '') {
+        $registerFirstName = (string) ($pendingRegister['first_name'] ?? '');
     }
+    if ($registerMiddleName === '') {
+        $registerMiddleName = (string) ($pendingRegister['middle_name'] ?? '');
+    }
+    if ($registerLastName === '') {
+        $registerLastName = (string) ($pendingRegister['last_name'] ?? '');
+    }
+    if ($registerEmail === '') {
+        $registerEmail = (string) ($pendingRegister['email'] ?? '');
+    }
+    $showRegisterVerificationStep = true;
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form_action'] ?? '') === 'forgot_password_modal') {
@@ -584,56 +666,6 @@ $publicNavItems = [
         </div>
     </section>
 
-    <section class="hris-actions container">
-        <div class="section-heading section-heading-compact">
-            <span class="section-kicker">Quick Access</span>
-        </div>
-        <div class="hris-actions-grid">
-            <a href="login.php" class="hris-action-card js-login-trigger">
-                <span class="hris-action-eyebrow">Employee Workflow</span>
-                <div class="hris-action-icon" aria-hidden="true">
-                    <svg width="38" height="38" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M4 6.5A2.5 2.5 0 0 1 6.5 4H15l5 5v8.5A2.5 2.5 0 0 1 17.5 20h-11A2.5 2.5 0 0 1 4 17.5v-11Z" stroke="currentColor" stroke-width="1.8" />
-                        <path d="M15 4v5h5" stroke="currentColor" stroke-width="1.8" />
-                        <path d="M8 13h8M8 16h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
-                    </svg>
-                </div>
-                <h3>Application</h3>
-                <p>Submit HR requests, apply for available opportunities, and start your workflow in one secure portal.</p>
-                <span class="hris-action-cta">Open service</span>
-            </a>
-
-            <a href="login.php" class="hris-action-card js-login-trigger">
-                <span class="hris-action-eyebrow">Account Details</span>
-                <div class="hris-action-icon" aria-hidden="true">
-                    <svg width="38" height="38" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <rect x="3" y="5" width="18" height="14" rx="3" stroke="currentColor" stroke-width="1.8" />
-                        <circle cx="9" cy="11" r="2.2" stroke="currentColor" stroke-width="1.8" />
-                        <path d="M6 17c.9-1.9 2.4-2.9 4.5-2.9S14.1 15.1 15 17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
-                        <path d="M15.5 10h3M15.5 13h3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
-                    </svg>
-                </div>
-                <h3>My Profile</h3>
-                <p>Review personal information, employment details, and profile records.</p>
-                <span class="hris-action-cta">Manage profile</span>
-            </a>
-
-            <a href="login.php" class="hris-action-card js-login-trigger">
-                <span class="hris-action-eyebrow">Document Hub</span>
-                <div class="hris-action-icon" aria-hidden="true">
-                    <svg width="38" height="38" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M3.5 8.5A2.5 2.5 0 0 1 6 6h4l1.7 2H18a2.5 2.5 0 0 1 2.5 2.5v6A2.5 2.5 0 0 1 18 19H6A2.5 2.5 0 0 1 3.5 16.5v-8Z" stroke="currentColor" stroke-width="1.8" />
-                        <path d="M7.5 12h9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
-                        <path d="M7.5 15h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
-                    </svg>
-                </div>
-                <h3>My Files</h3>
-                <p>Upload, manage, and track supporting documents, forms, and personnel requirements in one organized space.</p>
-                <span class="hris-action-cta">View files</span>
-            </a>
-        </div>
-    </section>
-
     <section class="privacy-notice-section container">
         <div class="privacy-notice-wrap">
             <h2>Privacy Notice for Employees and Job Applicants</h2>
@@ -987,6 +1019,7 @@ $publicNavItems = [
                         <form class="login-form-modern login-form-modal register-form-modal" method="post" action="index.php">
                         <input type="hidden" name="form_action" value="register_modal">
                         <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken); ?>">
+                        <input type="hidden" name="register_verification_action" id="registerVerificationAction" value="<?php echo $showRegisterVerificationStep ? 'verify_code' : 'send_code'; ?>">
                         <div class="register-honeypot" aria-hidden="true">
                             <label for="registerWebsite">Website</label>
                             <input type="text" id="registerWebsite" name="website" tabindex="-1" autocomplete="off">
@@ -1000,7 +1033,7 @@ $publicNavItems = [
                                         <path d="M12 14c-4.42 0-8 2.24-8 5v1h16v-1c0-2.76-3.58-5-8-5Z" fill="currentColor" />
                                     </svg>
                                 </span>
-                                <input type="text" id="registerModalFirstName" name="first_name" placeholder=" " value="<?php echo htmlspecialchars($registerFirstName ?? ''); ?>" autocomplete="given-name" maxlength="80" required>
+                                <input type="text" id="registerModalFirstName" name="first_name" placeholder=" " value="<?php echo htmlspecialchars($registerFirstName ?? ''); ?>" autocomplete="given-name" maxlength="80" <?php echo $showRegisterVerificationStep ? 'readonly' : ''; ?> required>
                                 <label class="login-floating-label" for="registerModalFirstName">First Name</label>
                             </div>
                         </div>
@@ -1013,7 +1046,7 @@ $publicNavItems = [
                                         <path d="M12 14c-4.42 0-8 2.24-8 5v1h16v-1c0-2.76-3.58-5-8-5Z" fill="currentColor" />
                                     </svg>
                                 </span>
-                                <input type="text" id="registerModalMiddleName" name="middle_name" placeholder=" " value="<?php echo htmlspecialchars($registerMiddleName ?? ''); ?>" autocomplete="additional-name" maxlength="80">
+                                <input type="text" id="registerModalMiddleName" name="middle_name" placeholder=" " value="<?php echo htmlspecialchars($registerMiddleName ?? ''); ?>" autocomplete="additional-name" maxlength="80" <?php echo $showRegisterVerificationStep ? 'readonly' : ''; ?>>
                                 <label class="login-floating-label" for="registerModalMiddleName">Middle Name</label>
                             </div>
                         </div>
@@ -1026,7 +1059,7 @@ $publicNavItems = [
                                         <path d="M12 14c-4.42 0-8 2.24-8 5v1h16v-1c0-2.76-3.58-5-8-5Z" fill="currentColor" />
                                     </svg>
                                 </span>
-                                <input type="text" id="registerModalLastName" name="last_name" placeholder=" " value="<?php echo htmlspecialchars($registerLastName ?? ''); ?>" autocomplete="family-name" maxlength="80" required>
+                                <input type="text" id="registerModalLastName" name="last_name" placeholder=" " value="<?php echo htmlspecialchars($registerLastName ?? ''); ?>" autocomplete="family-name" maxlength="80" <?php echo $showRegisterVerificationStep ? 'readonly' : ''; ?> required>
                                 <label class="login-floating-label" for="registerModalLastName">Last Name</label>
                             </div>
                         </div>
@@ -1039,7 +1072,7 @@ $publicNavItems = [
                                         <path d="m6 8 6 4 6-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
                                     </svg>
                                 </span>
-                                <input type="email" id="registerModalEmail" name="email" placeholder=" " value="<?php echo htmlspecialchars($registerEmail); ?>" autocomplete="email" maxlength="150" required>
+                                <input type="email" id="registerModalEmail" name="email" placeholder=" " value="<?php echo htmlspecialchars($registerEmail); ?>" autocomplete="email" maxlength="150" <?php echo $showRegisterVerificationStep ? 'readonly' : ''; ?> required>
                                 <label class="login-floating-label" for="registerModalEmail">Email</label>
                             </div>
                         </div>
@@ -1052,7 +1085,7 @@ $publicNavItems = [
                                         <path d="M17 9h-1V7a4 4 0 0 0-8 0v2H7a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2Zm-6 0V7a2 2 0 1 1 4 0v2h-4Z" fill="currentColor" />
                                     </svg>
                                 </span>
-                                <input type="password" id="registerModalPassword" name="register_password" placeholder=" " autocomplete="new-password" minlength="10" maxlength="128" required>
+                                <input type="password" id="registerModalPassword" name="register_password" placeholder=" " autocomplete="new-password" minlength="10" maxlength="128" <?php echo $showRegisterVerificationStep ? '' : 'required'; ?> <?php echo $showRegisterVerificationStep ? 'disabled' : ''; ?>>
                                 <label class="login-floating-label" for="registerModalPassword">Password</label>
                             </div>
                             <button type="button" class="login-password-toggle" id="registerPasswordToggle" aria-label="Show password" aria-pressed="false">
@@ -1079,7 +1112,7 @@ $publicNavItems = [
                                         <path d="M17 9h-1V7a4 4 0 0 0-8 0v2H7a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2Zm-6 0V7a2 2 0 1 1 4 0v2h-4Z" fill="currentColor" />
                                     </svg>
                                 </span>
-                                <input type="password" id="registerModalConfirmPassword" name="register_confirm_password" placeholder=" " autocomplete="new-password" minlength="10" maxlength="128" required>
+                                <input type="password" id="registerModalConfirmPassword" name="register_confirm_password" placeholder=" " autocomplete="new-password" minlength="10" maxlength="128" <?php echo $showRegisterVerificationStep ? '' : 'required'; ?> <?php echo $showRegisterVerificationStep ? 'disabled' : ''; ?>>
                                 <label class="login-floating-label" for="registerModalConfirmPassword">Confirm Password</label>
                             </div>
                             <button type="button" class="login-password-toggle" id="registerConfirmPasswordToggle" aria-label="Show password" aria-pressed="false">
@@ -1104,7 +1137,22 @@ $publicNavItems = [
                             <a href="login.php" class="register-login-link js-login-trigger">Login</a>
                         </div>
 
-                        <div class="password-validation-indicator is-hidden" id="passwordValidationIndicator">
+                        <?php if ($showRegisterVerificationStep): ?>
+                        <div class="login-input-wrap login-input-wrap-modal register-input-wrap">
+                            <div class="login-input-shell">
+                                <span class="login-input-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none">
+                                        <path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v11A2.5 2.5 0 0 1 17.5 20h-11A2.5 2.5 0 0 1 4 17.5v-11Z" stroke="currentColor" stroke-width="1.8" />
+                                        <path d="m6 8 6 4 6-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                </span>
+                                <input type="text" id="registerVerificationCode" name="register_verification_code" placeholder=" " value="<?php echo htmlspecialchars($registerVerificationCode); ?>" inputmode="numeric" maxlength="6" pattern="[0-9]{6}" required>
+                                <label class="login-floating-label" for="registerVerificationCode">Email Verification Code</label>
+                            </div>
+                        </div>
+                        <?php endif; ?>
+
+                        <div class="password-validation-indicator<?php echo $showRegisterVerificationStep ? ' is-hidden' : ' is-hidden'; ?>" id="passwordValidationIndicator">
                             <div class="password-strength-progress" aria-hidden="true">
                                 <span class="password-strength-progress-bar" id="passwordStrengthProgressBar"></span>
                             </div>
@@ -1139,9 +1187,20 @@ $publicNavItems = [
                             </div>
                         </div>
 
-                            <button type="submit" class="login-submit-btn login-submit-btn-modal login-submit-btn-modal-split register-submit-btn-modal">
-                                <span>Register</span>
-                            </button>
+                            <?php if ($showRegisterVerificationStep): ?>
+                                <div class="register-verify-actions" style="display:flex;gap:10px;flex-wrap:wrap;">
+                                    <button type="submit" class="login-submit-btn login-submit-btn-modal login-submit-btn-modal-split register-submit-btn-modal" onclick="document.getElementById('registerVerificationAction').value='verify_code';">
+                                        <span>Verify and Create Account</span>
+                                    </button>
+                                    <button type="submit" class="login-submit-btn login-submit-btn-modal login-submit-btn-modal-split register-submit-btn-modal" style="background:#f1f5fb;color:#1f4f8f;border-color:#b8c9e6;" onclick="document.getElementById('registerVerificationAction').value='resend_code';">
+                                        <span>Resend Code</span>
+                                    </button>
+                                </div>
+                            <?php else: ?>
+                                <button type="submit" class="login-submit-btn login-submit-btn-modal login-submit-btn-modal-split register-submit-btn-modal" onclick="document.getElementById('registerVerificationAction').value='send_code';">
+                                    <span>Send Verification Code</span>
+                                </button>
+                            <?php endif; ?>
                         </form>
                     </div>
                 </div>

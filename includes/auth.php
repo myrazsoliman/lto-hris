@@ -298,7 +298,23 @@ function send_email_message($to, $subject, $message)
 
     $sent = false;
 
-    if (SMTP_HOST !== '') {
+    // Prefer PHPMailer when available (composer vendor/autoload.php).
+    $autoloadCandidates = [
+        __DIR__ . '/../vendor/autoload.php',
+        __DIR__ . '/vendor/autoload.php',
+    ];
+    foreach ($autoloadCandidates as $autoloadPath) {
+        if (is_file($autoloadPath)) {
+            require_once $autoloadPath;
+            break;
+        }
+    }
+
+    if (class_exists('\\PHPMailer\\PHPMailer\\PHPMailer')) {
+        $sent = phpmailer_send_mail($to, $subject, $message);
+    }
+
+    if (!$sent && SMTP_HOST !== '') {
         $sent = smtp_send_mail($to, $subject, $message);
     }
 
@@ -315,6 +331,42 @@ function send_email_message($to, $subject, $message)
     }
 
     return $sent;
+}
+
+function phpmailer_send_mail($to, $subject, $body)
+{
+    try {
+        $mail = new \PHPMailer\PHPMailer\PHPMailer(true);
+        $mail->isSMTP();
+        $mail->Host = SMTP_HOST !== '' ? SMTP_HOST : 'smtp.gmail.com';
+        $mail->Port = SMTP_PORT ?: 587;
+        $mail->SMTPAuth = SMTP_USER !== '';
+
+        $secure = strtolower((string) SMTP_SECURE);
+        if ($secure === 'ssl') {
+            $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS;
+        } elseif ($secure === 'tls' || $secure === '') {
+            $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
+        }
+
+        if (SMTP_USER !== '') {
+            $mail->Username = SMTP_USER;
+            $mail->Password = SMTP_PASS;
+        }
+
+        $fromEmail = SMTP_FROM_EMAIL !== '' ? SMTP_FROM_EMAIL : (SMTP_USER !== '' ? SMTP_USER : 'noreply@localhost');
+        $fromName = SMTP_FROM_NAME !== '' ? SMTP_FROM_NAME : 'LTO HRIS';
+        $mail->setFrom($fromEmail, $fromName);
+        $mail->addAddress((string) $to);
+        $mail->Subject = (string) $subject;
+        $mail->Body = (string) $body;
+        $mail->isHTML(false);
+        $mail->CharSet = 'UTF-8';
+
+        return $mail->send();
+    } catch (Throwable $e) {
+        return false;
+    }
 }
 
 function format_user_agent($ua)
@@ -984,6 +1036,14 @@ function create_user_directly($firstName, $middleName, $lastName, $email, $passw
 {
     ensure_auth_schema();
 
+    $passwordHash = password_hash($password, PASSWORD_DEFAULT);
+    return create_user_directly_with_hash($firstName, $middleName, $lastName, $email, $passwordHash);
+}
+
+function create_user_directly_with_hash($firstName, $middleName, $lastName, $email, $passwordHash)
+{
+    ensure_auth_schema();
+
     $hasMiddleName = auth_table_has_column('users', 'middle_name');
     if ($hasMiddleName) {
         $stmt = db()->prepare(
@@ -995,7 +1055,7 @@ function create_user_directly($firstName, $middleName, $lastName, $email, $passw
             trim($middleName) !== '' ? trim($middleName) : null,
             trim($lastName),
             normalize_identifier($email),
-            password_hash($password, PASSWORD_DEFAULT),
+            (string) $passwordHash,
         ]);
     } else {
         $stmt = db()->prepare(
@@ -1006,7 +1066,7 @@ function create_user_directly($firstName, $middleName, $lastName, $email, $passw
             trim($firstName),
             trim($lastName),
             normalize_identifier($email),
-            password_hash($password, PASSWORD_DEFAULT),
+            (string) $passwordHash,
         ]);
     }
 
