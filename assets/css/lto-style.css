@@ -327,20 +327,81 @@ body{font-family:Arial,Helvetica,sans-serif;margin:0;color:#111;background:var(-
 }
 
 /* Vision & Mission modern card styles */
-.vision-mission{max-width:1360px;margin:0 auto;padding:56px 18px;background:transparent}
-.vision-mission .vm-inner{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:30px;align-items:stretch}
-.vision-mission .vm-col{position:relative;overflow:hidden;background:linear-gradient(180deg,#ffffff 0%,#f9fbff 100%);border-radius:22px;padding:34px 34px 30px;box-shadow:0 18px 42px rgba(32,45,66,0.10);border:1px solid rgba(43,95,165,0.10);min-height:220px;display:flex;flex-direction:column;justify-content:flex-start}
-.vision-mission .vm-col::before{content:"";position:absolute;top:0;left:0;width:100%;height:6px;background:linear-gradient(90deg,#2b5fa5,#5f88c2)}
-.vision-mission .vm-col::after{content:"";position:absolute;right:-30px;bottom:-36px;width:140px;height:140px;border-radius:999px;background:radial-gradient(circle, rgba(43,95,165,0.10), rgba(43,95,165,0) 70%)}
-.vision-mission .vm-col h2{margin:0 0 16px;font-family:'Oswald',sans-serif;color:var(--brand);font-size:34px;letter-spacing:1px;line-height:1}
-.vision-mission .vm-col p{margin:0;max-width:56ch;color:#5f6f86;line-height:1.75;font-size:19px;text-align:justify;text-justify:inter-word}
+.vision-mission{
+  max-width:1360px;
+  margin:0 auto;
+  padding:52px 18px 48px;
+  background:transparent;
+}
+.vision-mission .vm-inner{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:28px;
+  align-items:stretch;
+}
+.vision-mission .vm-col{
+  position:relative;
+  overflow:hidden;
+  background:
+    linear-gradient(180deg,#ffffff 0%,#f6faff 100%);
+  border-radius:20px;
+  padding:30px 32px 28px;
+  box-shadow:0 12px 28px rgba(24,48,84,.10);
+  border:1px solid rgba(43,95,165,.14);
+  min-height:220px;
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-start;
+  transition:transform .22s ease, box-shadow .22s ease, border-color .22s ease;
+}
+.vision-mission .vm-col::before{
+  content:"";
+  position:absolute;
+  top:0;
+  left:0;
+  width:100%;
+  height:5px;
+  background:linear-gradient(90deg,#2b5fa5 0%,#4e79b8 58%,#7fa4d8 100%);
+}
+.vision-mission .vm-col::after{
+  content:"";
+  position:absolute;
+  right:-34px;
+  bottom:-40px;
+  width:168px;
+  height:168px;
+  border-radius:999px;
+  background:radial-gradient(circle, rgba(43,95,165,.12), rgba(43,95,165,0) 72%);
+}
+.vision-mission .vm-col h2{
+  margin:0 0 14px;
+  font-family:'Oswald',sans-serif;
+  color:#173761;
+  font-size:30px;
+  letter-spacing:.6px;
+  line-height:1.05;
+}
+.vision-mission .vm-col p{
+  margin:0;
+  max-width:58ch;
+  color:#3f5a7f;
+  line-height:1.72;
+  font-size:17px;
+  text-align:justify;
+  text-justify:inter-word;
+}
+.vision-mission .vm-col:hover{
+  transform:translateY(-2px);
+  border-color:rgba(43,95,165,.22);
+  box-shadow:0 16px 34px rgba(24,48,84,.14);
+}
 
 @media(max-width:880px){
   .vision-mission .vm-inner{grid-template-columns:1fr;gap:18px}
   .vision-mission{padding:32px 18px}
   .vision-mission .vm-col{min-height:auto;padding:26px 24px;align-items:center;text-align:center}
-  .vision-mission .vm-col h2{font-size:28px;text-align:center}
-  .vision-mission .vm-col p{max-width:100%;font-size:17px;margin:0 auto;text-align:justify;text-justify:inter-word}
+  .vision-mission .vm-col h2{font-size:26px;text-align:center}
+  .vision-mission .vm-col p{max-width:100%;font-size:16px;margin:0 auto;text-align:justify;text-justify:inter-word}
 }
 
 /* HRIS quick actions */
@@ -846,6 +907,9 @@ body.public-page-contact-us .pub-layout{grid-template-columns:1.2fr .8fr}
 @media(max-width:980px){
   .pub-kpi-grid,.pub-vacancy-grid,.pub-link-grid,.contact-form-grid{grid-template-columns:1fr}
   .pub-layout{grid-template-columns:1fr !important}
+  body.public-page-mission-and-vision .pub-panel{min-height:auto}
+  body.public-page-mission-and-vision .pub-panel h3{font-size:24px}
+  body.public-page-mission-and-vision .pub-panel p{font-size:16px}
 }
 
 /* Per-page card look differences */
@@ -867,7 +931,75 @@ body.public-page-citisend .pub-step{background:#f6f3ff}
 body.public-page-resources .pub-link-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
 body.public-page-downloadable-forms .pub-provider-table td:first-child{font-weight:700}
 body.public-page-hrds-forms .pub-step::before{background:#5e4f9e}
-body.public-page-mission-and-vision .pub-panel{min-height:190px}
+body.public-page-mission-and-vision .public-hero{
+  border:1px solid rgba(43,95,165,.16);
+  border-top:4px solid #2b5fa5;
+  border-radius:16px;
+  background:linear-gradient(180deg,#f9fbff 0%,#f2f7ff 100%);
+  box-shadow:0 14px 30px rgba(22,49,90,.09);
+}
+body.public-page-mission-and-vision .pub-layout{
+  gap:16px;
+}
+body.public-page-mission-and-vision .vm-brief-layout{
+  align-items:stretch;
+}
+body.public-page-mission-and-vision .pub-panel{
+  min-height:230px;
+  position:relative;
+  padding:18px 20px 18px;
+  border:1px solid rgba(43,95,165,.16);
+  border-radius:14px;
+  background:linear-gradient(180deg,#ffffff 0%,#f7faff 100%);
+  box-shadow:0 10px 22px rgba(23,54,99,.08);
+}
+body.public-page-mission-and-vision .pub-panel::before{
+  content:"";
+  position:absolute;
+  top:0;
+  left:0;
+  right:0;
+  height:4px;
+  background:linear-gradient(90deg,#2b5fa5 0%,#4e79b8 58%,#7fa4d8 100%);
+}
+body.public-page-mission-and-vision .pub-panel h3{
+  margin:0 0 10px;
+  color:#173761;
+  font-size:32px;
+  letter-spacing:.35px;
+  line-height:1.05;
+}
+body.public-page-mission-and-vision .pub-panel p{
+  color:#3f5a7f;
+  font-size:18px;
+  line-height:1.74;
+}
+body.public-page-mission-and-vision .vm-brief-label{
+  margin:0 0 8px;
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:#4f6f99;
+}
+body.public-page-mission-and-vision .vm-card-vision{
+  border-left:3px solid #2b5fa5;
+}
+body.public-page-mission-and-vision .vm-card-mission{
+  border-left:3px solid #3b6fb3;
+}
+body.public-page-mission-and-vision .vm-card-vision::after,
+body.public-page-mission-and-vision .vm-card-mission::after{
+  content:"";
+  position:absolute;
+  right:-28px;
+  bottom:-34px;
+  width:136px;
+  height:136px;
+  border-radius:999px;
+  background:radial-gradient(circle,rgba(43,95,165,.11),rgba(43,95,165,0) 72%);
+  pointer-events:none;
+}
 body.public-page-mandate-and-functions .pub-kpi{background:linear-gradient(145deg,#fbfff1,#f1f7de)}
 body.public-page-historical-background .pub-timeline li{border-left:4px solid #785029}
 body.public-page-road-safety-action-plan .pub-step::before{background:#8b2f2f}
@@ -1642,7 +1774,410 @@ body:is(
 .contact-submit-btn:hover{filter:saturate(1.05)}
 .contact-channel-list{margin:0;padding-left:18px;display:grid;gap:8px;color:#344c68;font-size:14px;line-height:1.6}
 
-/* Policy pages - consistent modern layout */
+body.public-page-contact-us .contact-gov-page{
+  background:linear-gradient(180deg,#f3f7fc 0%,#ffffff 72%);
+}
+body.public-page-contact-us .contact-gov-hero{
+  border:1px solid rgba(29,61,102,.18);
+  border-top:4px solid #2b5fa5;
+  border-radius:12px;
+  background:linear-gradient(180deg,#fbfdff 0%,#f6f9fe 100%);
+  box-shadow:0 12px 28px rgba(18,43,78,.08);
+  padding:14px 16px 12px;
+  position:relative;
+  overflow:hidden;
+}
+body.public-page-contact-us .contact-gov-hero::before{
+  content:"";
+  position:absolute;
+  inset:auto -20% -35% -20%;
+  height:60%;
+  background:
+    radial-gradient(120% 90% at 15% 95%,rgba(94,134,199,.17),transparent 62%),
+    radial-gradient(100% 70% at 85% 100%,rgba(66,107,178,.14),transparent 64%);
+  pointer-events:none;
+}
+body.public-page-contact-us .contact-gov-grid,
+body.public-page-contact-us .contact-gov-hero > *{
+  position:relative;
+  z-index:1;
+}
+body.public-page-contact-us .contact-gov-hero .public-kicker{
+  font-size:11px;
+  letter-spacing:.16em;
+}
+body.public-page-contact-us .contact-gov-hero .public-title{
+  font-size:38px;
+  color:#173761;
+}
+body.public-page-contact-us .contact-gov-hero .public-summary{
+  max-width:78ch;
+  font-size:15px;
+}
+body.public-page-contact-us .contact-gov-grid{
+  margin-top:10px;
+  display:grid;
+  grid-template-columns:1.1fr .9fr;
+  gap:8px;
+  align-items:stretch;
+}
+body.public-page-contact-us .contact-gov-grid-main{
+  grid-template-columns:minmax(320px,1fr) minmax(380px,1.25fr);
+  gap:10px;
+  align-items:stretch;
+}
+body.public-page-contact-us .contact-gov-info .contact-gov-table th{
+  width:170px;
+}
+body.public-page-contact-us .contact-gov-info{display:flex;flex-direction:column;max-width:none;height:100%;justify-content:flex-start;gap:8px}
+body.public-page-contact-us .contact-gov-intro{
+  margin:0 0 10px;
+  font-size:14px;
+  line-height:1.65;
+  color:#475d7c;
+  max-width:42ch;
+}
+body.public-page-contact-us .contact-gov-contact-list{
+  margin:0;
+  padding:0;
+  list-style:none;
+  display:grid;
+  gap:10px;
+  margin-top:2px;
+}
+body.public-page-contact-us .contact-gov-contact-list li{
+  display:grid;
+  grid-template-columns:20px 1fr;
+  gap:8px;
+  align-items:start;
+  color:#2f4969;
+  font-size:14px;
+  line-height:1.45;
+  padding:6px 8px;
+  border:1px solid rgba(31,72,120,.12);
+  border-radius:8px;
+  background:#f9fbff;
+}
+body.public-page-contact-us .contact-gov-contact-list a{
+  color:#1d4f92;
+  text-decoration:none;
+}
+body.public-page-contact-us .contact-gov-contact-list a:hover{text-decoration:underline}
+body.public-page-contact-us .contact-gov-icon{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:18px;
+  height:18px;
+  margin-top:1px;
+  background-color:#2b5fa5;
+  -webkit-mask-repeat:no-repeat;
+  -webkit-mask-position:center;
+  -webkit-mask-size:contain;
+  mask-repeat:no-repeat;
+  mask-position:center;
+  mask-size:contain;
+}
+body.public-page-contact-us .contact-gov-icon-phone{
+  -webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black'%3E%3Cpath d='M6.62 10.79a15.05 15.05 0 0 0 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24a11.7 11.7 0 0 0 3.68.59c.55 0 1 .45 1 1V20a1 1 0 0 1-1 1C10.3 21 3 13.7 3 4a1 1 0 0 1 1-1h3.47c.55 0 1 .45 1 1 0 1.27.2 2.5.59 3.68.12.35.03.74-.24 1.01l-2.2 2.1z'/%3E%3C/svg%3E");
+  mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black'%3E%3Cpath d='M6.62 10.79a15.05 15.05 0 0 0 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24a11.7 11.7 0 0 0 3.68.59c.55 0 1 .45 1 1V20a1 1 0 0 1-1 1C10.3 21 3 13.7 3 4a1 1 0 0 1 1-1h3.47c.55 0 1 .45 1 1 0 1.27.2 2.5.59 3.68.12.35.03.74-.24 1.01l-2.2 2.1z'/%3E%3C/svg%3E");
+}
+body.public-page-contact-us .contact-gov-icon-mail{
+  -webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black'%3E%3Cpath d='M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 4-8 5L4 8V6l8 5 8-5v2z'/%3E%3C/svg%3E");
+  mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black'%3E%3Cpath d='M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 4-8 5L4 8V6l8 5 8-5v2z'/%3E%3C/svg%3E");
+}
+body.public-page-contact-us .contact-gov-icon-pin{
+  -webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black'%3E%3Cpath d='M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5z'/%3E%3C/svg%3E");
+  mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black'%3E%3Cpath d='M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5z'/%3E%3C/svg%3E");
+}
+body.public-page-contact-us .contact-gov-icon-time{
+  -webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black'%3E%3Cpath d='M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm1 11h-5V11h3V7h2z'/%3E%3C/svg%3E");
+  mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black'%3E%3Cpath d='M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm1 11h-5V11h3V7h2z'/%3E%3C/svg%3E");
+}
+body.public-page-contact-us .contact-gov-mini-block{
+  margin-top:2px;
+  padding:8px 10px;
+  border:1px solid rgba(31,72,120,.15);
+  border-radius:10px;
+  background:linear-gradient(180deg,#ffffff 0%,#f7fbff 100%);
+  box-shadow:0 6px 14px rgba(23,58,106,.06);
+}
+body.public-page-contact-us .contact-gov-mini-block h4{
+  margin:0 0 6px;
+  color:#173761;
+  font-size:17px;
+  letter-spacing:.02em;
+  text-transform:uppercase;
+}
+body.public-page-contact-us .contact-gov-required-list{
+  margin:0;
+  padding-left:20px;
+  display:grid;
+  gap:4px;
+  font-size:15px;
+  line-height:1.45;
+  color:#334e6f;
+}
+body.public-page-contact-us .contact-gov-note{
+  margin-top:auto;
+  padding:8px 10px;
+  border:1px solid rgba(31,72,120,.14);
+  border-radius:10px;
+  background:linear-gradient(180deg,#f1f6ff 0%,#e8f0fc 100%);
+  color:#2f4969;
+  font-size:13px;
+  line-height:1.5;
+}
+body.public-page-contact-us .contact-gov-form-section .contact-form-grid{
+  grid-template-columns:1fr 1fr;
+}
+body.public-page-contact-us .contact-gov-form-section .contact-submit-btn{
+  justify-self:start;
+  min-width:200px;
+}
+body.public-page-contact-us .contact-gov-section{
+  border:1px solid rgba(31,72,120,.16);
+  border-radius:10px;
+  background:linear-gradient(180deg,#ffffff 0%,#fbfdff 100%);
+  padding:10px 11px;
+  position:relative;
+  box-shadow:0 10px 18px rgba(17,48,90,.07);
+  height:100%;
+}
+body.public-page-contact-us .contact-gov-section h3{
+  margin:0 0 7px;
+  padding-bottom:6px;
+  border-bottom:1px solid rgba(31,72,120,.14);
+  font-size:20px;
+  letter-spacing:.01em;
+  color:#173761;
+}
+body.public-page-contact-us .contact-gov-wide{
+  grid-column:1 / -1;
+}
+body.public-page-contact-us .contact-gov-bottom-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+body.public-page-contact-us .contact-channel-list-enhanced{
+  margin:0;
+  padding:0;
+  list-style:none;
+  display:grid;
+  gap:6px;
+}
+body.public-page-contact-us .contact-channel-list-enhanced li{
+  position:relative;
+  padding:8px 10px 8px 42px;
+  border:1px solid rgba(31,72,120,.12);
+  border-radius:10px;
+  background:linear-gradient(180deg,#f7faff 0%,#eef4fe 100%);
+  color:#2f4969;
+  font-size:15px;
+  line-height:1.45;
+  box-shadow:0 6px 14px rgba(20,52,99,.07);
+}
+body.public-page-contact-us .contact-channel-list-enhanced li::before{
+  content:"";
+  position:absolute;
+  left:12px;
+  top:11px;
+  width:20px;
+  height:20px;
+  border-radius:999px;
+  background:#dce8fb;
+  box-shadow:inset 0 0 0 1px rgba(35,82,150,.14);
+}
+body.public-page-contact-us .contact-channel-list-enhanced li::after{
+  content:"";
+  position:absolute;
+  left:16px;
+  top:15px;
+  width:12px;
+  height:12px;
+  background-color:#245ab0;
+  -webkit-mask-repeat:no-repeat;
+  -webkit-mask-position:center;
+  -webkit-mask-size:contain;
+  mask-repeat:no-repeat;
+  mask-position:center;
+  mask-size:contain;
+}
+body.public-page-contact-us .channel-item-general::after{
+  -webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black'%3E%3Cpath d='M3 22h18V8H3v14zm2-2v-4h4v4H5zm6 0v-4h4v4h-4zm6 0v-4h2v4h-2zM3 6h18V2H3v4z'/%3E%3C/svg%3E");
+  mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black'%3E%3Cpath d='M3 22h18V8H3v14zm2-2v-4h4v4H5zm6 0v-4h4v4h-4zm6 0v-4h2v4h-2zM3 6h18V2H3v4z'/%3E%3C/svg%3E");
+}
+body.public-page-contact-us .channel-item-followup::after{
+  -webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black'%3E%3Cpath d='M6 2h9l5 5v15a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm8 1.5V8h4.5L14 3.5zM8 12h8v1.5H8V12zm0 4h8v1.5H8V16z'/%3E%3C/svg%3E");
+  mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black'%3E%3Cpath d='M6 2h9l5 5v15a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm8 1.5V8h4.5L14 3.5zM8 12h8v1.5H8V12zm0 4h8v1.5H8V16z'/%3E%3C/svg%3E");
+}
+body.public-page-contact-us .channel-item-onsite::after{
+  -webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black'%3E%3Cpath d='M16 11c1.66 0 3-1.57 3-3.5S17.66 4 16 4s-3 1.57-3 3.5 1.34 3.5 3 3.5zM8 11c1.66 0 3-1.57 3-3.5S9.66 4 8 4 5 5.57 5 7.5 6.34 11 8 11zm0 2c-2.33 0-7 1.17-7 3.5V20h14v-3.5C15 14.17 10.33 13 8 13zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.98 1.97 3.45V20h6v-3.5c0-2.33-4.67-3.5-7-3.5z'/%3E%3C/svg%3E");
+  mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black'%3E%3Cpath d='M16 11c1.66 0 3-1.57 3-3.5S17.66 4 16 4s-3 1.57-3 3.5 1.34 3.5 3 3.5zM8 11c1.66 0 3-1.57 3-3.5S9.66 4 8 4 5 5.57 5 7.5 6.34 11 8 11zm0 2c-2.33 0-7 1.17-7 3.5V20h14v-3.5C15 14.17 10.33 13 8 13zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.98 1.97 3.45V20h6v-3.5c0-2.33-4.67-3.5-7-3.5z'/%3E%3C/svg%3E");
+}
+body.public-page-contact-us .contact-timeline-cards{
+  display:grid;
+  gap:6px;
+}
+body.public-page-contact-us .contact-timeline-card{
+  position:relative;
+  padding:8px 10px 8px 50px;
+  border:1px solid rgba(31,72,120,.13);
+  border-radius:10px;
+  background:linear-gradient(180deg,#f8fbff 0%,#eef4fe 100%);
+  box-shadow:0 6px 14px rgba(20,52,99,.07);
+}
+body.public-page-contact-us .contact-timeline-card::before{
+  content:"";
+  position:absolute;
+  left:12px;
+  top:12px;
+  width:28px;
+  height:28px;
+  border-radius:999px;
+  background:#dce8fb;
+  box-shadow:inset 0 0 0 1px rgba(35,82,150,.14);
+}
+body.public-page-contact-us .contact-timeline-card::after{
+  content:"";
+  position:absolute;
+  left:19px;
+  top:19px;
+  width:14px;
+  height:14px;
+  background-color:#245ab0;
+  -webkit-mask-repeat:no-repeat;
+  -webkit-mask-position:center;
+  -webkit-mask-size:contain;
+  mask-repeat:no-repeat;
+  mask-position:center;
+  mask-size:contain;
+}
+body.public-page-contact-us .contact-timeline-card h4{
+  margin:0 0 2px;
+  color:#163f77;
+  font-size:15px;
+  font-weight:700;
+  line-height:1.25;
+}
+body.public-page-contact-us .contact-timeline-card p{
+  margin:0;
+  color:#36506f;
+  font-size:15px;
+  line-height:1.45;
+}
+body.public-page-contact-us .timeline-item-ack::after{
+  -webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black'%3E%3Cpath d='M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 4-8 5L4 8V6l8 5 8-5v2z'/%3E%3C/svg%3E");
+  mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black'%3E%3Cpath d='M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 4-8 5L4 8V6l8 5 8-5v2z'/%3E%3C/svg%3E");
+}
+body.public-page-contact-us .timeline-item-review::after{
+  -webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black'%3E%3Cpath d='M10 2a8 8 0 1 0 4.9 14.32l4.39 4.39 1.41-1.41-4.39-4.39A8 8 0 0 0 10 2zm0 2a6 6 0 1 1 0 12 6 6 0 0 1 0-12z'/%3E%3C/svg%3E");
+  mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black'%3E%3Cpath d='M10 2a8 8 0 1 0 4.9 14.32l4.39 4.39 1.41-1.41-4.39-4.39A8 8 0 0 0 10 2zm0 2a6 6 0 1 1 0 12 6 6 0 0 1 0-12z'/%3E%3C/svg%3E");
+}
+body.public-page-contact-us .timeline-item-resolution::after{
+  -webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black'%3E%3Cpath d='M10.59 13.41a1.996 1.996 0 0 1 0-2.82l4-4a1.996 1.996 0 1 1 2.82 2.82l-4 4a1.996 1.996 0 0 1-2.82 0zM6 4h8l6 6-9 9H5v-6l9-9H6V4z'/%3E%3C/svg%3E");
+  mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black'%3E%3Cpath d='M10.59 13.41a1.996 1.996 0 0 1 0-2.82l4-4a1.996 1.996 0 1 1 2.82 2.82l-4 4a1.996 1.996 0 0 1-2.82 0zM6 4h8l6 6-9 9H5v-6l9-9H6V4z'/%3E%3C/svg%3E");
+}
+body.public-page-contact-us .contact-gov-table{
+  width:100%;
+  border-collapse:collapse;
+  background:#fff;
+  border:1px solid rgba(31,72,120,.14);
+  border-radius:8px;
+  overflow:hidden;
+  table-layout:fixed;
+}
+body.public-page-contact-us .contact-gov-table th,
+body.public-page-contact-us .contact-gov-table td{
+  text-align:left;
+  vertical-align:top;
+  padding:7px 9px;
+  border-bottom:1px solid rgba(31,72,120,.13);
+  font-size:13px;
+  color:#2f4969;
+}
+body.public-page-contact-us .contact-gov-table th{
+  width:210px;
+  background:#edf3fd;
+  color:#173761;
+  font-weight:700;
+}
+body.public-page-contact-us .contact-gov-table tbody tr:nth-child(even) td{
+  background:#fbfdff;
+}
+body.public-page-contact-us .contact-gov-table tbody tr:hover td{
+  background:#f4f8ff;
+}
+body.public-page-contact-us .contact-gov-table tr:last-child th,
+body.public-page-contact-us .contact-gov-table tr:last-child td{
+  border-bottom:0;
+}
+body.public-page-contact-us .contact-gov-table a{
+  color:#1d4f92;
+  text-decoration:none;
+}
+body.public-page-contact-us .contact-gov-table a:hover{text-decoration:underline}
+body.public-page-contact-us .contact-form{
+  gap:7px;
+}
+body.public-page-contact-us .contact-form label span{
+  color:#4f6484;
+  font-size:11px;
+  letter-spacing:.08em;
+}
+body.public-page-contact-us .contact-form input,
+body.public-page-contact-us .contact-form textarea{
+  border:1px solid rgba(31,72,120,.22);
+  border-radius:8px;
+  background:#fff;
+  transition:border-color 160ms ease, box-shadow 160ms ease;
+}
+body.public-page-contact-us .contact-form input:focus,
+body.public-page-contact-us .contact-form textarea:focus{
+  outline:none;
+  border-color:#1f4e89;
+  box-shadow:0 0 0 2px rgba(43,95,165,.14);
+}
+body.public-page-contact-us .contact-submit-btn{
+  min-height:36px;
+  border-radius:8px;
+  border:1px solid rgba(22,63,122,.24);
+  background:linear-gradient(135deg,#1a4780,#2b5fa5);
+  font-size:13px;
+  letter-spacing:.08em;
+}
+body.public-page-contact-us .contact-submit-btn:hover{
+  background:linear-gradient(135deg,#153b6b,#244f88);
+  filter:none;
+}
+body.public-page-contact-us .contact-form-note{
+  margin:0;
+  padding:6px 8px;
+  border:1px solid rgba(31,72,120,.14);
+  border-radius:8px;
+  background:#f5f9ff;
+  color:#3b5271;
+  font-size:12px;
+  line-height:1.55;
+}
+body.public-page-contact-us .contact-gov-info .contact-gov-note{
+  margin-top:auto;
+}
+
+@media(max-width:980px){
+  body.public-page-contact-us .contact-gov-grid{grid-template-columns:1fr}
+  body.public-page-contact-us .contact-gov-grid-main{grid-template-columns:1fr}
+  body.public-page-contact-us .contact-gov-hero .public-title{font-size:32px}
+  body.public-page-contact-us .contact-gov-section h3{font-size:21px}
+  body.public-page-contact-us .contact-gov-section{height:auto}
+  body.public-page-contact-us .contact-gov-info{height:auto}
+  body.public-page-contact-us .contact-gov-note{margin-top:8px}
+  body.public-page-contact-us .contact-gov-bottom-grid{grid-template-columns:1fr}
+  body.public-page-contact-us .contact-gov-form-section .contact-form-grid{grid-template-columns:1fr}
+  body.public-page-contact-us .contact-gov-form-section .contact-submit-btn{width:100%;min-width:0}
+}
+
 .policy-page .policy-hero{
   border:1px solid rgba(43,95,165,0.16);
   border-radius:20px;
@@ -1664,7 +2199,6 @@ body:is(
 .policy-list li{margin:0 0 8px}
 .policy-list li:last-child{margin-bottom:0}
 
-/* Data Privacy Notice: formal government document style */
 .gov-policy-doc .policy-hero{
   border:1px solid rgba(31,72,120,.24);
   border-radius:8px;

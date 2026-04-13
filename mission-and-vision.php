@@ -214,7 +214,29 @@ $publicNavItems = [
         </div>
     </header>
 
-        <section class="public-page"><div class="public-wrap"><div class="public-hero"><span class="public-kicker">Institutional Direction</span><h2 class="public-title">Mission and Vision</h2><p class="public-summary">Guiding statements that shape LTO service commitments and organizational direction.</p><div class="pub-layout"><article class="pub-panel"><h3>Vision</h3><p>A modern, responsive, and citizen-centered transportation agency anchored on safety and public trust.</p></article><article class="pub-panel"><h3>Mission</h3><p>Deliver reliable transportation services through professional personnel, transparent processes, and digital transformation.</p></article></div></div></div></section>
+    <section class="public-page">
+        <div class="public-wrap">
+            <div class="public-hero">
+                <span class="public-kicker">Institutional Direction</span>
+                <h2 class="public-title">Mission and Vision</h2>
+                <p class="public-summary">Guiding statements that shape LTO service commitments and organizational direction.</p>
+
+                <div class="pub-layout vm-brief-layout">
+                    <article class="pub-panel vm-brief-card vm-card-vision">
+                        <p class="vm-brief-label">Official Vision Statement</p>
+                        <h3>Vision</h3>
+                        <p>A modern, responsive, and citizen-centered transportation agency anchored on safety and public trust.</p>
+                    </article>
+
+                    <article class="pub-panel vm-brief-card vm-card-mission">
+                        <p class="vm-brief-label">Official Mission Statement</p>
+                        <h3>Mission</h3>
+                        <p>Deliver reliable transportation services through professional personnel, transparent processes, and digital transformation.</p>
+                    </article>
+                </div>
+            </div>
+        </div>
+    </section>
 
     <?php include __DIR__ . '/includes/public-footer.php'; ?>
 

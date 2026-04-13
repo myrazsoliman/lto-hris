@@ -214,73 +214,112 @@ $publicNavItems = [
         </div>
     </header>
 
-    <section class="public-page">
+    <section class="public-page contact-gov-page">
         <div class="public-wrap">
-            <div class="public-hero">
-                <span class="public-kicker">LTO HRIS Public Information</span>
+            <div class="public-hero contact-gov-hero">
+                <span class="public-kicker">Official Public Assistance</span>
                 <h2 class="public-title">Contact Us</h2>
-                <p class="public-summary">Reach the LTO Pila District Office for public assistance, inquiry routing, and service coordination.</p>
-                <div class="pub-layout contact-layout">
-                    <article class="pub-panel contact-primary">
-                        <h3>Office Contact Directory</h3>
-                        <div class="contact-list">
-                            <div class="contact-item">
-                                <span class="contact-label">Office Address</span>
-                                <span class="contact-value">Brgy. Sta. Clara Sur, Pila, Laguna, Philippines</span>
-                            </div>
-                            <div class="contact-item">
-                                <span class="contact-label">Landline</span>
-                                <span class="contact-value"><a href="tel:+63492501712">+63 49 250-1712</a></span>
-                            </div>
-                            <div class="contact-item">
-                                <span class="contact-label">Public Email</span>
-                                <span class="contact-value"><a href="mailto:lto.pila@lto.gov.ph">lto.pila@lto.gov.ph</a></span>
-                            </div>
-                            <div class="contact-item">
-                                <span class="contact-label">Office Hours</span>
-                                <span class="contact-value">Monday to Friday, 8:00 AM to 5:00 PM</span>
-                            </div>
+                <p class="public-summary">For official public assistance, inquiry routing, and service coordination, please contact the LTO Pila District Office through the channels below.</p>
+
+                <div class="contact-gov-grid contact-gov-grid-main">
+                    <section class="contact-gov-section contact-gov-info">
+                        <h3>Contact Us</h3>
+                        <p class="contact-gov-intro">Feel free to use the form or send us an official email. You may also contact the district office by phone during office hours.</p>
+                        <ul class="contact-gov-contact-list">
+                            <li>
+                                <span class="contact-gov-icon contact-gov-icon-phone" aria-hidden="true"></span>
+                                <span><a href="tel:+63492501712">+63 49 250-1712</a></span>
+                            </li>
+                            <li>
+                                <span class="contact-gov-icon contact-gov-icon-mail" aria-hidden="true"></span>
+                                <span><a href="mailto:lto.pila@lto.gov.ph">lto.pila@lto.gov.ph</a></span>
+                            </li>
+                            <li>
+                                <span class="contact-gov-icon contact-gov-icon-pin" aria-hidden="true"></span>
+                                <span>Brgy. Sta. Clara Sur, Pila, Laguna, Philippines</span>
+                            </li>
+                            <li>
+                                <span class="contact-gov-icon contact-gov-icon-time" aria-hidden="true"></span>
+                                <span>Monday to Friday, 8:00 AM to 5:00 PM</span>
+                            </li>
+                        </ul>
+                        <div class="contact-gov-mini-block">
+                            <h4>Expected Response</h4>
+                            <ul class="contact-gov-required-list">
+                                <li>Initial acknowledgement is typically issued within 1-2 working days, subject to request volume and validation.</li>
+                            </ul>
                         </div>
-                        <div class="pub-alert">For account-specific HRIS concerns, include your full name and agency email in your message.</div>
-                    </article>
-                    <article class="pub-panel contact-secondary">
+                        <div class="contact-gov-mini-block">
+                            <h4>Required Details Before Sending</h4>
+                            <ul class="contact-gov-required-list">
+                                <li>Full Name</li>
+                                <li>Subject of Inquiry</li>
+                                <li>Reference Number (for follow-up requests)</li>
+                            </ul>
+                        </div>
+                        <p class="contact-gov-note">Submitted contact details and inquiry records are handled through official channels under applicable data privacy and policies.</p>
+                    </section>
+
+                    <section class="contact-gov-section contact-gov-form-section">
                         <h3>Public Inquiry Form</h3>
                         <form class="contact-form" action="#" method="post" novalidate>
                             <div class="contact-form-grid">
                                 <label>
-                                    <span>Full Name</span>
-                                    <input type="text" placeholder="Juan Dela Cruz">
+                                    <span>First Name *</span>
+                                    <input type="text" placeholder="Juan">
                                 </label>
                                 <label>
-                                    <span>Email Address</span>
-                                    <input type="email" placeholder="name@example.com">
+                                    <span>Last Name *</span>
+                                    <input type="text" placeholder="Dela Cruz">
                                 </label>
                             </div>
                             <label>
-                                <span>Subject</span>
+                                <span>Email Address *</span>
+                                <input type="email" placeholder="name@example.com">
+                            </label>
+                            <label>
+                                <span>Phone (Optional)</span>
+                                <input type="text" placeholder="09XX-XXX-XXXX">
+                            </label>
+                            <label>
+                                <span>Subject *</span>
                                 <input type="text" placeholder="Inquiry subject">
                             </label>
                             <label>
-                                <span>Message</span>
+                                <span>Message *</span>
                                 <textarea rows="5" placeholder="Type your concern here..."></textarea>
                             </label>
-                            <button type="button" class="contact-submit-btn">Submit Inquiry</button>
+                            <p class="contact-form-note">Submitted inquiries are processed through official LTO channels in accordance with applicable data privacy and records policies.</p>
+                            <button type="button" class="contact-submit-btn">Submit Official Inquiry</button>
                         </form>
-                    </article>
-                    <article class="pub-panel contact-tertiary">
-                        <h3>Service Channels</h3>
-                        <ul class="contact-channel-list">
-                            <li><strong>General Inquiries:</strong> Office contact directory above</li>
-                            <li><strong>Document Follow-up:</strong> Bring your reference number when calling</li>
-                            <li><strong>On-site Assistance:</strong> Visit during office hours for walk-in concerns</li>
-                        </ul>
-                        <h3>Response Timeline</h3>
-                        <div class="pub-kpi-grid">
-                            <div class="pub-kpi"><strong>1-2 Days</strong><span>Email acknowledgement</span></div>
-                            <div class="pub-kpi"><strong>3-5 Days</strong><span>Initial coordination</span></div>
-                            <div class="pub-kpi"><strong>As Needed</strong><span>Final resolution window</span></div>
+                    </section>
+                </div>
+
+                <div class="contact-gov-grid">
+                    <section class="contact-gov-section contact-gov-wide">
+                        <h3>Service Channels and Response Timeline</h3>
+                        <div class="contact-gov-bottom-grid">
+                            <ul class="contact-channel-list contact-channel-list-enhanced">
+                                <li class="channel-item channel-item-general"><strong>General Inquiries:</strong> Please use the Office Contact Directory for official communication.</li>
+                                <li class="channel-item channel-item-followup"><strong>Document Follow-Up:</strong> Provide your reference number and transaction details when calling.</li>
+                                <li class="channel-item channel-item-onsite"><strong>On-site Assistance:</strong> Walk-in concerns are accommodated during posted office hours.</li>
+                            </ul>
+                            <div class="contact-timeline-cards">
+                                <div class="contact-timeline-card timeline-item timeline-item-ack">
+                                    <h4>1-2 Working Days</h4>
+                                    <p>Email acknowledgment and initial routing confirmation.</p>
+                                </div>
+                                <div class="contact-timeline-card timeline-item timeline-item-review">
+                                    <h4>3-5 Working Days</h4>
+                                    <p>Preliminary review and coordination by concerned office unit.</p>
+                                </div>
+                                <div class="contact-timeline-card timeline-item timeline-item-resolution">
+                                    <h4>As Needed</h4>
+                                    <p>Final resolution timeline based on case requirements and validation.</p>
+                                </div>
+                            </div>
                         </div>
-                    </article>
+                    </section>
                 </div>
             </div>
         </div>
