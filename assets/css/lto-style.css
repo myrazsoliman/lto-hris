@@ -73,8 +73,15 @@ body{font-family:Arial,Helvetica,sans-serif;margin:0;color:#111;background:var(-
 .gov-mobile-submenu a:hover{background:#f5f7fb}
 .gov-mobile-submenu-group{display:grid}
 .gov-mobile-submenu-group-title{padding:14px 24px 10px;background:#f7f9fc;color:#3a4a63;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;box-shadow:inset 0 -1px 0 rgba(0,0,0,0.06)}
-.gov-mobile-submenu-group-title-link{display:block;padding:14px 24px 10px;background:#f7f9fc;color:#2c3f5f;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;text-decoration:none;box-shadow:inset 0 -1px 0 rgba(0,0,0,0.06)}
+.gov-mobile-submenu-group-title-link{display:block;position:relative;padding:14px 64px 10px 24px;background:#f7f9fc;color:#2c3f5f;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;text-decoration:none;box-shadow:inset 0 -1px 0 rgba(0,0,0,0.06)}
 .gov-mobile-submenu-group-title-link:hover{background:#eef3fb;color:#173761}
+.gov-mobile-submenu-group > a:not(.gov-mobile-submenu-group-title-link){padding-left:34px;background:#fbfcff}
+.gov-mobile-submenu-group.is-collapsible > a:not(.gov-mobile-submenu-group-title-link){display:none}
+.gov-mobile-submenu-group.is-collapsible.is-open > a:not(.gov-mobile-submenu-group-title-link){display:flex}
+.gov-mobile-submenu-toggle{position:relative;margin:-43px 12px 6px auto;width:34px;height:34px;border:1px solid rgba(43,95,165,0.22);border-radius:999px;background:#fff;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;z-index:2}
+.gov-mobile-submenu-toggle::before{content:"";width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:7px solid #5a6f8f;transition:transform 180ms ease}
+.gov-mobile-submenu-group.is-open > .gov-mobile-submenu-toggle::before{transform:rotate(180deg)}
+.gov-mobile-submenu-toggle:hover{background:#f0f5fd;border-color:rgba(43,95,165,0.36)}
 .gov-mobile-search{display:none;padding:16px 24px 18px;background:#f7f7f7;box-shadow:inset 0 -1px 0 rgba(0,0,0,0.08)}
 .gov-mobile-search input{width:100%;height:56px;padding:0 16px;border:2px solid #d4d4d4;border-radius:0;background:#fff;font-size:18px;color:#2a2a2a}
 .gov-mobile-search input::placeholder{color:#c9c9c9}
@@ -82,6 +89,7 @@ body{font-family:Arial,Helvetica,sans-serif;margin:0;color:#111;background:var(-
 .gov-mobile-actions .btn{width:136px;height:64px;padding:0;font-size:16px;line-height:1}
 
 @media(max-width:1180px){
+  .gov-topbar.menu-open{--gov-mobile-menu-open-width:124px;--gov-mobile-panel-open-width:min(34vw,420px)}
   body{padding-top:var(--gov-height)}
   .gov-topbar{height:var(--gov-height);min-height:0}
   .gov-inner{display:grid;grid-template-columns:auto 1fr auto;height:100%;padding-top:0;padding-bottom:0;column-gap:16px}
@@ -101,14 +109,15 @@ body{font-family:Arial,Helvetica,sans-serif;margin:0;color:#111;background:var(-
   .gov-topbar.menu-closing .gov-mobile-panel{display:grid}
   .gov-topbar.menu-open .gov-mobile-panel{transform:translateX(0)}
   .gov-topbar.menu-closing .gov-mobile-panel{transform:translateX(100%)}
-  .gov-topbar.menu-open .gov-menu-toggle{position:fixed;top:0;right:min(34vw,420px);height:var(--gov-height);padding:0 18px 0 22px;background:rgba(243,243,243,0.96);border:0;box-shadow:inset 0 -1px 0 rgba(0,0,0,0.06);z-index:1251}
-  .gov-topbar.menu-open .gov-mobile-search{display:flex;position:fixed;top:0;right:0;width:min(34vw,420px);max-width:calc(100vw - 230px);min-width:0;height:var(--gov-height);align-items:center;padding:8px 16px 8px 20px;background:rgba(243,243,243,0.96);border:0;box-shadow:inset 0 -1px 0 rgba(0,0,0,0.06);z-index:1250}
+  .gov-topbar.menu-open .gov-menu-toggle{position:fixed;top:0;left:auto;right:var(--gov-mobile-panel-open-width);width:var(--gov-mobile-menu-open-width);min-width:var(--gov-mobile-menu-open-width);height:var(--gov-height);padding:0 8px;background:rgba(243,243,243,0.96);border:0;box-shadow:inset 0 -1px 0 rgba(0,0,0,0.06);z-index:1251}
+  .gov-topbar.menu-open .gov-mobile-search{display:flex;position:fixed;top:0;left:auto;right:0;width:min(var(--gov-mobile-panel-open-width),calc(100vw - var(--gov-mobile-menu-open-width)));max-width:none;min-width:0;height:var(--gov-height);align-items:center;padding:8px 16px 8px 12px;background:rgba(243,243,243,0.96);border:0;box-shadow:inset 0 -1px 0 rgba(0,0,0,0.06);z-index:1250}
   .gov-topbar.menu-open .gov-mobile-search input{height:100%}
   .gov-mobile-nav{padding-top:0}
   .gov-mobile-panel.submenu-open .gov-mobile-actions{display:none}
 }
 
 @media(max-width:640px){
+  .gov-topbar.menu-open{--gov-mobile-menu-open-width:96px;--gov-mobile-panel-open-width:min(86vw,360px)}
   .gov-inner{column-gap:10px}
   .gov-left{font-size:clamp(14px,5vw,18px)}
   .gov-menu-toggle{gap:8px}
@@ -116,8 +125,8 @@ body{font-family:Arial,Helvetica,sans-serif;margin:0;color:#111;background:var(-
   .gov-menu-toggle-box{width:30px;height:24px}
   .gov-menu-toggle-box span{width:30px;height:4px}
   .gov-mobile-panel{width:min(86vw,360px);min-width:0}
-  .gov-topbar.menu-open .gov-menu-toggle{right:min(86vw,360px)}
-  .gov-topbar.menu-open .gov-mobile-search{width:min(86vw,360px);max-width:calc(100vw - 120px);min-width:0;height:var(--gov-height);padding:8px 12px 8px 14px}
+  .gov-topbar.menu-open .gov-menu-toggle{left:auto;right:var(--gov-mobile-panel-open-width);width:var(--gov-mobile-menu-open-width);min-width:var(--gov-mobile-menu-open-width);padding:0 6px}
+  .gov-topbar.menu-open .gov-mobile-search{left:auto;right:0;width:min(var(--gov-mobile-panel-open-width),calc(100vw - var(--gov-mobile-menu-open-width)));max-width:none;min-width:0;height:var(--gov-height);padding:8px 12px 8px 12px}
   .gov-mobile-submenu-view{padding-top:0}
   .gov-mobile-back{padding:14px 18px 10px}
   .gov-mobile-submenu-title{padding:0 18px 16px;font-size:24px}
@@ -125,10 +134,11 @@ body{font-family:Arial,Helvetica,sans-serif;margin:0;color:#111;background:var(-
 }
 
 @media(max-width:420px){
+  .gov-topbar.menu-open{--gov-mobile-menu-open-width:64px;--gov-mobile-panel-open-width:min(86vw,360px)}
   .gov-menu-toggle-label{display:none}
   .gov-menu-toggle{gap:0;padding-right:4px}
-  .gov-topbar.menu-open .gov-menu-toggle{padding:0 12px}
-  .gov-topbar.menu-open .gov-mobile-search{max-width:calc(100vw - 72px)}
+  .gov-topbar.menu-open .gov-menu-toggle{padding:0 6px;width:var(--gov-mobile-menu-open-width);min-width:var(--gov-mobile-menu-open-width)}
+  .gov-topbar.menu-open .gov-mobile-search{left:auto;right:0;width:min(var(--gov-mobile-panel-open-width),calc(100vw - var(--gov-mobile-menu-open-width)));max-width:none;padding:8px 10px 8px 10px}
 }
 
 @media(min-width:1400px){
@@ -871,6 +881,748 @@ body.public-page-citizens-charter .policy-list li{margin-bottom:10px}
 body.public-page-contact-us .pub-panel{border-radius:16px}
 body.public-page-contact-us .contact-secondary{background:linear-gradient(180deg,#ffffff,#f5f9ff)}
 body.public-page-contact-us .contact-tertiary{background:linear-gradient(180deg,#ffffff,#f8fbff)}
+
+/* About Us dropdown pages - professional government redesign */
+body:is(
+  .public-page-news-and-updates,
+  .public-page-careers,
+  .public-page-lto-accredited,
+  .public-page-otdc-it-provider,
+  .public-page-medical-clinics,
+  .public-page-medical-it-providers,
+  .public-page-lecturers,
+  .public-page-driving-schools,
+  .public-page-driving-school-instructors,
+  .public-page-drivers-education-center,
+  .public-page-affiliates,
+  .public-page-ltms-portal,
+  .public-page-cde-program,
+  .public-page-cde-online-exam,
+  .public-page-citisend,
+  .public-page-resources,
+  .public-page-downloadable-forms,
+  .public-page-hrds-forms,
+  .public-page-mission-and-vision,
+  .public-page-mandate-and-functions,
+  .public-page-historical-background,
+  .public-page-road-safety-action-plan,
+  .public-page-lto-pila-office
+) .public-page{
+  background:linear-gradient(180deg,#edf3fb 0%,#f7faff 36%,#ffffff 100%);
+  padding-top:30px;
+}
+body:is(
+  .public-page-news-and-updates,
+  .public-page-careers,
+  .public-page-lto-accredited,
+  .public-page-otdc-it-provider,
+  .public-page-medical-clinics,
+  .public-page-medical-it-providers,
+  .public-page-lecturers,
+  .public-page-driving-schools,
+  .public-page-driving-school-instructors,
+  .public-page-drivers-education-center,
+  .public-page-affiliates,
+  .public-page-ltms-portal,
+  .public-page-cde-program,
+  .public-page-cde-online-exam,
+  .public-page-citisend,
+  .public-page-resources,
+  .public-page-downloadable-forms,
+  .public-page-hrds-forms,
+  .public-page-mission-and-vision,
+  .public-page-mandate-and-functions,
+  .public-page-historical-background,
+  .public-page-road-safety-action-plan,
+  .public-page-lto-pila-office
+) .public-hero{
+  border:1px solid rgba(23,55,97,0.18);
+  border-top:4px solid #2b5fa5;
+  border-radius:10px;
+  background:linear-gradient(180deg,#f8fbff 0%,#ffffff 70%);
+  box-shadow:0 10px 24px rgba(13,35,69,0.08);
+  padding:22px 22px 18px;
+}
+body:is(
+  .public-page-news-and-updates,
+  .public-page-careers,
+  .public-page-lto-accredited,
+  .public-page-otdc-it-provider,
+  .public-page-medical-clinics,
+  .public-page-medical-it-providers,
+  .public-page-lecturers,
+  .public-page-driving-schools,
+  .public-page-driving-school-instructors,
+  .public-page-drivers-education-center,
+  .public-page-affiliates,
+  .public-page-ltms-portal,
+  .public-page-cde-program,
+  .public-page-cde-online-exam,
+  .public-page-citisend,
+  .public-page-resources,
+  .public-page-downloadable-forms,
+  .public-page-hrds-forms,
+  .public-page-mission-and-vision,
+  .public-page-mandate-and-functions,
+  .public-page-historical-background,
+  .public-page-road-safety-action-plan,
+  .public-page-lto-pila-office
+) .public-title{
+  font-size:38px;
+  letter-spacing:.2px;
+}
+body:is(
+  .public-page-news-and-updates,
+  .public-page-careers,
+  .public-page-lto-accredited,
+  .public-page-otdc-it-provider,
+  .public-page-medical-clinics,
+  .public-page-medical-it-providers,
+  .public-page-lecturers,
+  .public-page-driving-schools,
+  .public-page-driving-school-instructors,
+  .public-page-drivers-education-center,
+  .public-page-affiliates,
+  .public-page-ltms-portal,
+  .public-page-cde-program,
+  .public-page-cde-online-exam,
+  .public-page-citisend,
+  .public-page-resources,
+  .public-page-downloadable-forms,
+  .public-page-hrds-forms,
+  .public-page-mission-and-vision,
+  .public-page-mandate-and-functions,
+  .public-page-historical-background,
+  .public-page-road-safety-action-plan,
+  .public-page-lto-pila-office
+) .pub-layout{
+  margin-top:18px;
+  gap:12px;
+}
+body:is(
+  .public-page-news-and-updates,
+  .public-page-careers,
+  .public-page-lto-accredited,
+  .public-page-otdc-it-provider,
+  .public-page-medical-clinics,
+  .public-page-medical-it-providers,
+  .public-page-lecturers,
+  .public-page-driving-schools,
+  .public-page-driving-school-instructors,
+  .public-page-drivers-education-center,
+  .public-page-affiliates,
+  .public-page-ltms-portal,
+  .public-page-cde-program,
+  .public-page-cde-online-exam,
+  .public-page-citisend,
+  .public-page-resources,
+  .public-page-downloadable-forms,
+  .public-page-hrds-forms,
+  .public-page-mission-and-vision,
+  .public-page-mandate-and-functions,
+  .public-page-historical-background,
+  .public-page-road-safety-action-plan,
+  .public-page-lto-pila-office
+) .pub-panel{
+  border:1px solid rgba(27,67,118,0.18);
+  border-radius:8px;
+  box-shadow:none;
+  background:#fff;
+  padding:14px;
+}
+body:is(
+  .public-page-news-and-updates,
+  .public-page-careers,
+  .public-page-lto-accredited,
+  .public-page-otdc-it-provider,
+  .public-page-medical-clinics,
+  .public-page-medical-it-providers,
+  .public-page-lecturers,
+  .public-page-driving-schools,
+  .public-page-driving-school-instructors,
+  .public-page-drivers-education-center,
+  .public-page-affiliates,
+  .public-page-ltms-portal,
+  .public-page-cde-program,
+  .public-page-cde-online-exam,
+  .public-page-citisend,
+  .public-page-resources,
+  .public-page-downloadable-forms,
+  .public-page-hrds-forms,
+  .public-page-mission-and-vision,
+  .public-page-mandate-and-functions,
+  .public-page-historical-background,
+  .public-page-road-safety-action-plan,
+  .public-page-lto-pila-office
+) .pub-panel h3{
+  margin-bottom:10px;
+  padding-bottom:8px;
+  border-bottom:1px solid rgba(23,55,97,0.16);
+  font-size:20px;
+  color:#173761;
+}
+body:is(
+  .public-page-news-and-updates,
+  .public-page-careers,
+  .public-page-lto-accredited,
+  .public-page-otdc-it-provider,
+  .public-page-medical-clinics,
+  .public-page-medical-it-providers,
+  .public-page-lecturers,
+  .public-page-driving-schools,
+  .public-page-driving-school-instructors,
+  .public-page-drivers-education-center,
+  .public-page-affiliates,
+  .public-page-ltms-portal,
+  .public-page-cde-program,
+  .public-page-cde-online-exam,
+  .public-page-citisend,
+  .public-page-resources,
+  .public-page-downloadable-forms,
+  .public-page-hrds-forms,
+  .public-page-mission-and-vision,
+  .public-page-mandate-and-functions,
+  .public-page-historical-background,
+  .public-page-road-safety-action-plan,
+  .public-page-lto-pila-office
+) .pub-vacancy,
+body:is(
+  .public-page-news-and-updates,
+  .public-page-careers,
+  .public-page-lto-accredited,
+  .public-page-otdc-it-provider,
+  .public-page-medical-clinics,
+  .public-page-medical-it-providers,
+  .public-page-lecturers,
+  .public-page-driving-schools,
+  .public-page-driving-school-instructors,
+  .public-page-drivers-education-center,
+  .public-page-affiliates,
+  .public-page-ltms-portal,
+  .public-page-cde-program,
+  .public-page-cde-online-exam,
+  .public-page-citisend,
+  .public-page-resources,
+  .public-page-downloadable-forms,
+  .public-page-hrds-forms,
+  .public-page-mission-and-vision,
+  .public-page-mandate-and-functions,
+  .public-page-historical-background,
+  .public-page-road-safety-action-plan,
+  .public-page-lto-pila-office
+) .pub-link-card,
+body:is(
+  .public-page-news-and-updates,
+  .public-page-careers,
+  .public-page-lto-accredited,
+  .public-page-otdc-it-provider,
+  .public-page-medical-clinics,
+  .public-page-medical-it-providers,
+  .public-page-lecturers,
+  .public-page-driving-schools,
+  .public-page-driving-school-instructors,
+  .public-page-drivers-education-center,
+  .public-page-affiliates,
+  .public-page-ltms-portal,
+  .public-page-cde-program,
+  .public-page-cde-online-exam,
+  .public-page-citisend,
+  .public-page-resources,
+  .public-page-downloadable-forms,
+  .public-page-hrds-forms,
+  .public-page-mission-and-vision,
+  .public-page-mandate-and-functions,
+  .public-page-historical-background,
+  .public-page-road-safety-action-plan,
+  .public-page-lto-pila-office
+) .pub-step,
+body:is(
+  .public-page-news-and-updates,
+  .public-page-careers,
+  .public-page-lto-accredited,
+  .public-page-otdc-it-provider,
+  .public-page-medical-clinics,
+  .public-page-medical-it-providers,
+  .public-page-lecturers,
+  .public-page-driving-schools,
+  .public-page-driving-school-instructors,
+  .public-page-drivers-education-center,
+  .public-page-affiliates,
+  .public-page-ltms-portal,
+  .public-page-cde-program,
+  .public-page-cde-online-exam,
+  .public-page-citisend,
+  .public-page-resources,
+  .public-page-downloadable-forms,
+  .public-page-hrds-forms,
+  .public-page-mission-and-vision,
+  .public-page-mandate-and-functions,
+  .public-page-historical-background,
+  .public-page-road-safety-action-plan,
+  .public-page-lto-pila-office
+) .pub-timeline li{
+  border:1px solid rgba(27,67,118,0.16);
+  border-radius:8px;
+  background:#fcfeff;
+}
+body:is(
+  .public-page-news-and-updates,
+  .public-page-careers,
+  .public-page-lto-accredited,
+  .public-page-otdc-it-provider,
+  .public-page-medical-clinics,
+  .public-page-medical-it-providers,
+  .public-page-lecturers,
+  .public-page-driving-schools,
+  .public-page-driving-school-instructors,
+  .public-page-drivers-education-center,
+  .public-page-affiliates,
+  .public-page-ltms-portal,
+  .public-page-cde-program,
+  .public-page-cde-online-exam,
+  .public-page-citisend,
+  .public-page-resources,
+  .public-page-downloadable-forms,
+  .public-page-hrds-forms,
+  .public-page-mission-and-vision,
+  .public-page-mandate-and-functions,
+  .public-page-historical-background,
+  .public-page-road-safety-action-plan,
+  .public-page-lto-pila-office
+) .pub-provider-table th,
+body:is(
+  .public-page-news-and-updates,
+  .public-page-careers,
+  .public-page-lto-accredited,
+  .public-page-otdc-it-provider,
+  .public-page-medical-clinics,
+  .public-page-medical-it-providers,
+  .public-page-lecturers,
+  .public-page-driving-schools,
+  .public-page-driving-school-instructors,
+  .public-page-drivers-education-center,
+  .public-page-affiliates,
+  .public-page-ltms-portal,
+  .public-page-cde-program,
+  .public-page-cde-online-exam,
+  .public-page-citisend,
+  .public-page-resources,
+  .public-page-downloadable-forms,
+  .public-page-hrds-forms,
+  .public-page-mission-and-vision,
+  .public-page-mandate-and-functions,
+  .public-page-historical-background,
+  .public-page-road-safety-action-plan,
+  .public-page-lto-pila-office
+) .public-table th{
+  background:#eaf2fc;
+  color:#173761;
+  border-bottom:1px solid rgba(23,55,97,0.18);
+}
+body:is(
+  .public-page-news-and-updates,
+  .public-page-careers,
+  .public-page-lto-accredited,
+  .public-page-otdc-it-provider,
+  .public-page-medical-clinics,
+  .public-page-medical-it-providers,
+  .public-page-lecturers,
+  .public-page-driving-schools,
+  .public-page-driving-school-instructors,
+  .public-page-drivers-education-center,
+  .public-page-affiliates,
+  .public-page-ltms-portal,
+  .public-page-cde-program,
+  .public-page-cde-online-exam,
+  .public-page-citisend,
+  .public-page-resources,
+  .public-page-downloadable-forms,
+  .public-page-hrds-forms,
+  .public-page-mission-and-vision,
+  .public-page-mandate-and-functions,
+  .public-page-historical-background,
+  .public-page-road-safety-action-plan,
+  .public-page-lto-pila-office
+) .pub-alert{
+  border-left:3px solid #2b5fa5;
+  border-radius:6px;
+  background:#f4f8ff;
+  color:#1f3f67;
+}
+body:is(
+  .public-page-news-and-updates,
+  .public-page-careers,
+  .public-page-lto-accredited,
+  .public-page-otdc-it-provider,
+  .public-page-medical-clinics,
+  .public-page-medical-it-providers,
+  .public-page-lecturers,
+  .public-page-driving-schools,
+  .public-page-driving-school-instructors,
+  .public-page-drivers-education-center,
+  .public-page-affiliates,
+  .public-page-ltms-portal,
+  .public-page-cde-program,
+  .public-page-cde-online-exam,
+  .public-page-citisend,
+  .public-page-resources,
+  .public-page-downloadable-forms,
+  .public-page-hrds-forms,
+  .public-page-mission-and-vision,
+  .public-page-mandate-and-functions,
+  .public-page-historical-background,
+  .public-page-road-safety-action-plan,
+  .public-page-lto-pila-office
+) .pub-meta li{
+  background:#f1f6ff;
+  color:#1f457f;
+  border:1px solid rgba(31,69,127,0.16);
+}
+body:is(
+  .public-page-news-and-updates,
+  .public-page-careers,
+  .public-page-lto-accredited,
+  .public-page-otdc-it-provider,
+  .public-page-medical-clinics,
+  .public-page-medical-it-providers,
+  .public-page-lecturers,
+  .public-page-driving-schools,
+  .public-page-driving-school-instructors,
+  .public-page-drivers-education-center,
+  .public-page-affiliates,
+  .public-page-ltms-portal,
+  .public-page-cde-program,
+  .public-page-cde-online-exam,
+  .public-page-citisend,
+  .public-page-resources,
+  .public-page-downloadable-forms,
+  .public-page-hrds-forms,
+  .public-page-mission-and-vision,
+  .public-page-mandate-and-functions,
+  .public-page-historical-background,
+  .public-page-road-safety-action-plan,
+  .public-page-lto-pila-office
+) .pub-step::before{
+  background:#2b5fa5;
+}
+
+@media(max-width:980px){
+  body:is(
+    .public-page-news-and-updates,
+    .public-page-careers,
+    .public-page-lto-accredited,
+    .public-page-otdc-it-provider,
+    .public-page-medical-clinics,
+    .public-page-medical-it-providers,
+    .public-page-lecturers,
+    .public-page-driving-schools,
+    .public-page-driving-school-instructors,
+    .public-page-drivers-education-center,
+    .public-page-affiliates,
+    .public-page-ltms-portal,
+    .public-page-cde-program,
+    .public-page-cde-online-exam,
+    .public-page-citisend,
+    .public-page-resources,
+    .public-page-downloadable-forms,
+    .public-page-hrds-forms,
+    .public-page-mission-and-vision,
+    .public-page-mandate-and-functions,
+    .public-page-historical-background,
+    .public-page-road-safety-action-plan,
+    .public-page-lto-pila-office
+  ) .public-title{font-size:31px}
+  body:is(
+    .public-page-news-and-updates,
+    .public-page-careers,
+    .public-page-lto-accredited,
+    .public-page-otdc-it-provider,
+    .public-page-medical-clinics,
+    .public-page-medical-it-providers,
+    .public-page-lecturers,
+    .public-page-driving-schools,
+    .public-page-driving-school-instructors,
+    .public-page-drivers-education-center,
+    .public-page-affiliates,
+    .public-page-ltms-portal,
+    .public-page-cde-program,
+    .public-page-cde-online-exam,
+    .public-page-citisend,
+    .public-page-resources,
+    .public-page-downloadable-forms,
+    .public-page-hrds-forms,
+    .public-page-mission-and-vision,
+    .public-page-mandate-and-functions,
+    .public-page-historical-background,
+    .public-page-road-safety-action-plan,
+    .public-page-lto-pila-office
+  ) .public-hero{padding:18px 16px}
+}
+
+/* About Us final override: policy-like document presentation */
+body:is(
+  .public-page-news-and-updates,
+  .public-page-careers,
+  .public-page-lto-accredited,
+  .public-page-otdc-it-provider,
+  .public-page-medical-clinics,
+  .public-page-medical-it-providers,
+  .public-page-lecturers,
+  .public-page-driving-schools,
+  .public-page-driving-school-instructors,
+  .public-page-drivers-education-center,
+  .public-page-affiliates,
+  .public-page-ltms-portal,
+  .public-page-cde-program,
+  .public-page-cde-online-exam,
+  .public-page-citisend,
+  .public-page-resources,
+  .public-page-downloadable-forms,
+  .public-page-hrds-forms,
+  .public-page-mission-and-vision,
+  .public-page-mandate-and-functions,
+  .public-page-historical-background,
+  .public-page-road-safety-action-plan,
+  .public-page-lto-pila-office
+){
+  --public-accent:#2b5fa5;
+  --public-title:#173761;
+  --public-bg-start:#f2f6fb;
+  --public-hero-end:#eef3fb;
+}
+body:is(
+  .public-page-news-and-updates,
+  .public-page-careers,
+  .public-page-lto-accredited,
+  .public-page-otdc-it-provider,
+  .public-page-medical-clinics,
+  .public-page-medical-it-providers,
+  .public-page-lecturers,
+  .public-page-driving-schools,
+  .public-page-driving-school-instructors,
+  .public-page-drivers-education-center,
+  .public-page-affiliates,
+  .public-page-ltms-portal,
+  .public-page-cde-program,
+  .public-page-cde-online-exam,
+  .public-page-citisend,
+  .public-page-resources,
+  .public-page-downloadable-forms,
+  .public-page-hrds-forms,
+  .public-page-mission-and-vision,
+  .public-page-mandate-and-functions,
+  .public-page-historical-background,
+  .public-page-road-safety-action-plan,
+  .public-page-lto-pila-office
+) .public-kicker{
+  font-size:12px;
+  letter-spacing:.14em;
+}
+body:is(
+  .public-page-news-and-updates,
+  .public-page-careers,
+  .public-page-lto-accredited,
+  .public-page-otdc-it-provider,
+  .public-page-medical-clinics,
+  .public-page-medical-it-providers,
+  .public-page-lecturers,
+  .public-page-driving-schools,
+  .public-page-driving-school-instructors,
+  .public-page-drivers-education-center,
+  .public-page-affiliates,
+  .public-page-ltms-portal,
+  .public-page-cde-program,
+  .public-page-cde-online-exam,
+  .public-page-citisend,
+  .public-page-resources,
+  .public-page-downloadable-forms,
+  .public-page-hrds-forms,
+  .public-page-mission-and-vision,
+  .public-page-mandate-and-functions,
+  .public-page-historical-background,
+  .public-page-road-safety-action-plan,
+  .public-page-lto-pila-office
+) .public-summary{
+  font-size:16px;
+  max-width:76ch;
+}
+body:is(
+  .public-page-news-and-updates,
+  .public-page-careers,
+  .public-page-lto-accredited,
+  .public-page-otdc-it-provider,
+  .public-page-medical-clinics,
+  .public-page-medical-it-providers,
+  .public-page-lecturers,
+  .public-page-driving-schools,
+  .public-page-driving-school-instructors,
+  .public-page-drivers-education-center,
+  .public-page-affiliates,
+  .public-page-ltms-portal,
+  .public-page-cde-program,
+  .public-page-cde-online-exam,
+  .public-page-citisend,
+  .public-page-resources,
+  .public-page-downloadable-forms,
+  .public-page-hrds-forms,
+  .public-page-mission-and-vision,
+  .public-page-mandate-and-functions,
+  .public-page-historical-background,
+  .public-page-road-safety-action-plan,
+  .public-page-lto-pila-office
+) .pub-link-grid{
+  grid-template-columns:1fr;
+  gap:0;
+  border:1px solid rgba(23,55,97,0.16);
+  border-radius:6px;
+  overflow:hidden;
+}
+body:is(
+  .public-page-news-and-updates,
+  .public-page-careers,
+  .public-page-lto-accredited,
+  .public-page-otdc-it-provider,
+  .public-page-medical-clinics,
+  .public-page-medical-it-providers,
+  .public-page-lecturers,
+  .public-page-driving-schools,
+  .public-page-driving-school-instructors,
+  .public-page-drivers-education-center,
+  .public-page-affiliates,
+  .public-page-ltms-portal,
+  .public-page-cde-program,
+  .public-page-cde-online-exam,
+  .public-page-citisend,
+  .public-page-resources,
+  .public-page-downloadable-forms,
+  .public-page-hrds-forms,
+  .public-page-mission-and-vision,
+  .public-page-mandate-and-functions,
+  .public-page-historical-background,
+  .public-page-road-safety-action-plan,
+  .public-page-lto-pila-office
+) .pub-link-card{
+  padding:12px 14px;
+  border:0;
+  border-bottom:1px solid rgba(23,55,97,0.12);
+  border-radius:0;
+  background:#fff;
+  color:#173761;
+  font-weight:600;
+}
+body:is(
+  .public-page-news-and-updates,
+  .public-page-careers,
+  .public-page-lto-accredited,
+  .public-page-otdc-it-provider,
+  .public-page-medical-clinics,
+  .public-page-medical-it-providers,
+  .public-page-lecturers,
+  .public-page-driving-schools,
+  .public-page-driving-school-instructors,
+  .public-page-drivers-education-center,
+  .public-page-affiliates,
+  .public-page-ltms-portal,
+  .public-page-cde-program,
+  .public-page-cde-online-exam,
+  .public-page-citisend,
+  .public-page-resources,
+  .public-page-downloadable-forms,
+  .public-page-hrds-forms,
+  .public-page-mission-and-vision,
+  .public-page-mandate-and-functions,
+  .public-page-historical-background,
+  .public-page-road-safety-action-plan,
+  .public-page-lto-pila-office
+) .pub-link-card:last-child{
+  border-bottom:0;
+}
+body:is(
+  .public-page-news-and-updates,
+  .public-page-careers,
+  .public-page-lto-accredited,
+  .public-page-otdc-it-provider,
+  .public-page-medical-clinics,
+  .public-page-medical-it-providers,
+  .public-page-lecturers,
+  .public-page-driving-schools,
+  .public-page-driving-school-instructors,
+  .public-page-drivers-education-center,
+  .public-page-affiliates,
+  .public-page-ltms-portal,
+  .public-page-cde-program,
+  .public-page-cde-online-exam,
+  .public-page-citisend,
+  .public-page-resources,
+  .public-page-downloadable-forms,
+  .public-page-hrds-forms,
+  .public-page-mission-and-vision,
+  .public-page-mandate-and-functions,
+  .public-page-historical-background,
+  .public-page-road-safety-action-plan,
+  .public-page-lto-pila-office
+) .pub-vacancy-grid{
+  grid-template-columns:1fr;
+  gap:0;
+}
+body:is(
+  .public-page-news-and-updates,
+  .public-page-careers,
+  .public-page-lto-accredited,
+  .public-page-otdc-it-provider,
+  .public-page-medical-clinics,
+  .public-page-medical-it-providers,
+  .public-page-lecturers,
+  .public-page-driving-schools,
+  .public-page-driving-school-instructors,
+  .public-page-drivers-education-center,
+  .public-page-affiliates,
+  .public-page-ltms-portal,
+  .public-page-cde-program,
+  .public-page-cde-online-exam,
+  .public-page-citisend,
+  .public-page-resources,
+  .public-page-downloadable-forms,
+  .public-page-hrds-forms,
+  .public-page-mission-and-vision,
+  .public-page-mandate-and-functions,
+  .public-page-historical-background,
+  .public-page-road-safety-action-plan,
+  .public-page-lto-pila-office
+) .pub-vacancy{
+  border:0;
+  border-bottom:1px solid rgba(23,55,97,0.14);
+  border-radius:0;
+  background:#fff;
+  padding:12px 2px;
+}
+body:is(
+  .public-page-news-and-updates,
+  .public-page-careers,
+  .public-page-lto-accredited,
+  .public-page-otdc-it-provider,
+  .public-page-medical-clinics,
+  .public-page-medical-it-providers,
+  .public-page-lecturers,
+  .public-page-driving-schools,
+  .public-page-driving-school-instructors,
+  .public-page-drivers-education-center,
+  .public-page-affiliates,
+  .public-page-ltms-portal,
+  .public-page-cde-program,
+  .public-page-cde-online-exam,
+  .public-page-citisend,
+  .public-page-resources,
+  .public-page-downloadable-forms,
+  .public-page-hrds-forms,
+  .public-page-mission-and-vision,
+  .public-page-mandate-and-functions,
+  .public-page-historical-background,
+  .public-page-road-safety-action-plan,
+  .public-page-lto-pila-office
+) .pub-vacancy:last-child{
+  border-bottom:0;
+}
 
 .contact-layout{gap:14px}
 .contact-list{display:grid;gap:10px}

@@ -16,7 +16,7 @@
             <h4>About LTO-HRIS</h4>
             <p>LTO-HRIS is the official Human Resource Information System of the LTO Pila District Office for personnel records, policy references, and public information services.</p>
             <ul class="flat-links">
-                <li><a href="index.php">Public Home</a></li>
+                <li><a href="index.php">Home</a></li>
                 <li><a href="contact-us.php">Contact Us</a></li>
                 <li><a href="data-privacy-notice.php">Data Privacy Notice</a></li>
             </ul>

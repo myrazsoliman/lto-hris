@@ -1162,6 +1162,45 @@ $publicNavItems = [
                     let closeTimer = null;
                     const submenuPanels = Array.from(panel.querySelectorAll('[data-submenu-panel]'));
                     const submenuTriggers = Array.from(panel.querySelectorAll('[data-submenu]'));
+                    const nestedGroups = Array.from(panel.querySelectorAll('.gov-mobile-submenu-group'));
+                    const collapseNestedGroups = () => {
+                        nestedGroups.forEach((group) => {
+                            group.classList.remove('is-open');
+                            const toggle = group.querySelector('.gov-mobile-submenu-toggle');
+                            if (toggle) toggle.setAttribute('aria-expanded', 'false');
+                            group.querySelectorAll(':scope > a:not(.gov-mobile-submenu-group-title-link)').forEach((link) => { link.hidden = true; });
+                        });
+                    };
+                    const initializeNestedGroups = () => {
+                        nestedGroups.forEach((group) => {
+                            const titleLink = group.querySelector(':scope > .gov-mobile-submenu-group-title-link');
+                            const childLinks = Array.from(group.querySelectorAll(':scope > a:not(.gov-mobile-submenu-group-title-link)'));
+                            if (!titleLink || !childLinks.length) return;
+                            group.classList.add('is-collapsible');
+                            if (!group.querySelector('.gov-mobile-submenu-toggle')) {
+                                const toggleBtn = document.createElement('button');
+                                toggleBtn.type = 'button';
+                                toggleBtn.className = 'gov-mobile-submenu-toggle';
+                                toggleBtn.setAttribute('aria-expanded', 'false');
+                                toggleBtn.setAttribute('aria-label', 'Show submenu for ' + (titleLink.textContent || 'group'));
+                                titleLink.insertAdjacentElement('afterend', toggleBtn);
+                                toggleBtn.addEventListener('click', () => {
+                                    const willOpen = !group.classList.contains('is-open');
+                                    nestedGroups.forEach((sibling) => {
+                                        if (sibling === group) return;
+                                        sibling.classList.remove('is-open');
+                                        const siblingToggle = sibling.querySelector('.gov-mobile-submenu-toggle');
+                                        if (siblingToggle) siblingToggle.setAttribute('aria-expanded', 'false');
+                                        sibling.querySelectorAll(':scope > a:not(.gov-mobile-submenu-group-title-link)').forEach((link) => { link.hidden = true; });
+                                    });
+                                    group.classList.toggle('is-open', willOpen);
+                                    toggleBtn.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+                                    childLinks.forEach((link) => { link.hidden = !willOpen; });
+                                });
+                            }
+                            childLinks.forEach((link) => { link.hidden = true; });
+                        });
+                    };
 
                     const closeSubmenus = () => {
                         submenuPanels.forEach((submenu) => {
@@ -1225,6 +1264,7 @@ $publicNavItems = [
                             closeSubmenus();
                             const submenu = panel.querySelector(`[data-submenu-panel="${target}"]`);
                             if (!submenu) return;
+                            collapseNestedGroups();
                             submenu.hidden = false;
                             panel.classList.add('submenu-open');
                         });
@@ -1233,6 +1273,7 @@ $publicNavItems = [
                     panel.querySelectorAll('.gov-mobile-back').forEach((button) => {
                         button.addEventListener('click', closeSubmenus);
                     });
+                    initializeNestedGroups();
                 }
             }
         }());
@@ -1907,6 +1948,8 @@ $publicNavItems = [
 </body>
 
 </html>
+
+
 
 
 
