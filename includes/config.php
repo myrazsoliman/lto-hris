@@ -1,5 +1,17 @@
 <?php
 
+// Optional per-environment overrides. Create `includes/config.local.php` (not committed)
+// to define constants (SMTP_*, APP_BASE_URL, etc.) for your server.
+$localConfigCandidates = [
+    __DIR__ . '/config.local.php',
+];
+foreach ($localConfigCandidates as $localConfigPath) {
+    if (is_file($localConfigPath)) {
+        require_once $localConfigPath;
+        break;
+    }
+}
+
 if (!defined('APP_BASE_URL')) {
     // Example: https://hris.lto.gov.ph or http://localhost/LTO%20HRIS
     define('APP_BASE_URL', (string) (getenv('APP_BASE_URL') ?: ''));

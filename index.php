@@ -17,7 +17,9 @@ $registerLastName = '';
 $registerEmail = '';
 $registerVerificationCode = '';
 $showRegisterVerificationStep = isset($_SESSION['pending_register_verification']);
-$showRegisterModal = isset($_GET['register']);
+$showRegisterVerificationModal = $showRegisterVerificationStep;
+$showRegisterModal = isset($_GET['register']) && !$showRegisterVerificationStep;
+$showLogoutSuccessModal = !empty($_COOKIE['lto_hris_logout_success']);
 $forgotError = '';
 $forgotSuccess = '';
 $forgotEmail = '';
@@ -54,6 +56,25 @@ if (isset($_GET['cancel_2fa'])) {
     unset($_SESSION['flash_2fa_code']);
     header('Location: index.php');
     exit;
+}
+
+if (isset($_GET['cancel_register_verification'])) {
+    unset($_SESSION['pending_register_verification']);
+    unset($_SESSION['flash_register_verification_code']);
+    header('Location: index.php?register=1');
+    exit;
+}
+
+if ($showLogoutSuccessModal) {
+    $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+        || (isset($_SERVER['SERVER_PORT']) && (int) $_SERVER['SERVER_PORT'] === 443);
+    setcookie('lto_hris_logout_success', '', [
+        'expires' => time() - 3600,
+        'path' => '/',
+        'secure' => $isHttps,
+        'httponly' => true,
+        'samesite' => 'Lax',
+    ]);
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form_action'] ?? '') === 'verify_2fa') {
@@ -199,6 +220,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form_action'] ?? '') === '
 
                 if ($userId) {
                     unset($_SESSION['pending_register_verification']);
+                    unset($_SESSION['flash_register_verification_code']);
                     clear_failed_attempts('register');
                     regenerate_csrf_token();
                     header('Location: index.php?login=1&registration_success=1');
@@ -222,13 +244,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form_action'] ?? '') === '
                     $_SESSION['pending_register_verification'] = $pendingRegister;
 
                     $subject = 'LTO HRIS Email Verification Code';
-                    $message = "Your LTO HRIS registration verification code is: {$verificationCode}\n\nThis code expires in 10 minutes.";
-                    $sent = send_email_message((string) $pendingRegister['email'], $subject, $message);
+                    $text = "Your LTO HRIS registration verification code is: {$verificationCode}\n\nThis code expires in 10 minutes.\n\nIf you didn’t request this, you can ignore this email.";
+                    $html = build_verification_email_html(
+                        'Email Verification Code',
+                        $verificationCode,
+                        10,
+                        'Use this code to complete your registration.'
+                    );
+                    $sent = send_email_message_html((string) $pendingRegister['email'], $subject, $text, $html);
 
                     if ($sent) {
                         $registerSuccess = 'A new verification code has been sent to your email.';
                     } else {
+                        if (AUTH_DEV_MODE) {
+                            $_SESSION['flash_register_verification_code'] = $verificationCode;
+                        }
                         $registerError = 'Unable to send verification code right now. Please try again later.';
+                        if (AUTH_DEV_MODE && last_mail_error() !== '') {
+                            $registerError .= ' (DEV: ' . last_mail_error() . ')';
+                        }
                     }
                 }
             }
@@ -260,14 +294,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form_action'] ?? '') === '
                     ];
 
                     $subject = 'LTO HRIS Email Verification Code';
-                    $message = "Your LTO HRIS registration verification code is: {$verificationCode}\n\nThis code expires in 10 minutes.";
-                    $sent = send_email_message($registerEmail, $subject, $message);
+                    $text = "Your LTO HRIS registration verification code is: {$verificationCode}\n\nThis code expires in 10 minutes.\n\nIf you didn’t request this, you can ignore this email.";
+                    $html = build_verification_email_html(
+                        'Email Verification Code',
+                        $verificationCode,
+                        10,
+                        'Use this code to complete your registration.'
+                    );
+                    $sent = send_email_message_html($registerEmail, $subject, $text, $html);
 
                     if ($sent) {
                         $registerSuccess = 'A verification code has been sent to your email. Enter the code to complete registration.';
                     } else {
+                        if (AUTH_DEV_MODE) {
+                            $_SESSION['flash_register_verification_code'] = $verificationCode;
+                        }
                         unset($_SESSION['pending_register_verification']);
                         $registerError = 'Unable to send verification code right now. Please try again later.';
+                        if (AUTH_DEV_MODE && last_mail_error() !== '') {
+                            $registerError .= ' (DEV: ' . last_mail_error() . ')';
+                        }
                     }
                 }
             }
@@ -278,7 +324,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form_action'] ?? '') === '
         register_failed_attempt('register');
     }
 
-    $showRegisterModal = true;
+    $showRegisterVerificationStep = isset($_SESSION['pending_register_verification']);
+    $showRegisterVerificationModal = $showRegisterVerificationStep;
+    $showRegisterModal = !$showRegisterVerificationStep;
 }
 
 if (isset($_SESSION['pending_register_verification']) && is_array($_SESSION['pending_register_verification'])) {
@@ -296,6 +344,8 @@ if (isset($_SESSION['pending_register_verification']) && is_array($_SESSION['pen
         $registerEmail = (string) ($pendingRegister['email'] ?? '');
     }
     $showRegisterVerificationStep = true;
+    $showRegisterVerificationModal = true;
+    $showRegisterModal = false;
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form_action'] ?? '') === 'forgot_password_modal') {
@@ -328,6 +378,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form_action'] ?? '') === '
 
     $showForgotModal = true;
 }
+
+$registerOtpPrefill = substr(preg_replace('/\D+/', '', (string) $registerVerificationCode), 0, 6);
+$registerOtpDigits = str_split($registerOtpPrefill);
 
 $currentPage = basename($_SERVER['PHP_SELF'] ?? 'index.php');
 $publicNavItems = [
@@ -825,7 +878,7 @@ $publicNavItems = [
                                 </div>
 
 
-                            <button type="submit" class="login-submit-btn login-submit-btn-modal login-submit-btn-modal-split">
+                            <button type="submit" class="login-submit-btn login-submit-btn-modal login-submit-btn-modal-split" data-login-submit>
                                 <span>Login</span>
                             </button>
                         </form>
@@ -1008,18 +1061,18 @@ $publicNavItems = [
                     </div>
 
                     <div class="login-modal-body login-modal-body-plain register-modal-body">
-                        <?php if ($registerError !== ''): ?>
+                        <?php if (!$showRegisterVerificationStep && $registerError !== ''): ?>
                             <div class="alert alert-error"><?php echo htmlspecialchars($registerError); ?></div>
                         <?php endif; ?>
 
-                        <?php if ($registerSuccess !== ''): ?>
+                        <?php if (!$showRegisterVerificationStep && $registerSuccess !== ''): ?>
                             <div class="alert alert-success"><?php echo htmlspecialchars($registerSuccess); ?></div>
                         <?php endif; ?>
 
                         <form class="login-form-modern login-form-modal register-form-modal" method="post" action="index.php">
                         <input type="hidden" name="form_action" value="register_modal">
                         <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken); ?>">
-                        <input type="hidden" name="register_verification_action" id="registerVerificationAction" value="<?php echo $showRegisterVerificationStep ? 'verify_code' : 'send_code'; ?>">
+                        <input type="hidden" name="register_verification_action" id="registerVerificationAction" value="send_code">
                         <div class="register-honeypot" aria-hidden="true">
                             <label for="registerWebsite">Website</label>
                             <input type="text" id="registerWebsite" name="website" tabindex="-1" autocomplete="off">
@@ -1033,7 +1086,7 @@ $publicNavItems = [
                                         <path d="M12 14c-4.42 0-8 2.24-8 5v1h16v-1c0-2.76-3.58-5-8-5Z" fill="currentColor" />
                                     </svg>
                                 </span>
-                                <input type="text" id="registerModalFirstName" name="first_name" placeholder=" " value="<?php echo htmlspecialchars($registerFirstName ?? ''); ?>" autocomplete="given-name" maxlength="80" <?php echo $showRegisterVerificationStep ? 'readonly' : ''; ?> required>
+                                <input type="text" id="registerModalFirstName" name="first_name" placeholder=" " value="<?php echo htmlspecialchars($registerFirstName ?? ''); ?>" autocomplete="given-name" maxlength="80" required>
                                 <label class="login-floating-label" for="registerModalFirstName">First Name</label>
                             </div>
                         </div>
@@ -1046,7 +1099,7 @@ $publicNavItems = [
                                         <path d="M12 14c-4.42 0-8 2.24-8 5v1h16v-1c0-2.76-3.58-5-8-5Z" fill="currentColor" />
                                     </svg>
                                 </span>
-                                <input type="text" id="registerModalMiddleName" name="middle_name" placeholder=" " value="<?php echo htmlspecialchars($registerMiddleName ?? ''); ?>" autocomplete="additional-name" maxlength="80" <?php echo $showRegisterVerificationStep ? 'readonly' : ''; ?>>
+                                <input type="text" id="registerModalMiddleName" name="middle_name" placeholder=" " value="<?php echo htmlspecialchars($registerMiddleName ?? ''); ?>" autocomplete="additional-name" maxlength="80">
                                 <label class="login-floating-label" for="registerModalMiddleName">Middle Name</label>
                             </div>
                         </div>
@@ -1059,7 +1112,7 @@ $publicNavItems = [
                                         <path d="M12 14c-4.42 0-8 2.24-8 5v1h16v-1c0-2.76-3.58-5-8-5Z" fill="currentColor" />
                                     </svg>
                                 </span>
-                                <input type="text" id="registerModalLastName" name="last_name" placeholder=" " value="<?php echo htmlspecialchars($registerLastName ?? ''); ?>" autocomplete="family-name" maxlength="80" <?php echo $showRegisterVerificationStep ? 'readonly' : ''; ?> required>
+                                <input type="text" id="registerModalLastName" name="last_name" placeholder=" " value="<?php echo htmlspecialchars($registerLastName ?? ''); ?>" autocomplete="family-name" maxlength="80" required>
                                 <label class="login-floating-label" for="registerModalLastName">Last Name</label>
                             </div>
                         </div>
@@ -1072,7 +1125,7 @@ $publicNavItems = [
                                         <path d="m6 8 6 4 6-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
                                     </svg>
                                 </span>
-                                <input type="email" id="registerModalEmail" name="email" placeholder=" " value="<?php echo htmlspecialchars($registerEmail); ?>" autocomplete="email" maxlength="150" <?php echo $showRegisterVerificationStep ? 'readonly' : ''; ?> required>
+                                <input type="email" id="registerModalEmail" name="email" placeholder=" " value="<?php echo htmlspecialchars($registerEmail); ?>" autocomplete="email" maxlength="150" required>
                                 <label class="login-floating-label" for="registerModalEmail">Email</label>
                             </div>
                         </div>
@@ -1085,7 +1138,7 @@ $publicNavItems = [
                                         <path d="M17 9h-1V7a4 4 0 0 0-8 0v2H7a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2Zm-6 0V7a2 2 0 1 1 4 0v2h-4Z" fill="currentColor" />
                                     </svg>
                                 </span>
-                                <input type="password" id="registerModalPassword" name="register_password" placeholder=" " autocomplete="new-password" minlength="10" maxlength="128" <?php echo $showRegisterVerificationStep ? '' : 'required'; ?> <?php echo $showRegisterVerificationStep ? 'disabled' : ''; ?>>
+                                <input type="password" id="registerModalPassword" name="register_password" placeholder=" " autocomplete="new-password" minlength="10" maxlength="128" required>
                                 <label class="login-floating-label" for="registerModalPassword">Password</label>
                             </div>
                             <button type="button" class="login-password-toggle" id="registerPasswordToggle" aria-label="Show password" aria-pressed="false">
@@ -1112,7 +1165,7 @@ $publicNavItems = [
                                         <path d="M17 9h-1V7a4 4 0 0 0-8 0v2H7a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2Zm-6 0V7a2 2 0 1 1 4 0v2h-4Z" fill="currentColor" />
                                     </svg>
                                 </span>
-                                <input type="password" id="registerModalConfirmPassword" name="register_confirm_password" placeholder=" " autocomplete="new-password" minlength="10" maxlength="128" <?php echo $showRegisterVerificationStep ? '' : 'required'; ?> <?php echo $showRegisterVerificationStep ? 'disabled' : ''; ?>>
+                                <input type="password" id="registerModalConfirmPassword" name="register_confirm_password" placeholder=" " autocomplete="new-password" minlength="10" maxlength="128" required>
                                 <label class="login-floating-label" for="registerModalConfirmPassword">Confirm Password</label>
                             </div>
                             <button type="button" class="login-password-toggle" id="registerConfirmPasswordToggle" aria-label="Show password" aria-pressed="false">
@@ -1136,21 +1189,6 @@ $publicNavItems = [
                             <span>Already have an account?</span>
                             <a href="login.php" class="register-login-link js-login-trigger">Login</a>
                         </div>
-
-                        <?php if ($showRegisterVerificationStep): ?>
-                        <div class="login-input-wrap login-input-wrap-modal register-input-wrap">
-                            <div class="login-input-shell">
-                                <span class="login-input-icon" aria-hidden="true">
-                                    <svg viewBox="0 0 24 24" fill="none">
-                                        <path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v11A2.5 2.5 0 0 1 17.5 20h-11A2.5 2.5 0 0 1 4 17.5v-11Z" stroke="currentColor" stroke-width="1.8" />
-                                        <path d="m6 8 6 4 6-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-                                    </svg>
-                                </span>
-                                <input type="text" id="registerVerificationCode" name="register_verification_code" placeholder=" " value="<?php echo htmlspecialchars($registerVerificationCode); ?>" inputmode="numeric" maxlength="6" pattern="[0-9]{6}" required>
-                                <label class="login-floating-label" for="registerVerificationCode">Email Verification Code</label>
-                            </div>
-                        </div>
-                        <?php endif; ?>
 
                         <div class="password-validation-indicator<?php echo $showRegisterVerificationStep ? ' is-hidden' : ' is-hidden'; ?>" id="passwordValidationIndicator">
                             <div class="password-strength-progress" aria-hidden="true">
@@ -1187,21 +1225,120 @@ $publicNavItems = [
                             </div>
                         </div>
 
-                            <?php if ($showRegisterVerificationStep): ?>
-                                <div class="register-verify-actions" style="display:flex;gap:10px;flex-wrap:wrap;">
-                                    <button type="submit" class="login-submit-btn login-submit-btn-modal login-submit-btn-modal-split register-submit-btn-modal" onclick="document.getElementById('registerVerificationAction').value='verify_code';">
-                                        <span>Verify and Create Account</span>
-                                    </button>
-                                    <button type="submit" class="login-submit-btn login-submit-btn-modal login-submit-btn-modal-split register-submit-btn-modal" style="background:#f1f5fb;color:#1f4f8f;border-color:#b8c9e6;" onclick="document.getElementById('registerVerificationAction').value='resend_code';">
-                                        <span>Resend Code</span>
-                                    </button>
-                                </div>
-                            <?php else: ?>
-                                <button type="submit" class="login-submit-btn login-submit-btn-modal login-submit-btn-modal-split register-submit-btn-modal" onclick="document.getElementById('registerVerificationAction').value='send_code';">
-                                    <span>Send Verification Code</span>
-                                </button>
-                            <?php endif; ?>
+                            <button type="submit" class="login-submit-btn login-submit-btn-modal login-submit-btn-modal-split register-submit-btn-modal" data-register-send-code onclick="document.getElementById('registerVerificationAction').value='send_code';">
+                                <span>Register</span>
+                            </button>
                         </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="login-modal verification-modal<?php echo $showRegisterVerificationModal ? ' is-open' : ''; ?>" id="registerVerificationModal" aria-hidden="<?php echo $showRegisterVerificationModal ? 'false' : 'true'; ?>">
+        <a class="login-modal-backdrop" href="index.php?cancel_register_verification=1" aria-label="Cancel registration verification"></a>
+        <div class="login-modal-dialog verification-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="registerVerificationModalTitle">
+            <div class="login-card-modern login-card-modal login-card-modal-split verification-card-modal">
+                <div class="login-modal-visual verification-modal-visual">
+                    <div class="login-modal-visual-overlay"></div>
+                    <div class="login-modal-visual-content verification-modal-visual-content">
+                        <img src="assets/img/lto_logo.png" alt="Land Transportation Office seal" class="login-modal-visual-logo">
+                        <h2 class="login-modal-visual-title">LTO - HRIS</h2>
+                        <p class="login-modal-visual-subtitle">Land Transportation Office</p>
+                        <span class="login-modal-visual-kicker">Email Verification</span>
+                    </div>
+                </div>
+
+                <div class="login-modal-panel verification-modal-panel">
+                    <div class="login-modal-header login-modal-header-plain verification-modal-header-plain">
+                        <div class="login-modal-header-copy">
+                            <div class="login-modal-title-row">
+                                <h2>Verify <span>Email</span></h2>
+                            </div>
+                            <p class="login-modal-subtitle">Enter the 6-digit code we sent to your email.</p>
+                        </div>
+                        <a class="login-modal-close" href="index.php?cancel_register_verification=1" aria-label="Cancel registration verification">
+                            <span aria-hidden="true">&times;</span>
+                        </a>
+                    </div>
+
+                    <div class="login-modal-body login-modal-body-plain verification-modal-body">
+                        <?php if ($registerError !== ''): ?>
+                            <div class="alert alert-error"><?php echo htmlspecialchars($registerError); ?></div>
+                        <?php endif; ?>
+
+                        <?php if ($registerSuccess !== ''): ?>
+                            <div class="alert alert-success"><?php echo htmlspecialchars($registerSuccess); ?></div>
+                        <?php endif; ?>
+
+                        <div class="login-modal-role-band verification-modal-role-band">Registration Verification</div>
+
+                        <form class="login-form-modern login-form-modal verification-form" method="post" action="index.php" novalidate data-register-verification-form>
+                            <input type="hidden" name="form_action" value="register_modal">
+                            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken); ?>">
+                            <input type="hidden" id="registerVerificationModalAction" name="register_verification_action" value="<?php echo strlen($registerOtpPrefill) === 6 ? 'verify_code' : 'resend_code'; ?>">
+                            <input type="hidden" id="registerVerificationOtpCode" name="register_verification_code" value="<?php echo htmlspecialchars($registerOtpPrefill); ?>">
+
+                            <div class="verification-hero-icon<?php echo strlen($registerOtpPrefill) === 6 ? ' is-ready' : ''; ?>" id="registerVerificationHeroIcon" aria-hidden="true">
+                                <img src="assets/img/email-sent.png" alt="Email verification sent" class="verification-hero-image">
+                            </div>
+
+                            <div class="verification-otp-row" role="group" aria-label="6-digit verification code">
+                                <input class="verification-otp-digit" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="one-time-code" value="<?php echo htmlspecialchars($registerOtpDigits[0] ?? ''); ?>" aria-label="Verification digit 1">
+                                <input class="verification-otp-digit" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" value="<?php echo htmlspecialchars($registerOtpDigits[1] ?? ''); ?>" aria-label="Verification digit 2">
+                                <input class="verification-otp-digit" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" value="<?php echo htmlspecialchars($registerOtpDigits[2] ?? ''); ?>" aria-label="Verification digit 3">
+                                <input class="verification-otp-digit" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" value="<?php echo htmlspecialchars($registerOtpDigits[3] ?? ''); ?>" aria-label="Verification digit 4">
+                                <input class="verification-otp-digit" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" value="<?php echo htmlspecialchars($registerOtpDigits[4] ?? ''); ?>" aria-label="Verification digit 5">
+                                <input class="verification-otp-digit" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" value="<?php echo htmlspecialchars($registerOtpDigits[5] ?? ''); ?>" aria-label="Verification digit 6">
+                                <span class="verification-otp-ready<?php echo strlen($registerOtpPrefill) === 6 ? ' is-visible' : ''; ?>" id="registerVerificationReadyMark" aria-hidden="true">&#10003;</span>
+                            </div>
+
+                            <h3 id="registerVerificationModalTitle" class="verification-title">Verification Code</h3>
+                            <p class="verification-description">
+                                <?php if (isset($pendingRegister) && is_array($pendingRegister) && !empty($pendingRegister['email'])): ?>
+                                    We sent a code to <strong><?php echo htmlspecialchars((string) $pendingRegister['email']); ?></strong>.
+                                <?php else: ?>
+                                    Enter the code to complete your registration.
+                                <?php endif; ?>
+                            </p>
+
+                            <button type="submit" class="login-submit-btn login-submit-btn-modal login-submit-btn-modal-split verification-primary-btn" id="registerVerificationPrimaryButton">
+                                <span><?php echo strlen($registerOtpPrefill) === 6 ? 'Verify Code' : 'Resend'; ?></span>
+                            </button>
+
+                            <div class="register-login-row" style="justify-content:center;margin-top:14px;">
+                                <a href="index.php?cancel_register_verification=1" class="register-login-link">Use a different email</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="login-modal logout-success-modal<?php echo $showLogoutSuccessModal ? ' is-open' : ''; ?>" id="logoutSuccessModal" aria-hidden="<?php echo $showLogoutSuccessModal ? 'false' : 'true'; ?>">
+        <div class="login-modal-backdrop" data-close-logout-success-modal></div>
+        <div class="login-modal-dialog logout-success-dialog" role="dialog" aria-modal="true" aria-labelledby="logoutSuccessTitle">
+            <div class="login-card-modern login-card-modal login-card-modal-split logout-success-card">
+                <div class="login-modal-panel logout-success-panel">
+                    <div class="login-modal-header login-modal-header-plain logout-success-header">
+                        <div class="login-modal-header-copy">
+                            <div class="login-modal-title-row">
+                                <h2 id="logoutSuccessTitle">Signed <span>Out</span></h2>
+                            </div>
+                            <p class="login-modal-subtitle">You have been signed out successfully.</p>
+                        </div>
+                        <button class="login-modal-close" type="button" data-close-logout-success-modal aria-label="Close logout message">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+
+                    <div class="login-modal-body login-modal-body-plain logout-success-body">
+                        <div class="logout-success-icon" aria-hidden="true">&#10003;</div>
+                        <p class="logout-success-note">This message will close automatically.</p>
+                        <button type="button" class="login-submit-btn login-submit-btn-modal login-submit-btn-modal-split logout-success-ok" data-close-logout-success-modal>
+                            <span>OK</span>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -1391,9 +1528,13 @@ $publicNavItems = [
 
             if (!modalConfigs.length) return;
 
-            const verificationModal = document.getElementById('twoFaModal');
-            const anyModalOpen = () => modalConfigs.some((config) => config.modal.classList.contains('is-open')) ||
-                (verificationModal && verificationModal.classList.contains('is-open'));
+            const verificationModals = ['twoFaModal', 'registerVerificationModal', 'logoutSuccessModal']
+                .map((id) => document.getElementById(id))
+                .filter((modal) => modal);
+
+            const anyModalOpen = () =>
+                modalConfigs.some((config) => config.modal.classList.contains('is-open')) ||
+                verificationModals.some((modal) => modal.classList.contains('is-open'));
 
             const openHandlers = {};
 
@@ -1406,6 +1547,10 @@ $publicNavItems = [
                 modalConfigs.forEach((config) => {
                     config.modal.classList.remove('is-open');
                     config.modal.setAttribute('aria-hidden', 'true');
+                });
+                verificationModals.forEach((modal) => {
+                    modal.classList.remove('is-open');
+                    modal.setAttribute('aria-hidden', 'true');
                 });
                 syncBodyState();
             };
@@ -1482,15 +1627,18 @@ $publicNavItems = [
             const serverOpen = modalConfigs.find((config) => config.modal.classList.contains('is-open'));
             if (serverOpen && serverOpen.modal.id) {
                 setStoredModalId(serverOpen.modal.id);
-            } else if (verificationModal && verificationModal.classList.contains('is-open') && verificationModal.id) {
-                setStoredModalId(verificationModal.id);
             } else {
-                // Restore last open modal after refresh (client-side only modals).
-                const restoreId = getStoredModalId();
-                if (!anyModalOpen() && restoreId && openHandlers[restoreId]) {
-                    openHandlers[restoreId]();
-                } else if (restoreId && !openHandlers[restoreId]) {
-                    clearStoredModalId();
+                const serverVerificationOpen = verificationModals.find((modal) => modal.classList.contains('is-open'));
+                if (serverVerificationOpen && serverVerificationOpen.id) {
+                    setStoredModalId(serverVerificationOpen.id);
+                } else {
+                    // Restore last open modal after refresh (client-side only modals).
+                    const restoreId = getStoredModalId();
+                    if (!anyModalOpen() && restoreId && openHandlers[restoreId]) {
+                        openHandlers[restoreId]();
+                    } else if (restoreId && !openHandlers[restoreId]) {
+                        clearStoredModalId();
+                    }
                 }
             }
 
@@ -1498,102 +1646,198 @@ $publicNavItems = [
         }());
 
         (function() {
-            const modal = document.getElementById('twoFaModal');
-            if (!modal) return;
+            const initOtpModal = (modalId, config) => {
+                const modal = document.getElementById(modalId);
+                if (!modal) return;
 
-            const form = modal.querySelector('[data-verification-form]');
-            const actionInput = modal.querySelector('#verificationAction');
-            const codeInput = modal.querySelector('#otpCode');
-            const primaryButton = modal.querySelector('#verificationPrimaryButton');
-            const heroIcon = modal.querySelector('#verificationHeroIcon');
-            const readyMark = modal.querySelector('#verificationReadyMark');
-            const digitInputs = Array.from(modal.querySelectorAll('.verification-otp-digit'));
+                const form = modal.querySelector(config.formSelector);
+                const actionInput = modal.querySelector(config.actionInputSelector);
+                const codeInput = modal.querySelector(config.codeInputSelector);
+                const primaryButton = modal.querySelector(config.primaryButtonSelector);
+                const heroIcon = modal.querySelector(config.heroIconSelector);
+                const readyMark = modal.querySelector(config.readyMarkSelector);
+                const digitInputs = Array.from(modal.querySelectorAll('.verification-otp-digit'));
 
-            if (!form || !actionInput || !codeInput || !primaryButton || !heroIcon || !readyMark || digitInputs.length !== 6) return;
+                if (!form || !actionInput || !codeInput || !primaryButton || !heroIcon || !readyMark || digitInputs.length !== 6) return;
 
-            const digitsOnly = (value) => (value || '').replace(/\D+/g, '').slice(0, 6);
+                const digitsOnly = (value) => (value || '').replace(/\D+/g, '').slice(0, 6);
 
-            const setState = () => {
-                const value = digitsOnly(digitInputs.map((input) => input.value).join(''));
-                codeInput.value = value;
+                const setState = () => {
+                    const value = digitsOnly(digitInputs.map((input) => input.value).join(''));
+                    codeInput.value = value;
 
-                const complete = value.length === 6;
-                actionInput.value = complete ? 'verify_2fa' : 'resend_2fa';
-                primaryButton.classList.toggle('is-ready', complete);
-                heroIcon.classList.toggle('is-ready', complete);
-                readyMark.classList.toggle('is-visible', complete);
-                primaryButton.querySelector('span').textContent = complete ? 'Confirm Code' : 'Resend';
-            };
+                    const complete = value.length === 6;
+                    actionInput.value = complete ? config.verifyActionValue : config.resendActionValue;
+                    primaryButton.classList.toggle('is-ready', complete);
+                    heroIcon.classList.toggle('is-ready', complete);
+                    readyMark.classList.toggle('is-visible', complete);
+                    const label = complete ? config.confirmText : config.resendText;
+                    const span = primaryButton.querySelector('span');
+                    if (span) span.textContent = label;
+                };
 
-            const fillInputs = (value) => {
-                const chars = digitsOnly(value).split('');
-                digitInputs.forEach((input, index) => {
-                    input.value = chars[index] || '';
-                });
-                setState();
-            };
-
-            fillInputs(codeInput.value);
-
-            digitInputs.forEach((input, index) => {
-                input.addEventListener('input', () => {
-                    const value = digitsOnly(input.value);
-
-                    if (value.length > 1) {
-                        fillInputs(value + digitInputs.slice(index + 1).map((node) => node.value).join(''));
-                        const nextFocus = Math.min(index + value.length, digitInputs.length - 1);
-                        digitInputs[nextFocus].focus();
-                        return;
-                    }
-
-                    input.value = value;
-                    if (value && index < digitInputs.length - 1) {
-                        digitInputs[index + 1].focus();
-                    }
+                const fillInputs = (value) => {
+                    const chars = digitsOnly(value).split('');
+                    digitInputs.forEach((input, index) => {
+                        input.value = chars[index] || '';
+                    });
                     setState();
-                });
+                };
 
-                input.addEventListener('keydown', (event) => {
-                    if (event.key === 'Backspace') {
-                        event.preventDefault();
-                        if (input.value) {
-                            input.value = '';
-                        } else if (index > 0) {
-                            const prev = digitInputs[index - 1];
-                            prev.value = '';
-                            prev.focus();
+                fillInputs(codeInput.value);
+
+                digitInputs.forEach((input, index) => {
+                    input.addEventListener('input', () => {
+                        const value = digitsOnly(input.value);
+
+                        if (value.length > 1) {
+                            fillInputs(value + digitInputs.slice(index + 1).map((node) => node.value).join(''));
+                            const nextFocus = Math.min(index + value.length, digitInputs.length - 1);
+                            digitInputs[nextFocus].focus();
+                            return;
+                        }
+
+                        input.value = value;
+                        if (value && index < digitInputs.length - 1) {
+                            digitInputs[index + 1].focus();
                         }
                         setState();
-                        return;
-                    }
-                    if (event.key === 'Delete') {
+                    });
+
+                    input.addEventListener('keydown', (event) => {
+                        if (event.key === 'Backspace') {
+                            event.preventDefault();
+                            if (input.value) {
+                                input.value = '';
+                            } else if (index > 0) {
+                                const prev = digitInputs[index - 1];
+                                prev.value = '';
+                                prev.focus();
+                            }
+                            setState();
+                            return;
+                        }
+                        if (event.key === 'Delete') {
+                            event.preventDefault();
+                            input.value = '';
+                            setState();
+                            return;
+                        }
+                        if (event.key === 'ArrowLeft' && index > 0) {
+                            event.preventDefault();
+                            digitInputs[index - 1].focus();
+                        }
+                        if (event.key === 'ArrowRight' && index < digitInputs.length - 1) {
+                            event.preventDefault();
+                            digitInputs[index + 1].focus();
+                        }
+                    });
+
+                    input.addEventListener('paste', (event) => {
+                        const pasted = digitsOnly(event.clipboardData ? event.clipboardData.getData('text') : '');
+                        if (!pasted) return;
                         event.preventDefault();
-                        input.value = '';
-                        setState();
-                        return;
-                    }
-                    if (event.key === 'ArrowLeft' && index > 0) {
-                        event.preventDefault();
-                        digitInputs[index - 1].focus();
-                    }
-                    if (event.key === 'ArrowRight' && index < digitInputs.length - 1) {
-                        event.preventDefault();
-                        digitInputs[index + 1].focus();
-                    }
+                        fillInputs(pasted);
+                        const focusIndex = Math.min(pasted.length, digitInputs.length - 1);
+                        digitInputs[focusIndex].focus();
+                    });
                 });
 
-                input.addEventListener('paste', (event) => {
-                    const pasted = digitsOnly(event.clipboardData ? event.clipboardData.getData('text') : '');
-                    if (!pasted) return;
-                    event.preventDefault();
-                    fillInputs(pasted);
-                    const focusIndex = Math.min(pasted.length, digitInputs.length - 1);
-                    digitInputs[focusIndex].focus();
+                form.addEventListener('submit', () => {
+                    setState();
                 });
+            };
+
+            initOtpModal('twoFaModal', {
+                formSelector: '[data-verification-form]',
+                actionInputSelector: '#verificationAction',
+                codeInputSelector: '#otpCode',
+                primaryButtonSelector: '#verificationPrimaryButton',
+                heroIconSelector: '#verificationHeroIcon',
+                readyMarkSelector: '#verificationReadyMark',
+                verifyActionValue: 'verify_2fa',
+                resendActionValue: 'resend_2fa',
+                confirmText: 'Confirm Code',
+                resendText: 'Resend'
             });
 
+            initOtpModal('registerVerificationModal', {
+                formSelector: '[data-register-verification-form]',
+                actionInputSelector: '#registerVerificationModalAction',
+                codeInputSelector: '#registerVerificationOtpCode',
+                primaryButtonSelector: '#registerVerificationPrimaryButton',
+                heroIconSelector: '#registerVerificationHeroIcon',
+                readyMarkSelector: '#registerVerificationReadyMark',
+                verifyActionValue: 'verify_code',
+                resendActionValue: 'resend_code',
+                confirmText: 'Verify Code',
+                resendText: 'Resend'
+            });
+        }());
+
+        (function() {
+            const modal = document.getElementById('registerModal');
+            if (!modal) return;
+
+            const form = modal.querySelector('form.register-form-modal');
+            if (!form) return;
+
+            const actionInput = form.querySelector('#registerVerificationAction');
+            const button = form.querySelector('[data-register-send-code]');
+            if (!actionInput || !button) return;
+
+            const labelSpan = button.querySelector('span');
+            const originalLabel = labelSpan ? labelSpan.textContent : '';
+
             form.addEventListener('submit', () => {
-                setState();
+                if (actionInput.value !== 'send_code') return;
+                button.disabled = true;
+                button.setAttribute('aria-busy', 'true');
+                if (labelSpan) {
+                    labelSpan.textContent = 'Sending…';
+                }
+
+                window.setTimeout(() => {
+                    button.disabled = false;
+                    button.removeAttribute('aria-busy');
+                    if (labelSpan) {
+                        labelSpan.textContent = originalLabel || 'Register';
+                    }
+                }, 20000);
+            });
+        }());
+
+        (function() {
+            const modal = document.getElementById('loginModal');
+            if (!modal) return;
+
+            const form = modal.querySelector('form.login-form-modal');
+            if (!form) return;
+
+            const actionInput = form.querySelector('input[name="form_action"]');
+            const button = form.querySelector('[data-login-submit]');
+            if (!actionInput || !button) return;
+
+            const labelSpan = button.querySelector('span');
+            const originalLabel = labelSpan ? labelSpan.textContent : '';
+
+            form.addEventListener('submit', () => {
+                if ((actionInput.value || '') !== 'login_modal') return;
+                button.disabled = true;
+                button.classList.add('is-loading');
+                button.setAttribute('aria-busy', 'true');
+                if (labelSpan) {
+                    labelSpan.textContent = 'Signing in…';
+                }
+
+                window.setTimeout(() => {
+                    button.disabled = false;
+                    button.classList.remove('is-loading');
+                    button.removeAttribute('aria-busy');
+                    if (labelSpan) {
+                        labelSpan.textContent = originalLabel || 'Login';
+                    }
+                }, 20000);
             });
         }());
 

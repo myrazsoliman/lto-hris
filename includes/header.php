@@ -20,6 +20,10 @@ if ($user) {
     ensure_demo_notification_for_user($userIdForNotifications);
 }
 $notificationCount = $user ? get_unread_notification_count($userIdForNotifications) : 0;
+$showLoginSuccessModal = !empty($_SESSION['flash_login_success']) && $user;
+if ($showLoginSuccessModal) {
+    unset($_SESSION['flash_login_success']);
+}
 
 $navIconMap = [
     'Dashboard' => 'fa-solid fa-house',
@@ -177,6 +181,61 @@ $navIconMap = [
                         </div>
                     </div>
                 </div>
+
+                <?php if ($showLoginSuccessModal): ?>
+                    <div class="confirm-modal confirm-modal--menu confirm-modal--success" id="loginSuccessModal" aria-hidden="true">
+                        <div class="confirm-modal-backdrop" data-login-success-close></div>
+                        <div class="confirm-modal-dialog login-success-dialog" role="dialog" aria-modal="true" aria-labelledby="loginSuccessTitle">
+                            <div class="login-success-head">
+                                <span class="confirm-modal-icon login-success-icon" aria-hidden="true">
+                                    <i class="fa-solid fa-check"></i>
+                                </span>
+                                <h2 id="loginSuccessTitle" class="login-success-title">Login Successful</h2>
+                                <p class="confirm-modal-text login-success-text">Welcome back, <?php echo htmlspecialchars($profileName); ?>.</p>
+                                <p class="confirm-modal-text login-success-subtext">Redirecting you to your dashboard…</p>
+                            </div>
+                            <div class="confirm-modal-actions login-success-actions">
+                                <button type="button" class="btn btn-primary login-success-ok" data-login-success-close>OK</button>
+                            </div>
+                        </div>
+                    </div>
+                    <script>
+                        (function() {
+                            if (window.__loginSuccessModalBound) return;
+                            window.__loginSuccessModalBound = true;
+
+                            var modal = document.getElementById('loginSuccessModal');
+                            if (!modal) return;
+
+                            var closeTargets = modal.querySelectorAll('[data-login-success-close]');
+
+                            function setOpen(next) {
+                                var isOpen = !!next;
+                                modal.classList.toggle('is-open', isOpen);
+                                modal.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
+                                document.body.classList.toggle('modal-open', isOpen);
+                            }
+
+                            setOpen(true);
+                            window.setTimeout(function() {
+                                setOpen(false);
+                            }, 3000);
+
+                            closeTargets.forEach(function(el) {
+                                el.addEventListener('click', function(e) {
+                                    e.preventDefault();
+                                    setOpen(false);
+                                });
+                            });
+
+                            document.addEventListener('keydown', function(e) {
+                                if (e.key === 'Escape' && modal.classList.contains('is-open')) {
+                                    setOpen(false);
+                                }
+                            });
+                        }());
+                    </script>
+                <?php endif; ?>
                 <script>
                     (function() {
                         if (window.__logoutConfirmInlineBound) return;

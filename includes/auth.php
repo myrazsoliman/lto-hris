@@ -283,20 +283,108 @@ function clear_trusted_device_cookie()
     ]);
 }
 
+function set_last_mail_error($message)
+{
+    $GLOBALS['LTO_HRIS_LAST_MAIL_ERROR'] = is_string($message) ? trim($message) : '';
+}
+
+function last_mail_error()
+{
+    $v = $GLOBALS['LTO_HRIS_LAST_MAIL_ERROR'] ?? '';
+    return is_string($v) ? $v : '';
+}
+
+function build_verification_email_html($title, $code, $expiresMinutes, $subtitle = '')
+{
+    $title = (string) $title;
+    $code = (string) $code;
+    $expiresMinutes = (int) $expiresMinutes;
+    $subtitle = (string) $subtitle;
+
+    $safeTitle = htmlspecialchars($title, ENT_QUOTES, 'UTF-8');
+    $safeCode = htmlspecialchars($code, ENT_QUOTES, 'UTF-8');
+    $safeSubtitle = htmlspecialchars($subtitle, ENT_QUOTES, 'UTF-8');
+    $expiresText = $expiresMinutes > 0 ? ('This code expires in ' . $expiresMinutes . ' minutes.') : '';
+    $safeExpires = htmlspecialchars($expiresText, ENT_QUOTES, 'UTF-8');
+
+    $logoSrc = 'cid:lto_logo_png';
+    if (defined('APP_BASE_URL') && is_string(APP_BASE_URL) && APP_BASE_URL !== '') {
+        $base = rtrim(APP_BASE_URL, '/');
+        $logoSrc = $base . '/assets/img/lto_logo_email.png';
+    }
+    $safeLogoSrc = htmlspecialchars($logoSrc, ENT_QUOTES, 'UTF-8');
+
+    return '<!doctype html>'
+        . '<html lang="en">'
+        . '<head>'
+        . '<meta charset="utf-8">'
+        . '<meta name="viewport" content="width=device-width, initial-scale=1">'
+        . '<meta name="x-apple-disable-message-reformatting">'
+        . '<title>' . $safeTitle . '</title>'
+        . '</head>'
+        . '<body style="margin:0;padding:0;background:#f4f7fb;color:#1f2937;font-family:Segoe UI,Arial,sans-serif;">'
+        . '<div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;">'
+        . 'Your verification code is ' . $safeCode . '.'
+        . '</div>'
+        . '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#f4f7fb;padding:24px 12px;">'
+        . '<tr><td align="center">'
+        . '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" style="max-width:600px;width:100%;border-collapse:separate;">'
+        . '<tr>'
+        . '<td style="background:#f8fbff;border:1px solid #dbe6f6;border-bottom:none;border-top-left-radius:16px;border-top-right-radius:16px;padding:16px 18px;">'
+        . '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;">'
+        . '<tr>'
+        . '<td width="56" style="width:56px;padding:0;vertical-align:middle;">'
+        . '<img src="' . $safeLogoSrc . '" width="44" height="44" alt="LTO" style="display:block;width:44px;height:44px;object-fit:contain;border:0;outline:none;text-decoration:none;">'
+        . '</td>'
+        . '<td style="padding:0 0 0 10px;vertical-align:middle;">'
+        . '<div style="font-size:20px;font-weight:900;letter-spacing:.3px;color:#0b2b5a;line-height:1.15;">LTO HRIS</div>'
+        . '<div style="font-size:13px;color:#5b6b82;line-height:1.25;margin-top:2px;">Land Transportation Office</div>'
+        . '</td>'
+        . '</tr>'
+        . '</table>'
+        . '</td>'
+        . '</tr>'
+        . '<tr><td style="background:#ffffff;border:1px solid #dbe6f6;border-bottom-left-radius:16px;border-bottom-right-radius:16px;box-shadow:0 12px 30px rgba(31,79,143,.08);padding:22px;">'
+        . '<div style="font-size:18px;font-weight:900;color:#0b2b5a;line-height:1.2;margin:0 0 6px 0;">' . $safeTitle . '</div>'
+        . ($safeSubtitle !== '' ? ('<div style="font-size:13px;color:#5b6b82;line-height:1.5;margin:0 0 18px 0;">' . $safeSubtitle . '</div>') : '')
+        . '<div style="background:#f1f5fb;border:1px solid #cfe0fb;border-radius:14px;padding:16px;text-align:center;">'
+        . '<div style="font-size:12px;color:#5b6b82;margin:0 0 8px 0;">Your one-time code</div>'
+        . '<div style="font-size:34px;letter-spacing:6px;font-weight:900;color:#1f4f8f;margin:0;line-height:1.2;">' . $safeCode . '</div>'
+        . '</div>'
+        . '<div style="font-size:12px;color:#5b6b82;line-height:1.6;margin-top:14px;">' . $safeExpires . '</div>'
+        . '<div style="font-size:12px;color:#5b6b82;line-height:1.6;margin-top:10px;">'
+        . 'If you didn’t request this, you can safely ignore this email.'
+        . '</div>'
+        . '</td></tr>'
+        . '<tr><td style="padding:12px 6px 0 6px;">'
+        . '<div style="font-size:11px;color:#7b8aa3;line-height:1.6;text-align:center;">'
+        . '© ' . date('Y') . ' LTO HRIS. Please do not reply to this message.'
+        . '</div>'
+        . '</td></tr>'
+        . '</table>'
+        . '</td></tr>'
+        . '</table>'
+        . '</body>'
+        . '</html>';
+}
+
 function send_email_message($to, $subject, $message)
 {
     $to = (string) $to;
     $subject = (string) $subject;
     $message = (string) $message;
 
+    set_last_mail_error('');
+
+    $fromEmail = SMTP_FROM_EMAIL !== '' ? SMTP_FROM_EMAIL : (SMTP_USER !== '' ? SMTP_USER : 'noreply@localhost');
+    $fromName = SMTP_FROM_NAME !== '' ? SMTP_FROM_NAME : 'LTO HRIS';
+
     $headers = "MIME-Version: 1.0\r\n";
     $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
-    if (SMTP_FROM_EMAIL !== '') {
-        $fromName = SMTP_FROM_NAME !== '' ? SMTP_FROM_NAME : 'LTO HRIS';
-        $headers .= 'From: ' . $fromName . ' <' . SMTP_FROM_EMAIL . ">\r\n";
-    }
+    $headers .= 'From: ' . $fromName . ' <' . $fromEmail . ">\r\n";
 
     $sent = false;
+    $attempts = [];
 
     // Prefer PHPMailer when available (composer vendor/autoload.php).
     $autoloadCandidates = [
@@ -311,29 +399,197 @@ function send_email_message($to, $subject, $message)
     }
 
     if (class_exists('\\PHPMailer\\PHPMailer\\PHPMailer')) {
-        $sent = phpmailer_send_mail($to, $subject, $message);
+        [$sent, $err] = phpmailer_send_mail($to, $subject, $message);
+        $attempts[] = 'PHPMailer' . ($err !== '' ? (': ' . $err) : '');
     }
 
-    if (!$sent && SMTP_HOST !== '') {
-        $sent = smtp_send_mail($to, $subject, $message);
+    if (!$sent && (SMTP_HOST !== '' || SMTP_USER !== '')) {
+        [$sent, $err] = smtp_send_mail($to, $subject, $message);
+        $attempts[] = 'SMTP' . ($err !== '' ? (': ' . $err) : '');
     }
 
     try {
         if (!$sent) {
+            // Helps on Windows where mail() can complain about missing sendmail_from.
+            @ini_set('sendmail_from', $fromEmail);
             $sent = @mail($to, $subject, $message, $headers);
+            if (!$sent) {
+                $last = error_get_last();
+                $err = is_array($last) ? (string) ($last['message'] ?? '') : '';
+                if ($err !== '') {
+                    set_last_mail_error($err);
+                } elseif (SMTP_HOST === '' && SMTP_USER === '') {
+                    set_last_mail_error('No SMTP configured and PHP mail() failed (check php.ini sendmail/SMTP settings).');
+                } else {
+                    set_last_mail_error('PHP mail() failed.');
+                }
+                $attempts[] = 'mail(): ' . last_mail_error();
+            } else {
+                $attempts[] = 'mail()';
+            }
         }
     } catch (Throwable $e) {
         $sent = false;
+        set_last_mail_error($e->getMessage());
+        $attempts[] = 'mail(): ' . last_mail_error();
     }
 
     if (!$sent) {
-        error_log('[LTO HRIS] Email not sent (check SMTP). To=' . $to . ' Subject=' . $subject);
+        $details = $attempts ? (' Attempts=' . implode(' | ', $attempts)) : '';
+        $err = last_mail_error();
+        $errPart = $err !== '' ? (' LastError=' . $err) : '';
+        error_log('[LTO HRIS] Email not sent. To=' . $to . ' Subject=' . $subject . $errPart . $details);
     }
 
     return $sent;
 }
 
-function phpmailer_send_mail($to, $subject, $body)
+function send_email_message_html($to, $subject, $textBody, $htmlBody)
+{
+    $to = (string) $to;
+    $subject = (string) $subject;
+    $textBody = (string) $textBody;
+    $htmlBody = (string) $htmlBody;
+
+    set_last_mail_error('');
+
+    $fromEmail = SMTP_FROM_EMAIL !== '' ? SMTP_FROM_EMAIL : (SMTP_USER !== '' ? SMTP_USER : 'noreply@localhost');
+    $fromName = SMTP_FROM_NAME !== '' ? SMTP_FROM_NAME : 'LTO HRIS';
+
+    $relatedBoundary = 'lto_hris_rel_' . bin2hex(random_bytes(10));
+    $altBoundary = 'lto_hris_alt_' . bin2hex(random_bytes(10));
+
+    $inlineImages = [];
+    $needsInlineLogo = is_string($htmlBody) && strpos($htmlBody, 'cid:lto_logo_png') !== false;
+    $defaultLogoPath = __DIR__ . '/../assets/img/lto_logo_email.png';
+    if (!is_file($defaultLogoPath)) {
+        $defaultLogoPath = __DIR__ . '/../assets/img/lto_logo.png';
+    }
+    if ($needsInlineLogo && is_file($defaultLogoPath)) {
+        $inlineImages[] = [
+            'cid' => 'lto_logo_png',
+            'path' => $defaultLogoPath,
+            'mime' => 'image/png',
+            'filename' => basename($defaultLogoPath),
+        ];
+    }
+
+    $headersLines = [];
+    $headersLines[] = 'MIME-Version: 1.0';
+    $headersLines[] = 'From: ' . $fromName . ' <' . $fromEmail . '>';
+    $headersLines[] = 'Content-Type: multipart/related; boundary="' . $relatedBoundary . '"';
+
+    $headers = implode("\r\n", $headersLines) . "\r\n";
+
+    $body = '';
+    $body .= '--' . $relatedBoundary . "\r\n";
+    $body .= 'Content-Type: multipart/alternative; boundary="' . $altBoundary . "\"\r\n\r\n";
+
+    $body .= '--' . $altBoundary . "\r\n";
+    $body .= "Content-Type: text/plain; charset=UTF-8\r\n";
+    $body .= "Content-Transfer-Encoding: quoted-printable\r\n\r\n";
+    $body .= quoted_printable_encode($textBody) . "\r\n\r\n";
+
+    $body .= '--' . $altBoundary . "\r\n";
+    $body .= "Content-Type: text/html; charset=UTF-8\r\n";
+    $body .= "Content-Transfer-Encoding: quoted-printable\r\n\r\n";
+    $body .= quoted_printable_encode($htmlBody) . "\r\n\r\n";
+
+    $body .= '--' . $altBoundary . "--\r\n\r\n";
+
+    static $inlineCache = [];
+
+    foreach ($inlineImages as $img) {
+        $cid = (string) ($img['cid'] ?? '');
+        $path = (string) ($img['path'] ?? '');
+        $mime = (string) ($img['mime'] ?? 'application/octet-stream');
+        $filename = (string) ($img['filename'] ?? 'inline');
+
+        if ($cid === '' || !is_file($path)) {
+            continue;
+        }
+
+        $cacheKey = $path . '|' . (string) @filemtime($path);
+        if (!isset($inlineCache[$cacheKey])) {
+            $data = @file_get_contents($path);
+            if (!is_string($data) || $data === '') {
+                continue;
+            }
+            // Skip very large inline images (they slow down SMTP sends).
+            if (strlen($data) > (120 * 1024)) {
+                continue;
+            }
+            $inlineCache[$cacheKey] = chunk_split(base64_encode($data), 76, "\r\n");
+        }
+
+        $body .= '--' . $relatedBoundary . "\r\n";
+        $body .= 'Content-Type: ' . $mime . '; name="' . $filename . "\"\r\n";
+        $body .= "Content-Transfer-Encoding: base64\r\n";
+        $body .= 'Content-ID: <' . $cid . ">\r\n";
+        $body .= 'Content-Disposition: inline; filename="' . $filename . "\"\r\n\r\n";
+        $body .= $inlineCache[$cacheKey] . "\r\n";
+    }
+
+    $body .= '--' . $relatedBoundary . "--\r\n";
+
+    $sent = false;
+    $attempts = [];
+
+    $autoloadCandidates = [
+        __DIR__ . '/../vendor/autoload.php',
+        __DIR__ . '/vendor/autoload.php',
+    ];
+    foreach ($autoloadCandidates as $autoloadPath) {
+        if (is_file($autoloadPath)) {
+            require_once $autoloadPath;
+            break;
+        }
+    }
+
+    if (class_exists('\\PHPMailer\\PHPMailer\\PHPMailer')) {
+        [$sent, $err] = phpmailer_send_mail($to, $subject, $body, $headersLines);
+        $attempts[] = 'PHPMailer' . ($err !== '' ? (': ' . $err) : '');
+    }
+
+    if (!$sent && (SMTP_HOST !== '' || SMTP_USER !== '')) {
+        [$sent, $err] = smtp_send_mail($to, $subject, $body, $headersLines);
+        $attempts[] = 'SMTP' . ($err !== '' ? (': ' . $err) : '');
+    }
+
+    try {
+        if (!$sent) {
+            @ini_set('sendmail_from', $fromEmail);
+            $sent = @mail($to, $subject, $body, $headers);
+            if (!$sent) {
+                $last = error_get_last();
+                $err = is_array($last) ? (string) ($last['message'] ?? '') : '';
+                if ($err !== '') {
+                    set_last_mail_error($err);
+                } else {
+                    set_last_mail_error('PHP mail() failed.');
+                }
+                $attempts[] = 'mail(): ' . last_mail_error();
+            } else {
+                $attempts[] = 'mail()';
+            }
+        }
+    } catch (Throwable $e) {
+        $sent = false;
+        set_last_mail_error($e->getMessage());
+        $attempts[] = 'mail(): ' . last_mail_error();
+    }
+
+    if (!$sent) {
+        $details = $attempts ? (' Attempts=' . implode(' | ', $attempts)) : '';
+        $err = last_mail_error();
+        $errPart = $err !== '' ? (' LastError=' . $err) : '';
+        error_log('[LTO HRIS] Email not sent. To=' . $to . ' Subject=' . $subject . $errPart . $details);
+    }
+
+    return $sent;
+}
+
+function phpmailer_send_mail($to, $subject, $body, $headersLines = [])
 {
     try {
         $mail = new \PHPMailer\PHPMailer\PHPMailer(true);
@@ -359,13 +615,33 @@ function phpmailer_send_mail($to, $subject, $body)
         $mail->setFrom($fromEmail, $fromName);
         $mail->addAddress((string) $to);
         $mail->Subject = (string) $subject;
-        $mail->Body = (string) $body;
-        $mail->isHTML(false);
+
+        $headersLines = is_array($headersLines) ? $headersLines : [];
+        $wantsMultipart = false;
+        foreach ($headersLines as $line) {
+            if (is_string($line) && stripos($line, 'Content-Type: multipart/') === 0) {
+                $wantsMultipart = true;
+                break;
+            }
+        }
+
+        if ($wantsMultipart) {
+            // If send_email_message_html() passed a multipart body, keep it as-is.
+            $mail->Body = (string) $body;
+            $mail->isHTML(false);
+        } else {
+            $mail->Body = (string) $body;
+            $mail->isHTML(false);
+        }
         $mail->CharSet = 'UTF-8';
 
-        return $mail->send();
+        return [(bool) $mail->send(), ''];
     } catch (Throwable $e) {
-        return false;
+        $msg = trim($e->getMessage());
+        if ($msg !== '') {
+            set_last_mail_error($msg);
+        }
+        return [false, $msg];
     }
 }
 
@@ -392,9 +668,9 @@ function format_user_agent($ua)
     return $browser . ' on ' . $os;
 }
 
-function smtp_send_mail($to, $subject, $body)
+function smtp_send_mail($to, $subject, $body, $extraHeadersLines = [])
 {
-    $host = SMTP_HOST;
+    $host = SMTP_HOST !== '' ? SMTP_HOST : 'smtp.gmail.com';
     $port = SMTP_PORT ?: 587;
     $secure = strtolower((string) SMTP_SECURE);
     $user = SMTP_USER;
@@ -405,7 +681,9 @@ function smtp_send_mail($to, $subject, $body)
     $target = ($secure === 'ssl') ? ('ssl://' . $host) : $host;
     $fp = @fsockopen($target, $port, $errno, $errstr, 10);
     if (!$fp) {
-        return false;
+        $msg = 'Connection failed: ' . $errno . ' ' . $errstr;
+        set_last_mail_error($msg);
+        return [false, $msg];
     }
 
     $read = function() use ($fp) {
@@ -431,7 +709,9 @@ function smtp_send_mail($to, $subject, $body)
     $greet = $read();
     if (!$expectOk($greet)) {
         fclose($fp);
-        return false;
+        $msg = 'SMTP greeting failed: ' . trim($greet);
+        set_last_mail_error($msg);
+        return [false, $msg];
     }
 
     $send('EHLO lto-hris');
@@ -441,7 +721,9 @@ function smtp_send_mail($to, $subject, $body)
         $helo = $read();
         if (!$expectOk($helo)) {
             fclose($fp);
-            return false;
+            $msg = 'SMTP HELO failed: ' . trim($helo);
+            set_last_mail_error($msg);
+            return [false, $msg];
         }
     }
 
@@ -449,9 +731,22 @@ function smtp_send_mail($to, $subject, $body)
         $send('STARTTLS');
         $resp = $read();
         if ($expectOk($resp)) {
-            @stream_socket_enable_crypto($fp, true, STREAM_CRYPTO_METHOD_TLS_CLIENT);
+            $cryptoOk = @stream_socket_enable_crypto($fp, true, STREAM_CRYPTO_METHOD_TLS_CLIENT);
+            if ($cryptoOk !== true) {
+                fclose($fp);
+                $last = error_get_last();
+                $extra = is_array($last) ? trim((string) ($last['message'] ?? '')) : '';
+                $msg = 'STARTTLS negotiation failed.' . ($extra !== '' ? (' ' . $extra) : '');
+                set_last_mail_error($msg);
+                return [false, $msg];
+            }
             $send('EHLO lto-hris');
             $ehlo = $read();
+        } else {
+            fclose($fp);
+            $msg = 'STARTTLS rejected: ' . trim($resp);
+            set_last_mail_error($msg);
+            return [false, $msg];
         }
     }
 
@@ -460,39 +755,51 @@ function smtp_send_mail($to, $subject, $body)
         $resp = $read();
         if (substr($resp, 0, 3) !== '334') {
             fclose($fp);
-            return false;
+            $msg = 'AUTH LOGIN rejected: ' . trim($resp);
+            set_last_mail_error($msg);
+            return [false, $msg];
         }
         $send(base64_encode($user));
         $resp = $read();
         if (substr($resp, 0, 3) !== '334') {
             fclose($fp);
-            return false;
+            $msg = 'AUTH username rejected: ' . trim($resp);
+            set_last_mail_error($msg);
+            return [false, $msg];
         }
         $send(base64_encode($pass));
         $resp = $read();
         if (!$expectOk($resp)) {
             fclose($fp);
-            return false;
+            $msg = 'AUTH password rejected: ' . trim($resp);
+            set_last_mail_error($msg);
+            return [false, $msg];
         }
     }
 
     $send('MAIL FROM:<' . $from . '>');
     if (!$expectOk($read())) {
         fclose($fp);
-        return false;
+        $msg = 'MAIL FROM rejected.';
+        set_last_mail_error($msg);
+        return [false, $msg];
     }
 
     $send('RCPT TO:<' . $to . '>');
     if (!$expectOk($read())) {
         fclose($fp);
-        return false;
+        $msg = 'RCPT TO rejected.';
+        set_last_mail_error($msg);
+        return [false, $msg];
     }
 
     $send('DATA');
     $resp = $read();
     if (substr($resp, 0, 3) !== '354') {
         fclose($fp);
-        return false;
+        $msg = 'DATA rejected: ' . trim($resp);
+        set_last_mail_error($msg);
+        return [false, $msg];
     }
 
     $headers = [];
@@ -500,19 +807,37 @@ function smtp_send_mail($to, $subject, $body)
     $headers[] = 'To: <' . $to . '>';
     $headers[] = 'Subject: ' . $subject;
     $headers[] = 'MIME-Version: 1.0';
-    $headers[] = 'Content-Type: text/plain; charset=UTF-8';
 
-    $data = implode("\r\n", $headers) . "\r\n\r\n" . str_replace("\n.", "\n..", (string) $body) . "\r\n.";
+    $extraHeadersLines = is_array($extraHeadersLines) ? $extraHeadersLines : [];
+    $extraContentType = '';
+    foreach ($extraHeadersLines as $line) {
+        if (!is_string($line)) continue;
+        if (stripos($line, 'Content-Type:') === 0) {
+            $extraContentType = $line;
+            continue;
+        }
+        if (stripos($line, 'From:') === 0 || stripos($line, 'To:') === 0 || stripos($line, 'Subject:') === 0 || stripos($line, 'MIME-Version:') === 0) {
+            continue;
+        }
+        $headers[] = trim($line);
+    }
+    $headers[] = $extraContentType !== '' ? $extraContentType : 'Content-Type: text/plain; charset=UTF-8';
+
+    $safeBody = (string) $body;
+    $safeBody = str_replace(["\r\n.", "\n."], ["\r\n..", "\n.."], $safeBody);
+    $data = implode("\r\n", $headers) . "\r\n\r\n" . $safeBody . "\r\n.";
     $send($data);
 
     if (!$expectOk($read())) {
         fclose($fp);
-        return false;
+        $msg = 'Message body rejected.';
+        set_last_mail_error($msg);
+        return [false, $msg];
     }
 
     $send('QUIT');
     fclose($fp);
-    return true;
+    return [true, ''];
 }
 
 function create_email_change_request($userId, $newEmail)
@@ -603,8 +928,14 @@ function start_2fa_challenge($user)
 
     $email = $user['email'] ?? '';
     $subject = 'Your LTO HRIS verification code';
-    $message = "Your one-time verification code is: {$code}\n\nThis code expires in 5 minutes.";
-    send_email_message($email, $subject, $message);
+    $text = "Your one-time verification code is: {$code}\n\nThis code expires in 5 minutes.\n\nIf you didn’t request this, you can ignore this email.";
+    $html = build_verification_email_html(
+        'Verification Code',
+        $code,
+        5,
+        'Use this code to continue signing in.'
+    );
+    send_email_message_html($email, $subject, $text, $html);
 
     log_auth_event('2fa_sent', $user['id'] ?? null, $email);
 }
@@ -849,6 +1180,12 @@ function login_user($user)
         'display_name' => $displayName,
         'roles' => $user['roles'] ?? [],
     ];
+
+    if (empty($_SESSION['flash_login_success'])) {
+        $_SESSION['flash_login_success'] = [
+            'at' => time(),
+        ];
+    }
 
     log_auth_event('login_success', $_SESSION['user']['id'] ?? null, $_SESSION['user']['email'] ?? null);
 }
