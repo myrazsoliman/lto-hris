@@ -772,6 +772,10 @@ body.public-page-records-retention{
   --public-accent:#2b5fa5;--public-title:#173761;--public-bg-start:#f2f6fb;--public-hero-end:#e9f0f8;
   --policy-hero-bg:#eef3f9;--policy-panel-bg:#f8fbff;--policy-panel-emphasis:#ecf3fb;--policy-pill-bg:#eaf1fa
 }
+body.public-page-citizens-charter{
+  --public-accent:#2b5fa5;--public-title:#173761;--public-bg-start:#f2f6fb;--public-hero-end:#e9f0f8;
+  --policy-hero-bg:#eef3f9;--policy-panel-bg:#f8fbff;--policy-panel-emphasis:#ecf3fb;--policy-pill-bg:#eaf1fa
+}
 
 /* Lifelike public components */
 .pub-layout{display:grid;gap:14px;margin-top:16px}
@@ -858,6 +862,12 @@ body.public-page-historical-background .pub-timeline li{border-left:4px solid #7
 body.public-page-road-safety-action-plan .pub-step::before{background:#8b2f2f}
 body.public-page-lto-pila-office .pub-panel{background:linear-gradient(180deg,#ffffff,#eef4ff)}
 body.public-page-data-privacy-notice .pub-kpi{background:linear-gradient(145deg,#f4fbfc,#e7f3f6)}
+body.public-page-citizens-charter .gov-policy-reference{background:#f7fbff}
+body.public-page-citizens-charter .gov-policy-sections{background:#fcfdff}
+body.public-page-citizens-charter .public-table-wrap{margin-top:10px;border-color:rgba(31,72,120,.2);border-radius:0}
+body.public-page-citizens-charter .public-table th{background:#edf3fc;color:#173761}
+body.public-page-citizens-charter .public-table td{font-size:14px;line-height:1.6}
+body.public-page-citizens-charter .policy-list li{margin-bottom:10px}
 body.public-page-contact-us .pub-panel{border-radius:16px}
 body.public-page-contact-us .contact-secondary{background:linear-gradient(180deg,#ffffff,#f5f9ff)}
 body.public-page-contact-us .contact-tertiary{background:linear-gradient(180deg,#ffffff,#f8fbff)}

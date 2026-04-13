@@ -13,12 +13,21 @@
             <p><a href="tel:+63492501712">+63 49 250-1712</a></p>
         </div>
         <div class="footer-col">
-            <h4>About GOVPH</h4>
-            <p>Learn more about the Philippine government, its structure, how government works and the people behind it.</p>
+            <h4>About LTO-HRIS</h4>
+            <p>LTO-HRIS is the official Human Resource Information System of the LTO Pila District Office for personnel records, policy references, and public information services.</p>
             <ul class="flat-links">
-                <li><a href="https://portal.gov.ph/" target="_blank" rel="noopener noreferrer">GOV.PH</a></li>
-                <li><a href="https://open.gov.ph/" target="_blank" rel="noopener noreferrer">Open Data Portal</a></li>
-                <li><a href="https://www.officialgazette.gov.ph/" target="_blank" rel="noopener noreferrer">Official Gazette</a></li>
+                <li><a href="index.php">Public Home</a></li>
+                <li><a href="contact-us.php">Contact Us</a></li>
+                <li><a href="data-privacy-notice.php">Data Privacy Notice</a></li>
+            </ul>
+        </div>
+        <div class="footer-col">
+            <h4>Useful Links</h4>
+            <ul class="flat-links">
+                <li><a href="citizens-charter.php">Citizen&rsquo;s Charter</a></li>
+                <li><a href="downloadable-forms.php">Downloadable Forms</a></li>
+                <li><a href="data-privacy-notice.php">Data Privacy Notice</a></li>
+                <li><a href="contact-us.php">Feedback and Complaints</a></li>
             </ul>
         </div>
     </div>
