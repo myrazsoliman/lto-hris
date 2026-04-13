@@ -29,7 +29,7 @@ $publicNavItems = [
     ['label' => 'Transparency Seal', 'href' => 'transparency-seal.php', 'active' => $currentPage === 'transparency-seal.php', 'caret' => false],
 ];
 
-$contactLink = ['label' => 'Contact Us', 'href' => '#', 'active' => false, 'caret' => true];
+$contactLink = ['label' => 'Contact Us', 'href' => 'contact-us.php', 'active' => $currentPage === 'contact-us.php', 'caret' => false];
 ?>
 <div class="gov-topbar">
     <div class="gov-inner">

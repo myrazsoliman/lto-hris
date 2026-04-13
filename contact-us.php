@@ -1,7 +1,7 @@
 <?php
 require_once 'includes/auth.php';
 
-$currentPage = basename($_SERVER['PHP_SELF'] ?? 'employee-services.php');
+$currentPage = basename($_SERVER['PHP_SELF'] ?? 'contact-us.php');
 $publicNavItems = [
     ['label' => 'Home', 'href' => 'index.php', 'active' => $currentPage === 'index.php', 'caret' => false],
             [
@@ -102,7 +102,7 @@ $publicNavItems = [
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Downloadable Forms | LTO HRIS</title>
+<title>Contact Us | LTO HRIS</title>
     
     <?php require_once __DIR__ . '/includes/favicon-links.php'; ?>
 <link rel="stylesheet" href="assets/css/styles.css">
@@ -214,7 +214,77 @@ $publicNavItems = [
         </div>
     </header>
 
-        <section class="public-page"><div class="public-wrap"><div class="public-hero"><span class="public-kicker">LTO HRIS Public Information</span><h2 class="public-title">Downloadable Forms</h2><p class="public-summary">Catalog of form references used for public and internal workflows.</p><div class="pub-layout"><article class="pub-panel"><h3>Form Catalog</h3><table class="pub-provider-table"><thead><tr><th>Form</th><th>Use Case</th><th>Format</th></tr></thead><tbody><tr><td>Employee Information Update</td><td>Record correction</td><td>PDF</td></tr><tr><td>Request Routing Sheet</td><td>Office processing</td><td>DOCX</td></tr><tr><td>Certification Request</td><td>Document issuance</td><td>PDF</td></tr></tbody></table></article><article class="pub-panel"><h3>Submission Reminder</h3><div class="pub-alert">Attach complete supporting documents before filing.</div></article></div></div></div></section>
+    <section class="public-page">
+        <div class="public-wrap">
+            <div class="public-hero">
+                <span class="public-kicker">LTO HRIS Public Information</span>
+                <h2 class="public-title">Contact Us</h2>
+                <p class="public-summary">Reach the LTO Pila District Office for public assistance, inquiry routing, and service coordination.</p>
+                <div class="pub-layout contact-layout">
+                    <article class="pub-panel contact-primary">
+                        <h3>Office Contact Directory</h3>
+                        <div class="contact-list">
+                            <div class="contact-item">
+                                <span class="contact-label">Office Address</span>
+                                <span class="contact-value">Brgy. Sta. Clara Sur, Pila, Laguna, Philippines</span>
+                            </div>
+                            <div class="contact-item">
+                                <span class="contact-label">Landline</span>
+                                <span class="contact-value"><a href="tel:+63492501712">+63 49 250-1712</a></span>
+                            </div>
+                            <div class="contact-item">
+                                <span class="contact-label">Public Email</span>
+                                <span class="contact-value"><a href="mailto:lto.pila@lto.gov.ph">lto.pila@lto.gov.ph</a></span>
+                            </div>
+                            <div class="contact-item">
+                                <span class="contact-label">Office Hours</span>
+                                <span class="contact-value">Monday to Friday, 8:00 AM to 5:00 PM</span>
+                            </div>
+                        </div>
+                        <div class="pub-alert">For account-specific HRIS concerns, include your full name and agency email in your message.</div>
+                    </article>
+                    <article class="pub-panel contact-secondary">
+                        <h3>Public Inquiry Form</h3>
+                        <form class="contact-form" action="#" method="post" novalidate>
+                            <div class="contact-form-grid">
+                                <label>
+                                    <span>Full Name</span>
+                                    <input type="text" placeholder="Juan Dela Cruz">
+                                </label>
+                                <label>
+                                    <span>Email Address</span>
+                                    <input type="email" placeholder="name@example.com">
+                                </label>
+                            </div>
+                            <label>
+                                <span>Subject</span>
+                                <input type="text" placeholder="Inquiry subject">
+                            </label>
+                            <label>
+                                <span>Message</span>
+                                <textarea rows="5" placeholder="Type your concern here..."></textarea>
+                            </label>
+                            <button type="button" class="contact-submit-btn">Submit Inquiry</button>
+                        </form>
+                    </article>
+                    <article class="pub-panel contact-tertiary">
+                        <h3>Service Channels</h3>
+                        <ul class="contact-channel-list">
+                            <li><strong>General Inquiries:</strong> Office contact directory above</li>
+                            <li><strong>Document Follow-up:</strong> Bring your reference number when calling</li>
+                            <li><strong>On-site Assistance:</strong> Visit during office hours for walk-in concerns</li>
+                        </ul>
+                        <h3>Response Timeline</h3>
+                        <div class="pub-kpi-grid">
+                            <div class="pub-kpi"><strong>1-2 Days</strong><span>Email acknowledgement</span></div>
+                            <div class="pub-kpi"><strong>3-5 Days</strong><span>Initial coordination</span></div>
+                            <div class="pub-kpi"><strong>As Needed</strong><span>Final resolution window</span></div>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </div>
+    </section>
 
     <?php include __DIR__ . '/includes/public-footer.php'; ?>
 
@@ -278,6 +348,7 @@ $publicNavItems = [
     </script>
 </body>
 </html>
+
 
 
 

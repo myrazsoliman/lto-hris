@@ -1,7 +1,7 @@
 <?php
 require_once 'includes/auth.php';
 
-$currentPage = basename($_SERVER['PHP_SELF'] ?? 'employee-services.php');
+$currentPage = basename($_SERVER['PHP_SELF'] ?? 'records-retention.php');
 $publicNavItems = [
     ['label' => 'Home', 'href' => 'index.php', 'active' => $currentPage === 'index.php', 'caret' => false],
             [
@@ -102,7 +102,7 @@ $publicNavItems = [
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Downloadable Forms | LTO HRIS</title>
+<title>Records Retention | LTO HRIS</title>
     
     <?php require_once __DIR__ . '/includes/favicon-links.php'; ?>
 <link rel="stylesheet" href="assets/css/styles.css">
@@ -214,7 +214,53 @@ $publicNavItems = [
         </div>
     </header>
 
-        <section class="public-page"><div class="public-wrap"><div class="public-hero"><span class="public-kicker">LTO HRIS Public Information</span><h2 class="public-title">Downloadable Forms</h2><p class="public-summary">Catalog of form references used for public and internal workflows.</p><div class="pub-layout"><article class="pub-panel"><h3>Form Catalog</h3><table class="pub-provider-table"><thead><tr><th>Form</th><th>Use Case</th><th>Format</th></tr></thead><tbody><tr><td>Employee Information Update</td><td>Record correction</td><td>PDF</td></tr><tr><td>Request Routing Sheet</td><td>Office processing</td><td>DOCX</td></tr><tr><td>Certification Request</td><td>Document issuance</td><td>PDF</td></tr></tbody></table></article><article class="pub-panel"><h3>Submission Reminder</h3><div class="pub-alert">Attach complete supporting documents before filing.</div></article></div></div></div></section>
+    <section class="public-page policy-page gov-policy-doc">
+        <div class="public-wrap">
+            <div class="public-hero policy-hero">
+                <div class="policy-hero-head">
+                    <span class="public-kicker">Records Governance</span>
+                    <h2 class="public-title">Records Retention</h2>
+                    <p class="public-summary">This policy provides guidance on retention, archival handling, and controlled disposal of LTO HRIS-related records.</p>
+                </div>
+
+                <div class="gov-policy-reference" aria-label="Policy reference">
+                    <p><strong>Issuing Office:</strong> Land Transportation Office - Pila District Office</p>
+                    <p><strong>Coverage:</strong> Digital and administrative records associated with LTO HRIS operations</p>
+                    <p><strong>Policy Status:</strong> Official records governance reference for public information</p>
+                </div>
+
+                <div class="gov-policy-sections">
+                    <section class="gov-policy-section">
+                        <h3>1. Retention Framework</h3>
+                        <p>Records shall be retained based on lawful mandates, operational requirements, and audit accountability obligations of the agency.</p>
+                    </section>
+
+                    <section class="gov-policy-section">
+                        <h3>2. Retention and Disposal Controls</h3>
+                        <ul class="public-list policy-list">
+                            <li>Retention periods are established according to document type, record purpose, and applicable government policy.</li>
+                            <li>Records identified for archival or disposal shall follow documented and approved procedures.</li>
+                            <li>Disposal activities shall be controlled, traceable, and supported by proper administrative documentation.</li>
+                        </ul>
+                    </section>
+
+                    <section class="gov-policy-section">
+                        <h3>3. Access and Traceability</h3>
+                        <ul class="public-list policy-list">
+                            <li>Authorized personnel may retrieve records only for valid and official functions.</li>
+                            <li>Record handling shall preserve data integrity, confidentiality, and continuity of service.</li>
+                            <li>Audit trails shall be maintained to document lifecycle actions and administrative activities.</li>
+                        </ul>
+                    </section>
+
+                    <section class="gov-policy-section gov-policy-footnote">
+                        <h3>4. Policy Maintenance</h3>
+                        <p>Retention guidance may be updated to align with revised legal directives, records management standards, and institutional requirements.</p>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </section>
 
     <?php include __DIR__ . '/includes/public-footer.php'; ?>
 
@@ -278,8 +324,6 @@ $publicNavItems = [
     </script>
 </body>
 </html>
-
-
 
 
 

@@ -79,7 +79,22 @@ $publicNavItems = [
         ],
     ],
     ['label' => 'Services', 'href' => 'employee-services.php', 'active' => $currentPage === 'employee-services.php', 'caret' => false],
-    ['label' => 'Policies', 'href' => 'data-privacy-notice.php', 'active' => $currentPage === 'data-privacy-notice.php', 'caret' => false],
+    [
+        'label' => 'Policies',
+        'href' => '#',
+        'active' => in_array(
+            $currentPage,
+            ['data-privacy-notice.php', 'terms-of-use.php', 'security.php', 'records-retention.php'],
+            true
+        ),
+        'caret' => true,
+        'children' => [
+            ['label' => 'Data Privacy', 'href' => 'data-privacy-notice.php', 'active' => $currentPage === 'data-privacy-notice.php'],
+            ['label' => 'Terms of Use', 'href' => 'terms-of-use.php', 'active' => $currentPage === 'terms-of-use.php'],
+            ['label' => 'Security', 'href' => 'security.php', 'active' => $currentPage === 'security.php'],
+            ['label' => 'Records Retention', 'href' => 'records-retention.php', 'active' => $currentPage === 'records-retention.php'],
+        ],
+    ],
 ];
 ?>
 <!doctype html>
@@ -131,7 +146,7 @@ $publicNavItems = [
                     <?php endif; ?>
                 <?php endforeach; ?>
             </nav>
-            <a href="#" class="gov-contact-link has-caret">Contact Us</a>
+            <a href="contact-us.php" class="gov-contact-link <?php echo $currentPage === 'contact-us.php' ? 'active' : ''; ?>">Contact Us</a>
             <div class="gov-search"><input placeholder="Search..." aria-label="Search"></div>
             <div class="gov-actions">
                 <a class="btn btn-login js-login-trigger" href="login.php">Login</a>
@@ -172,7 +187,7 @@ $publicNavItems = [
                         <a href="<?php echo htmlspecialchars($item['href']); ?>" class="<?php echo !empty($item['active']) ? 'active' : ''; ?>"><?php echo htmlspecialchars($item['label']); ?></a>
                     <?php endif; ?>
                 <?php endforeach; ?>
-                <a href="#">Contact Us</a>
+                <a href="contact-us.php" class="<?php echo $currentPage === 'contact-us.php' ? 'active' : ''; ?>">Contact Us</a>
             </nav>
         </div>
     </div>
@@ -199,7 +214,53 @@ $publicNavItems = [
         </div>
     </header>
 
-    <section class="public-page"><div class="public-wrap"><div class="public-hero"><span class="public-kicker">Privacy and Compliance</span><h2 class="public-title">Data Privacy Notice</h2><p class="public-summary">Overview of lawful processing, security controls, and data subject rights.</p><div class="pub-layout"><article class="pub-panel"><h3>Privacy Principles</h3><div class="pub-kpi-grid"><div class="pub-kpi"><strong>Transparency</strong><span>Clear processing purpose</span></div><div class="pub-kpi"><strong>Legitimate Purpose</strong><span>Lawful operational basis</span></div><div class="pub-kpi"><strong>Proportionality</strong><span>Only necessary data use</span></div></div></article><article class="pub-panel"><h3>Rights and Remedies</h3><ul class="public-list"><li>Right to be informed and to access data.</li><li>Right to correction subject to policy.</li><li>Right to raise concerns through proper channels.</li></ul></article></div></div></div></section>
+    <section class="public-page policy-page gov-policy-doc">
+        <div class="public-wrap">
+            <div class="public-hero policy-hero">
+                <div class="policy-hero-head">
+                    <span class="public-kicker">Privacy and Compliance</span>
+                    <h2 class="public-title">Data Privacy Notice</h2>
+                    <p class="public-summary">This notice prescribes the lawful basis, institutional safeguards, and data subject rights applicable to personal information processed through the LTO HRIS.</p>
+                </div>
+
+                <div class="gov-policy-reference" aria-label="Policy reference">
+                    <p><strong>Issuing Office:</strong> Land Transportation Office - Pila District Office</p>
+                    <p><strong>Coverage:</strong> LTO HRIS public-facing services and authorized personnel transactions</p>
+                    <p><strong>Policy Status:</strong> Official public notice subject to periodic administrative and legal review</p>
+                </div>
+
+                <div class="gov-policy-sections">
+                    <section class="gov-policy-section">
+                        <h3>1. Scope and Legal Basis</h3>
+                        <p>The LTO HRIS processes personal information strictly for legitimate government purposes, including personnel administration, records management, and authorized service coordination, in accordance with applicable data privacy and public-sector governance requirements.</p>
+                    </section>
+
+                    <section class="gov-policy-section">
+                        <h3>2. Institutional Privacy Commitments</h3>
+                        <ul class="public-list policy-list">
+                            <li>Personal data shall be collected only to the extent necessary for official personnel administration and authorized government transactions.</li>
+                            <li>Processing activities shall be undertaken solely for legitimate, specific, and documented public service purposes.</li>
+                            <li>Administrative, technical, and organizational controls shall be enforced to ensure access by authorized personnel only.</li>
+                        </ul>
+                    </section>
+
+                    <section class="gov-policy-section">
+                        <h3>3. Data Subject Rights and Remedies</h3>
+                        <ul class="public-list policy-list">
+                            <li>Data subjects shall be informed regarding the collection, use, and disclosure of personal information.</li>
+                            <li>Requests for correction of inaccurate, incomplete, or outdated data may be submitted through official channels.</li>
+                            <li>Privacy-related concerns and grievances may be elevated through established LTO communication pathways.</li>
+                        </ul>
+                    </section>
+
+                    <section class="gov-policy-section gov-policy-footnote">
+                        <h3>4. Policy Review and Updates</h3>
+                        <p>This notice may be updated to reflect changes in law, regulation, administrative policy, or service operations. Updated versions shall be posted through official LTO HRIS pages.</p>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </section>
 
     <?php include __DIR__ . '/includes/public-footer.php'; ?>
 

@@ -1,7 +1,7 @@
 <?php
 require_once 'includes/auth.php';
 
-$currentPage = basename($_SERVER['PHP_SELF'] ?? 'employee-services.php');
+$currentPage = basename($_SERVER['PHP_SELF'] ?? 'terms-of-use.php');
 $publicNavItems = [
     ['label' => 'Home', 'href' => 'index.php', 'active' => $currentPage === 'index.php', 'caret' => false],
             [
@@ -102,7 +102,7 @@ $publicNavItems = [
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Downloadable Forms | LTO HRIS</title>
+<title>Terms of Use | LTO HRIS</title>
     
     <?php require_once __DIR__ . '/includes/favicon-links.php'; ?>
 <link rel="stylesheet" href="assets/css/styles.css">
@@ -214,7 +214,53 @@ $publicNavItems = [
         </div>
     </header>
 
-        <section class="public-page"><div class="public-wrap"><div class="public-hero"><span class="public-kicker">LTO HRIS Public Information</span><h2 class="public-title">Downloadable Forms</h2><p class="public-summary">Catalog of form references used for public and internal workflows.</p><div class="pub-layout"><article class="pub-panel"><h3>Form Catalog</h3><table class="pub-provider-table"><thead><tr><th>Form</th><th>Use Case</th><th>Format</th></tr></thead><tbody><tr><td>Employee Information Update</td><td>Record correction</td><td>PDF</td></tr><tr><td>Request Routing Sheet</td><td>Office processing</td><td>DOCX</td></tr><tr><td>Certification Request</td><td>Document issuance</td><td>PDF</td></tr></tbody></table></article><article class="pub-panel"><h3>Submission Reminder</h3><div class="pub-alert">Attach complete supporting documents before filing.</div></article></div></div></div></section>
+    <section class="public-page policy-page gov-policy-doc">
+        <div class="public-wrap">
+            <div class="public-hero policy-hero">
+                <div class="policy-hero-head">
+                    <span class="public-kicker">Usage and Access Policy</span>
+                    <h2 class="public-title">Terms of Use</h2>
+                    <p class="public-summary">This policy outlines the standards for lawful access, responsible usage, and accountability in relation to LTO HRIS public and portal services.</p>
+                </div>
+
+                <div class="gov-policy-reference" aria-label="Policy reference">
+                    <p><strong>Issuing Office:</strong> Land Transportation Office - Pila District Office</p>
+                    <p><strong>Coverage:</strong> LTO HRIS public pages, user sessions, and authorized digital transactions</p>
+                    <p><strong>Policy Status:</strong> Official terms of use for public guidance and compliance</p>
+                </div>
+
+                <div class="gov-policy-sections">
+                    <section class="gov-policy-section">
+                        <h3>1. Authorized Use</h3>
+                        <p>LTO HRIS pages and services shall be used solely for legitimate, lawful, and official government-related transactions and inquiries.</p>
+                    </section>
+
+                    <section class="gov-policy-section">
+                        <h3>2. User Obligations</h3>
+                        <ul class="public-list policy-list">
+                            <li>Users shall provide accurate, complete, and non-misleading information in all submissions.</li>
+                            <li>Any attempt to gain unauthorized access, disrupt services, or compromise system integrity is prohibited.</li>
+                            <li>Users shall comply with documented workflows, advisories, and administrative requirements.</li>
+                        </ul>
+                    </section>
+
+                    <section class="gov-policy-section">
+                        <h3>3. Accountability and Security Conduct</h3>
+                        <ul class="public-list policy-list">
+                            <li>Credentials, authentication codes, and verification details shall be treated as confidential.</li>
+                            <li>Suspicious account activity shall be reported immediately through official LTO channels.</li>
+                            <li>Non-compliance may result in access restrictions and corresponding administrative action, as applicable.</li>
+                        </ul>
+                    </section>
+
+                    <section class="gov-policy-section gov-policy-footnote">
+                        <h3>4. Policy Amendments</h3>
+                        <p>These terms may be revised to reflect legal, operational, or administrative updates. Revised terms shall be published through official LTO HRIS pages.</p>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </section>
 
     <?php include __DIR__ . '/includes/public-footer.php'; ?>
 
@@ -278,8 +324,6 @@ $publicNavItems = [
     </script>
 </body>
 </html>
-
-
 
 
 

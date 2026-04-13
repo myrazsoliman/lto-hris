@@ -1,7 +1,7 @@
 <?php
 require_once 'includes/auth.php';
 
-$currentPage = basename($_SERVER['PHP_SELF'] ?? 'employee-services.php');
+$currentPage = basename($_SERVER['PHP_SELF'] ?? 'security.php');
 $publicNavItems = [
     ['label' => 'Home', 'href' => 'index.php', 'active' => $currentPage === 'index.php', 'caret' => false],
             [
@@ -102,7 +102,7 @@ $publicNavItems = [
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Downloadable Forms | LTO HRIS</title>
+<title>Security | LTO HRIS</title>
     
     <?php require_once __DIR__ . '/includes/favicon-links.php'; ?>
 <link rel="stylesheet" href="assets/css/styles.css">
@@ -214,7 +214,53 @@ $publicNavItems = [
         </div>
     </header>
 
-        <section class="public-page"><div class="public-wrap"><div class="public-hero"><span class="public-kicker">LTO HRIS Public Information</span><h2 class="public-title">Downloadable Forms</h2><p class="public-summary">Catalog of form references used for public and internal workflows.</p><div class="pub-layout"><article class="pub-panel"><h3>Form Catalog</h3><table class="pub-provider-table"><thead><tr><th>Form</th><th>Use Case</th><th>Format</th></tr></thead><tbody><tr><td>Employee Information Update</td><td>Record correction</td><td>PDF</td></tr><tr><td>Request Routing Sheet</td><td>Office processing</td><td>DOCX</td></tr><tr><td>Certification Request</td><td>Document issuance</td><td>PDF</td></tr></tbody></table></article><article class="pub-panel"><h3>Submission Reminder</h3><div class="pub-alert">Attach complete supporting documents before filing.</div></article></div></div></div></section>
+    <section class="public-page policy-page gov-policy-doc">
+        <div class="public-wrap">
+            <div class="public-hero policy-hero">
+                <div class="policy-hero-head">
+                    <span class="public-kicker">Information Protection</span>
+                    <h2 class="public-title">Security</h2>
+                    <p class="public-summary">This policy summarizes control measures implemented to protect LTO HRIS data, user sessions, and service reliability.</p>
+                </div>
+
+                <div class="gov-policy-reference" aria-label="Policy reference">
+                    <p><strong>Issuing Office:</strong> Land Transportation Office - Pila District Office</p>
+                    <p><strong>Coverage:</strong> LTO HRIS platforms, user access channels, and related information assets</p>
+                    <p><strong>Policy Status:</strong> Official security guidance for public and authorized users</p>
+                </div>
+
+                <div class="gov-policy-sections">
+                    <section class="gov-policy-section">
+                        <h3>1. Security Governance</h3>
+                        <p>Security controls are implemented to preserve the confidentiality, integrity, and availability of LTO HRIS information and services.</p>
+                    </section>
+
+                    <section class="gov-policy-section">
+                        <h3>2. Core Protective Controls</h3>
+                        <ul class="public-list policy-list">
+                            <li>Role-based authorization and access management are enforced for system functions and records.</li>
+                            <li>Authentication and session validation controls are applied to prevent unauthorized use.</li>
+                            <li>System logs and monitoring mechanisms support verification, audit, and incident assessment.</li>
+                        </ul>
+                    </section>
+
+                    <section class="gov-policy-section">
+                        <h3>3. Public Security Responsibilities</h3>
+                        <ul class="public-list policy-list">
+                            <li>Users shall access LTO HRIS only through official and verified government channels.</li>
+                            <li>Passwords, OTPs, and account recovery credentials shall not be disclosed to unauthorized parties.</li>
+                            <li>Suspected compromise, phishing attempts, or suspicious activity shall be reported through official LTO contacts.</li>
+                        </ul>
+                    </section>
+
+                    <section class="gov-policy-section gov-policy-footnote">
+                        <h3>4. Continuous Security Review</h3>
+                        <p>Security controls are subject to periodic review and enhancement to address evolving operational and cybersecurity risks.</p>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </section>
 
     <?php include __DIR__ . '/includes/public-footer.php'; ?>
 
@@ -278,8 +324,6 @@ $publicNavItems = [
     </script>
 </body>
 </html>
-
-
 
 
 

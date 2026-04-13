@@ -79,7 +79,22 @@ $publicNavItems = [
         ],
     ],
     ['label' => 'Services', 'href' => 'employee-services.php', 'active' => $currentPage === 'employee-services.php', 'caret' => false],
-    ['label' => 'Policies', 'href' => 'data-privacy-notice.php', 'active' => $currentPage === 'data-privacy-notice.php', 'caret' => false],
+    [
+        'label' => 'Policies',
+        'href' => '#',
+        'active' => in_array(
+            $currentPage,
+            ['data-privacy-notice.php', 'terms-of-use.php', 'security.php', 'records-retention.php'],
+            true
+        ),
+        'caret' => true,
+        'children' => [
+            ['label' => 'Data Privacy', 'href' => 'data-privacy-notice.php', 'active' => $currentPage === 'data-privacy-notice.php'],
+            ['label' => 'Terms of Use', 'href' => 'terms-of-use.php', 'active' => $currentPage === 'terms-of-use.php'],
+            ['label' => 'Security', 'href' => 'security.php', 'active' => $currentPage === 'security.php'],
+            ['label' => 'Records Retention', 'href' => 'records-retention.php', 'active' => $currentPage === 'records-retention.php'],
+        ],
+    ],
 ];
 ?>
 <!doctype html>
@@ -131,7 +146,7 @@ $publicNavItems = [
                     <?php endif; ?>
                 <?php endforeach; ?>
             </nav>
-            <a href="#" class="gov-contact-link has-caret">Contact Us</a>
+            <a href="contact-us.php" class="gov-contact-link <?php echo $currentPage === 'contact-us.php' ? 'active' : ''; ?>">Contact Us</a>
             <div class="gov-search"><input placeholder="Search..." aria-label="Search"></div>
             <div class="gov-actions">
                 <a class="btn btn-login js-login-trigger" href="login.php">Login</a>
@@ -172,7 +187,7 @@ $publicNavItems = [
                         <a href="<?php echo htmlspecialchars($item['href']); ?>" class="<?php echo !empty($item['active']) ? 'active' : ''; ?>"><?php echo htmlspecialchars($item['label']); ?></a>
                     <?php endif; ?>
                 <?php endforeach; ?>
-                <a href="#">Contact Us</a>
+                <a href="contact-us.php" class="<?php echo $currentPage === 'contact-us.php' ? 'active' : ''; ?>">Contact Us</a>
             </nav>
         </div>
     </div>
