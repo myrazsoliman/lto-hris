@@ -40,6 +40,10 @@ if (!defined('SMTP_FROM_NAME')) {
     define('SMTP_FROM_NAME', (string) (getenv('SMTP_FROM_NAME') ?: 'LTO HRIS'));
 }
 
+if (!defined('PASSWORD_RESET_EXPIRES_MINUTES')) {
+    define('PASSWORD_RESET_EXPIRES_MINUTES', (int) (getenv('PASSWORD_RESET_EXPIRES_MINUTES') ?: 5));
+}
+
 // Reverse proxy support (only enable when you control/ trust the proxy).
 // Example env:
 // TRUST_PROXY_HEADERS=1

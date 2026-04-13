@@ -8,6 +8,7 @@ $showLoginModal = isset($_GET['login']) || isset($_GET['registration_success']);
 $registerError = '';
 $registerSuccess = '';
 $registrationSuccess = isset($_GET['registration_success']);
+$passwordResetSuccess = isset($_GET['password_reset']);
 $showLoginCaptcha = true;
 $loginCaptchaInput = '';
 $loginCaptchaNonce = '';
@@ -19,7 +20,7 @@ $registerVerificationCode = '';
 $showRegisterVerificationStep = isset($_SESSION['pending_register_verification']);
 $showRegisterVerificationModal = $showRegisterVerificationStep;
 $showRegisterModal = isset($_GET['register']) && !$showRegisterVerificationStep;
-$showLogoutSuccessModal = !empty($_COOKIE['lto_hris_logout_success']);
+$showLogoutSuccessModal = !empty($_COOKIE['lto_hris_logout_success']) || isset($_GET['logout_success']);
 $forgotError = '';
 $forgotSuccess = '';
 $forgotEmail = '';
@@ -239,16 +240,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form_action'] ?? '') === '
                 } else {
                     $verificationCode = (string) random_int(100000, 999999);
                     $pendingRegister['code_hash'] = password_hash($verificationCode, PASSWORD_DEFAULT);
-                    $pendingRegister['expires_at'] = time() + 600;
+                    $pendingRegister['expires_at'] = time() + 300;
                     $pendingRegister['sent_at'] = time();
                     $_SESSION['pending_register_verification'] = $pendingRegister;
 
-                    $subject = 'LTO HRIS Email Verification Code';
-                    $text = "Your LTO HRIS registration verification code is: {$verificationCode}\n\nThis code expires in 10 minutes.\n\nIf you didn’t request this, you can ignore this email.";
+                    $subject = 'Email Verification Code';
+                    $text = "Your LTO HRIS registration verification code is: {$verificationCode}\n\nThis code expires in 5 minutes.\n\nIf you didn’t request this, you can ignore this email.";
                     $html = build_verification_email_html(
                         'Email Verification Code',
                         $verificationCode,
-                        10,
+                        5,
                         'Use this code to complete your registration.'
                     );
                     $sent = send_email_message_html((string) $pendingRegister['email'], $subject, $text, $html);
@@ -289,16 +290,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form_action'] ?? '') === '
                         'email' => normalize_identifier($registerEmail),
                         'password_hash' => password_hash($password, PASSWORD_DEFAULT),
                         'code_hash' => password_hash($verificationCode, PASSWORD_DEFAULT),
-                        'expires_at' => time() + 600,
+                        'expires_at' => time() + 300,
                         'sent_at' => time(),
                     ];
 
                     $subject = 'LTO HRIS Email Verification Code';
-                    $text = "Your LTO HRIS registration verification code is: {$verificationCode}\n\nThis code expires in 10 minutes.\n\nIf you didn’t request this, you can ignore this email.";
+                    $text = "Your LTO HRIS registration verification code is: {$verificationCode}\n\nThis code expires in 5 minutes.\n\nIf you didn’t request this, you can ignore this email.";
                     $html = build_verification_email_html(
                         'Email Verification Code',
                         $verificationCode,
-                        10,
+                        5,
                         'Use this code to complete your registration.'
                     );
                     $sent = send_email_message_html($registerEmail, $subject, $text, $html);
@@ -360,16 +361,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form_action'] ?? '') === '
     } else {
         $existingUser = fetch_user_record($forgotEmail);
         if ($existingUser) {
-            $subject = 'LTO HRIS Password Assistance';
-            $message = "A password assistance request was submitted for your LTO HRIS account.\n\n"
-                . "If you made this request, please contact your HRIS administrator to reset your password.\n\n"
-                . "If you did not make this request, you can safely ignore this email.\n\n"
+            $token = create_password_reset_request((int) ($existingUser['id'] ?? 0));
+            $resetUrl = build_password_reset_url($token);
+            $expiresMinutes = defined('PASSWORD_RESET_EXPIRES_MINUTES') ? (int) PASSWORD_RESET_EXPIRES_MINUTES : 30;
+            $expiresMinutes = $expiresMinutes > 0 ? $expiresMinutes : 30;
+
+            $subject = 'LTO HRIS Password Reset';
+            $text = "We received a request to reset your LTO HRIS password.\n\n"
+                . "Use this link to reset your password:\n{$resetUrl}\n\n"
+                . "This link expires in {$expiresMinutes} minutes.\n\n"
+                . "If you did not request this, you can safely ignore this email.\n\n"
                 . "LTO HRIS";
-            send_email_message($forgotEmail, $subject, $message);
+            $name = trim((string) (($existingUser['first_name'] ?? '') . ' ' . ($existingUser['last_name'] ?? '')));
+            $html = build_password_reset_email_html($resetUrl, $expiresMinutes, $name);
+            send_email_message_html($forgotEmail, $subject, $text, $html);
         }
 
         clear_failed_attempts('forgot_password');
-        $forgotSuccess = 'If an account exists for this email, password assistance instructions have been sent.';
+        $forgotSuccess = 'If an account exists for this email, password reset instructions have been sent.';
     }
 
     if ($forgotError !== '') {
@@ -794,6 +803,12 @@ $publicNavItems = [
                         <?php if ($registrationSuccess): ?>
                             <div class="alert alert-success">
                                 Registration successful! You can now login with your email and password.
+                            </div>
+                        <?php endif; ?>
+
+                        <?php if ($passwordResetSuccess): ?>
+                            <div class="alert alert-success">
+                                Your password has been reset successfully. You can now login with your new password.
                             </div>
                         <?php endif; ?>
 
@@ -1316,31 +1331,19 @@ $publicNavItems = [
         </div>
     </div>
 
-    <div class="login-modal logout-success-modal<?php echo $showLogoutSuccessModal ? ' is-open' : ''; ?>" id="logoutSuccessModal" aria-hidden="<?php echo $showLogoutSuccessModal ? 'false' : 'true'; ?>">
-        <div class="login-modal-backdrop" data-close-logout-success-modal></div>
-        <div class="login-modal-dialog logout-success-dialog" role="dialog" aria-modal="true" aria-labelledby="logoutSuccessTitle">
-            <div class="login-card-modern login-card-modal login-card-modal-split logout-success-card">
-                <div class="login-modal-panel logout-success-panel">
-                    <div class="login-modal-header login-modal-header-plain logout-success-header">
-                        <div class="login-modal-header-copy">
-                            <div class="login-modal-title-row">
-                                <h2 id="logoutSuccessTitle">Signed <span>Out</span></h2>
-                            </div>
-                            <p class="login-modal-subtitle">You have been signed out successfully.</p>
-                        </div>
-                        <button class="login-modal-close" type="button" data-close-logout-success-modal aria-label="Close logout message">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-
-                    <div class="login-modal-body login-modal-body-plain logout-success-body">
-                        <div class="logout-success-icon" aria-hidden="true">&#10003;</div>
-                        <p class="logout-success-note">This message will close automatically.</p>
-                        <button type="button" class="login-submit-btn login-submit-btn-modal login-submit-btn-modal-split logout-success-ok" data-close-logout-success-modal>
-                            <span>OK</span>
-                        </button>
-                    </div>
-                </div>
+    <div class="confirm-modal confirm-modal--menu confirm-modal--success<?php echo $showLogoutSuccessModal ? ' is-open' : ''; ?>" id="logoutSuccessModal" aria-hidden="<?php echo $showLogoutSuccessModal ? 'false' : 'true'; ?>">
+        <div class="confirm-modal-backdrop" data-logout-success-close></div>
+        <div class="confirm-modal-dialog login-success-dialog" role="dialog" aria-modal="true" aria-labelledby="logoutSuccessTitle">
+            <div class="login-success-head">
+                <span class="confirm-modal-icon login-success-icon" aria-hidden="true">
+                    &#10003;
+                </span>
+                <h2 id="logoutSuccessTitle" class="login-success-title">Logout Successful</h2>
+                <p class="confirm-modal-text login-success-text">You have been signed out.</p>
+                <p class="confirm-modal-text login-success-subtext">This message will close automatically.</p>
+            </div>
+            <div class="confirm-modal-actions login-success-actions">
+                <button type="button" class="btn btn-primary login-success-ok" data-logout-success-close>OK</button>
             </div>
         </div>
     </div>
@@ -1528,7 +1531,7 @@ $publicNavItems = [
 
             if (!modalConfigs.length) return;
 
-            const verificationModals = ['twoFaModal', 'registerVerificationModal', 'logoutSuccessModal']
+            const verificationModals = ['twoFaModal', 'registerVerificationModal']
                 .map((id) => document.getElementById(id))
                 .filter((modal) => modal);
 
@@ -1632,6 +1635,21 @@ $publicNavItems = [
                 if (serverVerificationOpen && serverVerificationOpen.id) {
                     setStoredModalId(serverVerificationOpen.id);
                 } else {
+                    // After logout, don't restore any remembered login/register modal.
+                    let isLogoutSuccess = false;
+                    try {
+                        const params = new URLSearchParams(window.location.search);
+                        isLogoutSuccess = params.has('logout_success');
+                    } catch (err) {
+                        isLogoutSuccess = false;
+                    }
+                    const logoutSuccessModal = document.getElementById('logoutSuccessModal');
+                    if (isLogoutSuccess || (logoutSuccessModal && logoutSuccessModal.classList.contains('is-open'))) {
+                        clearStoredModalId();
+                        syncBodyState();
+                        return;
+                    }
+
                     // Restore last open modal after refresh (client-side only modals).
                     const restoreId = getStoredModalId();
                     if (!anyModalOpen() && restoreId && openHandlers[restoreId]) {
@@ -1804,6 +1822,50 @@ $publicNavItems = [
                         labelSpan.textContent = originalLabel || 'Register';
                     }
                 }, 20000);
+            });
+        }());
+
+        (function() {
+            const modal = document.getElementById('logoutSuccessModal');
+            if (!modal || !modal.classList.contains('is-open')) return;
+
+            const closeTargets = modal.querySelectorAll('[data-logout-success-close]');
+
+            const setOpen = (next) => {
+                const isOpen = !!next;
+                modal.classList.toggle('is-open', isOpen);
+                modal.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
+                document.body.classList.toggle('modal-open', isOpen);
+            };
+
+            setOpen(true);
+            try {
+                sessionStorage.removeItem('ltohris.open_modal');
+            } catch (err) {
+                // ignore
+            }
+            try {
+                const url = new URL(window.location.href);
+                if (url.searchParams.has('logout_success')) {
+                    url.searchParams.delete('logout_success');
+                    window.history.replaceState({}, document.title, url.toString());
+                }
+            } catch (err) {
+                // ignore
+            }
+            window.setTimeout(() => setOpen(false), 3000);
+
+            closeTargets.forEach((el) => {
+                el.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    setOpen(false);
+                });
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && modal.classList.contains('is-open')) {
+                    setOpen(false);
+                }
             });
         }());
 

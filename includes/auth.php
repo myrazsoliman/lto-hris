@@ -80,6 +80,7 @@ function ensure_auth_schema()
 
     ensure_auth_activity_table();
     ensure_email_change_requests_table();
+    ensure_password_reset_requests_table();
     ensure_trusted_devices_table();
     ensure_base_roles_exist();
 }
@@ -184,6 +185,119 @@ function ensure_trusted_devices_table()
             INDEX idx_user_expires (user_id, expires_at)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4'
     );
+}
+
+function ensure_password_reset_requests_table()
+{
+    db()->exec(
+        'CREATE TABLE IF NOT EXISTS password_reset_requests (
+            id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+            user_id INT UNSIGNED NOT NULL,
+            token_hash CHAR(64) NOT NULL,
+            expires_at DATETIME NOT NULL,
+            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE KEY uniq_token (token_hash),
+            INDEX idx_user_expires (user_id, expires_at)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4'
+    );
+}
+
+function app_base_url()
+{
+    if (defined('APP_BASE_URL') && is_string(APP_BASE_URL) && APP_BASE_URL !== '') {
+        return rtrim((string) APP_BASE_URL, '/');
+    }
+
+    $host = (string) ($_SERVER['HTTP_HOST'] ?? '');
+    if ($host === '') {
+        return '';
+    }
+
+    $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+        || (isset($_SERVER['SERVER_PORT']) && (int) $_SERVER['SERVER_PORT'] === 443);
+    $scheme = $isHttps ? 'https' : 'http';
+
+    $scriptName = (string) ($_SERVER['SCRIPT_NAME'] ?? '');
+    $basePath = $scriptName !== '' ? rtrim(str_replace('\\', '/', dirname($scriptName)), '/') : '';
+    if ($basePath === '.' || $basePath === '/') {
+        $basePath = '';
+    }
+
+    return $scheme . '://' . $host . $basePath;
+}
+
+function build_password_reset_url($token)
+{
+    $base = app_base_url();
+    $path = 'reset-password.php?token=' . rawurlencode((string) $token);
+    if ($base === '') {
+        return $path;
+    }
+    return $base . '/' . ltrim($path, '/');
+}
+
+function create_password_reset_request($userId)
+{
+    ensure_password_reset_requests_table();
+
+    $token = bin2hex(random_bytes(32));
+    $tokenHash = hash('sha256', $token);
+    $minutes = defined('PASSWORD_RESET_EXPIRES_MINUTES') ? (int) PASSWORD_RESET_EXPIRES_MINUTES : 30;
+    $minutes = $minutes > 0 ? $minutes : 30;
+    $expiresAt = (new DateTimeImmutable('+' . $minutes . ' minutes'))->format('Y-m-d H:i:s');
+
+    db()->prepare('DELETE FROM password_reset_requests WHERE user_id = ?')->execute([(int) $userId]);
+
+    $stmt = db()->prepare(
+        'INSERT INTO password_reset_requests (user_id, token_hash, expires_at)
+         VALUES (?, ?, ?)'
+    );
+    $stmt->execute([(int) $userId, $tokenHash, $expiresAt]);
+
+    return $token;
+}
+
+function reset_password_with_token($token, $newPassword)
+{
+    ensure_password_reset_requests_table();
+
+    $tokenHash = hash('sha256', (string) $token);
+    $stmt = db()->prepare(
+        'SELECT pr.id, pr.user_id, pr.expires_at, u.email
+         FROM password_reset_requests pr
+         INNER JOIN users u ON u.id = pr.user_id
+         WHERE pr.token_hash = ?
+         LIMIT 1'
+    );
+    $stmt->execute([$tokenHash]);
+    $row = $stmt->fetch();
+
+    if (!$row) {
+        return [false, 'Invalid or expired reset link.'];
+    }
+
+    $now = new DateTimeImmutable('now');
+    $expires = new DateTimeImmutable($row['expires_at']);
+    if ($expires < $now) {
+        db()->prepare('DELETE FROM password_reset_requests WHERE id = ?')->execute([(int) $row['id']]);
+        return [false, 'Reset link has expired.'];
+    }
+
+    $userId = (int) $row['user_id'];
+    $email = (string) ($row['email'] ?? '');
+
+    $policyErrors = password_policy_errors($newPassword, '', $email);
+    if ($policyErrors) {
+        return [false, $policyErrors[0]];
+    }
+
+    $update = db()->prepare('UPDATE users SET password = ? WHERE id = ?');
+    $update->execute([password_hash((string) $newPassword, PASSWORD_DEFAULT), $userId]);
+
+    db()->prepare('DELETE FROM password_reset_requests WHERE id = ?')->execute([(int) $row['id']]);
+    log_auth_event('password_reset', $userId, $email);
+
+    return [true, 'Password updated.'];
 }
 
 function trusted_device_cookie_value()
@@ -355,6 +469,80 @@ function build_verification_email_html($title, $code, $expiresMinutes, $subtitle
         . '<div style="font-size:12px;color:#5b6b82;line-height:1.6;margin-top:10px;">'
         . 'If you didn’t request this, you can safely ignore this email.'
         . '</div>'
+        . '</td></tr>'
+        . '<tr><td style="padding:12px 6px 0 6px;">'
+        . '<div style="font-size:11px;color:#7b8aa3;line-height:1.6;text-align:center;">'
+        . '© ' . date('Y') . ' LTO HRIS. Please do not reply to this message.'
+        . '</div>'
+        . '</td></tr>'
+        . '</table>'
+        . '</td></tr>'
+        . '</table>'
+        . '</body>'
+        . '</html>';
+}
+
+function build_password_reset_email_html($resetUrl, $expiresMinutes, $greetingName = '')
+{
+    $resetUrl = (string) $resetUrl;
+    $expiresMinutes = (int) $expiresMinutes;
+    $greetingName = trim((string) $greetingName);
+
+    $safeUrl = htmlspecialchars($resetUrl, ENT_QUOTES, 'UTF-8');
+    $greetingLine = $greetingName !== '' ? ('Hello ' . $greetingName . ',') : 'Hello,';
+    $safeGreeting = htmlspecialchars($greetingLine, ENT_QUOTES, 'UTF-8');
+    $expiresText = $expiresMinutes > 0 ? ('This link expires in ' . $expiresMinutes . ' minutes.') : '';
+    $safeExpires = htmlspecialchars($expiresText, ENT_QUOTES, 'UTF-8');
+
+    $logoSrc = '';
+    if (defined('APP_BASE_URL') && is_string(APP_BASE_URL) && APP_BASE_URL !== '') {
+        $base = rtrim(APP_BASE_URL, '/');
+        $logoSrc = $base . '/assets/img/lto_logo_email.png';
+    }
+    $logoSrc = $logoSrc !== '' ? $logoSrc : 'cid:lto_logo_png';
+    $safeLogoSrc = htmlspecialchars($logoSrc, ENT_QUOTES, 'UTF-8');
+
+    return '<!doctype html>'
+        . '<html lang="en">'
+        . '<head>'
+        . '<meta charset="utf-8">'
+        . '<meta name="viewport" content="width=device-width, initial-scale=1">'
+        . '<meta name="x-apple-disable-message-reformatting">'
+        . '<title>Password Reset</title>'
+        . '</head>'
+        . '<body style="margin:0;padding:0;background:#f4f7fb;color:#1f2937;font-family:Segoe UI,Arial,sans-serif;">'
+        . '<div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;">'
+        . 'Reset your LTO HRIS password.'
+        . '</div>'
+        . '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#f4f7fb;padding:24px 12px;">'
+        . '<tr><td align="center">'
+        . '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" style="max-width:600px;width:100%;border-collapse:separate;">'
+        . '<tr>'
+        . '<td style="background:#f8fbff;border:1px solid #dbe6f6;border-bottom:none;border-top-left-radius:16px;border-top-right-radius:16px;padding:16px 18px;">'
+        . '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;">'
+        . '<tr>'
+        . '<td width="56" style="width:56px;padding:0;vertical-align:middle;">'
+        . '<img src="' . $safeLogoSrc . '" width="44" height="44" alt="LTO" style="display:block;width:44px;height:44px;object-fit:contain;border:0;outline:none;text-decoration:none;">'
+        . '</td>'
+        . '<td style="padding:0 0 0 10px;vertical-align:middle;">'
+        . '<div style="font-size:20px;font-weight:900;letter-spacing:.3px;color:#0b2b5a;line-height:1.15;">LTO HRIS</div>'
+        . '<div style="font-size:13px;color:#5b6b82;line-height:1.25;margin-top:2px;">Land Transportation Office</div>'
+        . '</td>'
+        . '</tr>'
+        . '</table>'
+        . '</td>'
+        . '</tr>'
+        . '<tr><td style="background:#ffffff;border:1px solid #dbe6f6;border-bottom-left-radius:16px;border-bottom-right-radius:16px;box-shadow:0 12px 30px rgba(31,79,143,.08);padding:22px;">'
+        . '<div style="font-size:18px;font-weight:900;color:#0b2b5a;line-height:1.2;margin:0 0 10px 0;">Reset your password</div>'
+        . '<div style="font-size:13px;color:#5b6b82;line-height:1.6;margin:0 0 16px 0;">' . $safeGreeting . '</div>'
+        . '<div style="font-size:13px;color:#5b6b82;line-height:1.6;margin:0 0 18px 0;">We received a request to reset your password. Click the button below to set a new password.</div>'
+        . '<div style="text-align:center;margin:18px 0 18px;">'
+        . '<a href="' . $safeUrl . '" style="display:inline-block;background:linear-gradient(135deg,#163f7a,#2b5fa5);color:#ffffff;text-decoration:none;padding:14px 18px;border-radius:14px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;">Reset Password</a>'
+        . '</div>'
+        . '<div style="font-size:12px;color:#5b6b82;line-height:1.6;margin:0 0 10px 0;">' . $safeExpires . '</div>'
+        . '<div style="font-size:12px;color:#5b6b82;line-height:1.6;margin:0;">If you did not request a password reset, you can safely ignore this email.</div>'
+        . '<div style="font-size:12px;color:#5b6b82;line-height:1.6;margin-top:14px;">If the button doesn’t work, copy and paste this link into your browser:</div>'
+        . '<div style="font-size:12px;word-break:break-all;color:#1f4f8f;margin-top:6px;">' . $safeUrl . '</div>'
         . '</td></tr>'
         . '<tr><td style="padding:12px 6px 0 6px;">'
         . '<div style="font-size:11px;color:#7b8aa3;line-height:1.6;text-align:center;">'
@@ -547,7 +735,7 @@ function send_email_message_html($to, $subject, $textBody, $htmlBody)
     }
 
     if (class_exists('\\PHPMailer\\PHPMailer\\PHPMailer')) {
-        [$sent, $err] = phpmailer_send_mail($to, $subject, $body, $headersLines);
+        [$sent, $err] = phpmailer_send_mail_html($to, $subject, $textBody, $htmlBody, $inlineImages);
         $attempts[] = 'PHPMailer' . ($err !== '' ? (': ' . $err) : '');
     }
 
@@ -634,6 +822,63 @@ function phpmailer_send_mail($to, $subject, $body, $headersLines = [])
             $mail->isHTML(false);
         }
         $mail->CharSet = 'UTF-8';
+
+        return [(bool) $mail->send(), ''];
+    } catch (Throwable $e) {
+        $msg = trim($e->getMessage());
+        if ($msg !== '') {
+            set_last_mail_error($msg);
+        }
+        return [false, $msg];
+    }
+}
+
+function phpmailer_send_mail_html($to, $subject, $textBody, $htmlBody, $inlineImages = [])
+{
+    try {
+        $mail = new \PHPMailer\PHPMailer\PHPMailer(true);
+        $mail->isSMTP();
+        $mail->Host = SMTP_HOST !== '' ? SMTP_HOST : 'smtp.gmail.com';
+        $mail->Port = SMTP_PORT ?: 587;
+        $mail->SMTPAuth = SMTP_USER !== '';
+
+        $secure = strtolower((string) SMTP_SECURE);
+        if ($secure === 'ssl') {
+            $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS;
+        } elseif ($secure === 'tls' || $secure === '') {
+            $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
+        }
+
+        if (SMTP_USER !== '') {
+            $mail->Username = SMTP_USER;
+            $mail->Password = SMTP_PASS;
+        }
+
+        $fromEmail = SMTP_FROM_EMAIL !== '' ? SMTP_FROM_EMAIL : (SMTP_USER !== '' ? SMTP_USER : 'noreply@localhost');
+        $fromName = SMTP_FROM_NAME !== '' ? SMTP_FROM_NAME : 'LTO HRIS';
+        $mail->setFrom($fromEmail, $fromName);
+        $mail->addAddress((string) $to);
+        $mail->Subject = (string) $subject;
+        $mail->CharSet = 'UTF-8';
+
+        $mail->isHTML(true);
+        $mail->Body = (string) $htmlBody;
+        $mail->AltBody = (string) $textBody;
+
+        $inlineImages = is_array($inlineImages) ? $inlineImages : [];
+        foreach ($inlineImages as $img) {
+            if (!is_array($img)) {
+                continue;
+            }
+            $path = (string) ($img['path'] ?? '');
+            $cid = (string) ($img['cid'] ?? '');
+            $filename = (string) ($img['filename'] ?? basename($path));
+            $mime = (string) ($img['mime'] ?? 'application/octet-stream');
+            if ($path === '' || $cid === '' || !is_file($path)) {
+                continue;
+            }
+            $mail->addEmbeddedImage($path, $cid, $filename, 'base64', $mime);
+        }
 
         return [(bool) $mail->send(), ''];
     } catch (Throwable $e) {

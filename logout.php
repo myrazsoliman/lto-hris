@@ -15,5 +15,5 @@ setcookie('lto_hris_logout_success', '1', [
 ]);
 
 logout_user();
-header('Location: index.php');
+header('Location: index.php?logout_success=1');
 exit;

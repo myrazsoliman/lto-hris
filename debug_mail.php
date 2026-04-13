@@ -26,7 +26,7 @@ echo "SMTP_FROM_NAME: " . (SMTP_FROM_NAME !== '' ? SMTP_FROM_NAME : '(empty)') .
 
 $subject = 'LTO HRIS Mail Test';
 $text = "This is a test message from LTO HRIS.\n\nIf you received this, SMTP is configured correctly.";
-$html = build_verification_email_html('SMTP Test', '123456', 10, 'If you can read this nicely, HTML email is working.');
+$html = build_verification_email_html('SMTP Test', '123456', 5, 'If you can read this nicely, HTML email is working.');
 $ok = send_email_message_html($to, $subject, $text, $html);
 
 echo $ok ? "Result: SENT\n" : "Result: FAILED\n";
