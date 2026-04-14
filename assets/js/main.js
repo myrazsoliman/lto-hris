@@ -339,7 +339,10 @@ document.addEventListener('DOMContentLoaded',function(){
         var show = input.type === 'password';
         input.type = show ? 'text' : 'password';
         btn.setAttribute('aria-pressed', show ? 'true' : 'false');
-        btn.textContent = show ? 'Hide' : 'Show';
+        btn.classList.toggle('is-active', show);
+        if(btn.getAttribute('data-toggle-mode') !== 'icon'){
+          btn.textContent = show ? 'Hide' : 'Show';
+        }
         input.focus();
       });
     });

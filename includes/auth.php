@@ -226,14 +226,17 @@ function app_base_url()
     return $scheme . '://' . $host . $basePath;
 }
 
-function build_password_reset_url($token)
+function outbound_app_url($path)
 {
     $base = app_base_url();
-    $path = 'reset-password.php?token=' . rawurlencode((string) $token);
-    if ($base === '') {
-        return $path;
-    }
-    return $base . '/' . ltrim($path, '/');
+    $path = ltrim((string) $path, '/');
+    $url = $base === '' ? $path : ($base . '/' . $path);
+    return str_replace(' ', '%20', $url);
+}
+
+function build_password_reset_url($token)
+{
+    return outbound_app_url('reset-password.php?token=' . rawurlencode((string) $token));
 }
 
 function create_password_reset_request($userId)
@@ -1102,6 +1105,80 @@ function create_email_change_request($userId, $newEmail)
     $stmt->execute([(int) $userId, normalize_identifier($newEmail), $tokenHash, $expiresAt]);
 
     return $token;
+}
+
+function build_email_change_verification_url($token)
+{
+    return outbound_app_url('confirm-email-change.php?token=' . rawurlencode((string) $token));
+}
+
+function build_email_change_email_html($verifyUrl, $expiresHours = 24)
+{
+    $verifyUrl = (string) $verifyUrl;
+    $expiresHours = (int) $expiresHours;
+    $safeUrl = htmlspecialchars($verifyUrl, ENT_QUOTES, 'UTF-8');
+    $expiresText = $expiresHours > 0 ? ('This link expires in ' . $expiresHours . ' hours.') : '';
+    $safeExpires = htmlspecialchars($expiresText, ENT_QUOTES, 'UTF-8');
+
+    $logoSrc = '';
+    if (defined('APP_BASE_URL') && is_string(APP_BASE_URL) && APP_BASE_URL !== '') {
+        $base = rtrim(APP_BASE_URL, '/');
+        $logoSrc = str_replace(' ', '%20', $base . '/assets/img/lto_logo_email.png');
+    }
+    $logoSrc = $logoSrc !== '' ? $logoSrc : 'cid:lto_logo_png';
+    $safeLogoSrc = htmlspecialchars($logoSrc, ENT_QUOTES, 'UTF-8');
+
+    return '<!doctype html>'
+        . '<html lang="en">'
+        . '<head>'
+        . '<meta charset="utf-8">'
+        . '<meta name="viewport" content="width=device-width, initial-scale=1">'
+        . '<meta name="x-apple-disable-message-reformatting">'
+        . '<title>Confirm Email Change</title>'
+        . '</head>'
+        . '<body style="margin:0;padding:0;background:#f4f7fb;color:#1f2937;font-family:Segoe UI,Arial,sans-serif;">'
+        . '<div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;">'
+        . 'Confirm your LTO HRIS email change request.'
+        . '</div>'
+        . '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#f4f7fb;padding:24px 12px;">'
+        . '<tr><td align="center">'
+        . '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" style="max-width:600px;width:100%;border-collapse:separate;">'
+        . '<tr>'
+        . '<td style="background:#f8fbff;border:1px solid #dbe6f6;border-bottom:none;border-top-left-radius:16px;border-top-right-radius:16px;padding:16px 18px;">'
+        . '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;">'
+        . '<tr>'
+        . '<td width="56" style="width:56px;padding:0;vertical-align:middle;">'
+        . '<img src="' . $safeLogoSrc . '" width="44" height="44" alt="LTO" style="display:block;width:44px;height:44px;object-fit:contain;border:0;outline:none;text-decoration:none;">'
+        . '</td>'
+        . '<td style="padding:0 0 0 10px;vertical-align:middle;">'
+        . '<div style="font-size:20px;font-weight:900;letter-spacing:.3px;color:#0b2b5a;line-height:1.15;">LTO HRIS</div>'
+        . '<div style="font-size:13px;color:#5b6b82;line-height:1.25;margin-top:2px;">Land Transportation Office</div>'
+        . '</td>'
+        . '</tr>'
+        . '</table>'
+        . '</td>'
+        . '</tr>'
+        . '<tr><td style="background:#ffffff;border:1px solid #dbe6f6;border-bottom-left-radius:16px;border-bottom-right-radius:16px;box-shadow:0 12px 30px rgba(31,79,143,.08);padding:22px;">'
+        . '<div style="font-size:18px;font-weight:900;color:#0b2b5a;line-height:1.2;margin:0 0 10px 0;">Confirm your email change</div>'
+        . '<div style="font-size:13px;color:#5b6b82;line-height:1.6;margin:0 0 16px 0;">A request was made to update the email address on your LTO HRIS account. Use the button below to approve the change.</div>'
+        . '<div style="text-align:center;margin:18px 0 18px;">'
+        . '<a href="' . $safeUrl . '" style="display:inline-block;background:linear-gradient(135deg,#163f7a,#2b5fa5);color:#ffffff;text-decoration:none;padding:14px 18px;border-radius:14px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;">Confirm Email Change</a>'
+        . '</div>'
+        . '<div style="font-size:12px;color:#5b6b82;line-height:1.6;margin:0 0 10px 0;">' . $safeExpires . '</div>'
+        . '<div style="font-size:12px;color:#5b6b82;line-height:1.6;margin:0;">If you did not request this change, you can safely ignore this email.</div>'
+        . '<div style="font-size:12px;color:#5b6b82;line-height:1.6;margin-top:14px;">If the button doesn\'t work, copy and paste this link into your browser:</div>'
+        . '<div style="font-size:12px;word-break:break-all;color:#1f4f8f;margin-top:6px;"><a href="' . $safeUrl . '" style="color:#1f4f8f;text-decoration:underline;">' . $safeUrl . '</a></div>'
+        . '</td></tr>'
+        . '<tr><td style="padding:12px 6px 0 6px;">'
+        . '<div style="font-size:11px;color:#7b8aa3;line-height:1.6;text-align:center;">'
+        . '&copy; ' . date('Y') . ' LTO HRIS. Please do not reply to this message.'
+        . '</div>'
+        . '</td></tr>'
+        . '</table>'
+        . '</td></tr>'
+        . '</table>'
+        . '</body>'
+        . '</html>';
 }
 
 function verify_email_change_request($userId, $token)

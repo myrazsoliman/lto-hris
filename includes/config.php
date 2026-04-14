@@ -1,7 +1,8 @@
 <?php
 
-// Optional per-environment overrides. Create `includes/config.local.php` (not committed)
-// to define constants (SMTP_*, APP_BASE_URL, etc.) for your server.
+// Optional per-environment overrides. Copy `includes/config.local.example.php`
+// to `includes/config.local.php` (not committed) and define constants
+// (SMTP_*, APP_BASE_URL, etc.) for your server.
 $localConfigCandidates = [
     __DIR__ . '/config.local.php',
 ];

@@ -1830,13 +1830,65 @@ tbody tr:hover {
     border-top: 4px solid var(--primary);
 }
 
+.account-page-head-copy {
+    min-width: 0;
+}
+
+.account-page-head h3 {
+    margin: 4px 0 0;
+    font-size: clamp(28px, 4vw, 38px);
+    line-height: 1.08;
+    letter-spacing: -0.03em;
+    color: #16365f;
+}
+
+.account-head-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 16px;
+}
+
+.account-head-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 36px;
+    padding: 0 14px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(43, 95, 165, 0.16);
+    color: #36557d;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.account-head-badge i {
+    color: #2b5fa5;
+}
+
 .account-office-block {
     min-width: 220px;
-    padding: 12px 14px;
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    background: rgba(234, 242, 251, 0.7);
+    padding: 14px 16px;
+    border: 1px solid rgba(43, 95, 165, 0.12);
+    border-radius: 18px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(232, 240, 250, 0.92));
     text-align: right;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.account-office-icon {
+    width: 42px;
+    height: 42px;
+    margin: 0 0 10px auto;
+    border-radius: 14px;
+    display: grid;
+    place-items: center;
+    background: linear-gradient(135deg, #163f7a, #2b5fa5);
+    color: #fff;
+    box-shadow: 0 14px 24px rgba(22, 63, 122, 0.18);
 }
 
 .account-office-label {
@@ -1899,6 +1951,36 @@ tbody tr:hover {
     margin-top: 8px;
     color: var(--muted);
     font-size: 13px;
+}
+
+.account-summary-strip {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+.account-summary-stat {
+    padding: 14px 16px;
+    border-radius: 16px;
+    background: linear-gradient(180deg, #f8fbff, #eef4fc);
+    border: 1px solid rgba(43, 95, 165, 0.12);
+}
+
+.account-summary-stat-label {
+    display: block;
+    margin-bottom: 6px;
+    color: #5f738d;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.account-summary-stat strong {
+    color: #16365f;
+    font-size: 22px;
+    line-height: 1;
 }
 
 .role-badge {
@@ -1965,8 +2047,9 @@ tbody tr:hover {
     align-items: flex-start;
     padding: 12px 14px;
     background: linear-gradient(180deg, #fbfdff, #f4f8fd);
-    border: 1px solid var(--border);
-    border-radius: 14px;
+    border: 1px solid rgba(43, 95, 165, 0.10);
+    border-radius: 16px;
+    box-shadow: 0 10px 20px rgba(29, 56, 106, 0.04);
 }
 
 .account-tip-list i {
@@ -1987,6 +2070,355 @@ tbody tr:hover {
     font-size: 12px;
 }
 
+.account-panel--auth {
+    padding: 0;
+    overflow: hidden;
+    border-radius: 24px;
+}
+
+.account-auth-shell {
+    position: relative;
+    padding: 28px 28px 30px;
+    background:
+        radial-gradient(circle at top right, rgba(43, 95, 165, 0.12), transparent 34%),
+        linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+}
+
+.account-auth-shell::before {
+    content: "";
+    position: absolute;
+    inset: 0 auto auto 0;
+    width: 100%;
+    height: 5px;
+    background: linear-gradient(90deg, #b27a12, #e0bf73 28%, rgba(224, 191, 115, 0));
+}
+
+.account-auth-header {
+    margin-bottom: 22px;
+}
+
+.account-auth-title {
+    margin: 0;
+    font-size: 32px;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: #17365d;
+}
+
+.account-auth-subtitle {
+    margin: 10px 0 0;
+    max-width: 560px;
+    color: #5f738d;
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+.account-auth-form {
+    gap: 16px;
+}
+
+.account-auth-input-wrap {
+    margin: 0;
+}
+
+.account-auth-input-wrap .login-input-shell {
+    position: relative;
+    display: block;
+    min-height: 62px;
+    padding: 0 18px 0 52px;
+    border-radius: 16px;
+    border-color: #d7e3f5;
+    background: linear-gradient(180deg, #fbfdff, #f4f8ff);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75);
+}
+
+.account-auth-input-wrap .login-input-icon {
+    position: absolute;
+    left: 18px;
+    top: 50%;
+    width: 26px;
+    height: 26px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transform: translateY(-50%);
+    color: #2b5fa5;
+    pointer-events: none;
+    z-index: 2;
+    background: transparent;
+    box-shadow: none;
+    border: 0;
+}
+
+.account-auth-input-wrap .login-input-icon svg {
+    display: block;
+    width: 26px;
+    height: 26px;
+}
+
+.account-auth-input-wrap .login-floating-label {
+    position: absolute;
+    font-size: 15px;
+    left: 56px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6c7d93;
+}
+
+.account-auth-input-wrap input {
+    display: block;
+    width: 100%;
+    height: auto;
+    min-height: 60px;
+    margin: 0;
+    padding: 20px 0 6px;
+    border: 0 !important;
+    border-radius: 0;
+    background: transparent !important;
+    box-shadow: none !important;
+    font-size: 15px;
+}
+
+.account-auth-form.login-form-modern input {
+    height: auto;
+    min-height: 60px;
+    padding: 20px 0 6px;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+.account-auth-input-wrap input:focus + .login-floating-label,
+.account-auth-input-wrap input:not(:placeholder-shown) + .login-floating-label {
+    top: 10px;
+    transform: none;
+    font-size: 10px;
+    color: #2b5fa5;
+}
+
+.account-auth-input-wrap--password .login-input-shell input {
+    padding-right: 52px;
+}
+
+.account-auth-password-toggle {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    transform: translateY(-50%);
+    border-radius: 999px;
+    border: 0;
+    background: transparent;
+    color: #2b5fa5;
+    box-shadow: none;
+}
+
+.account-auth-password-toggle .login-password-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+}
+
+.account-auth-password-toggle .login-password-icon svg {
+    width: 18px;
+    height: 18px;
+}
+
+.account-auth-password-toggle .login-password-icon-hide {
+    display: none;
+}
+
+.account-auth-password-toggle:hover {
+    background: transparent;
+    border-color: transparent;
+    color: #9b6200;
+    transform: translateY(-50%);
+}
+
+.account-auth-password-toggle.is-active {
+    background: transparent;
+    color: #b67812;
+}
+
+.account-auth-password-toggle.is-active .login-password-icon-show {
+    display: none;
+}
+
+.account-auth-password-toggle.is-active .login-password-icon-hide {
+    display: inline-flex;
+}
+
+.account-auth-actions {
+    margin-top: 2px;
+}
+
+.account-auth-submit {
+    width: 100%;
+    min-height: 60px;
+    margin-top: 8px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, #163f7a, #2b5fa5);
+    letter-spacing: 0.16em;
+    box-shadow: 0 12px 24px rgba(22, 63, 122, 0.18);
+}
+
+.account-auth-submit:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 16px 28px rgba(22, 63, 122, 0.24);
+    filter: saturate(1.03);
+}
+
+.account-auth-form > .password-validation-indicator,
+.account-auth-form > .account-password-validation-indicator {
+    margin-top: 6px;
+    padding: 14px 0 0;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+}
+
+.account-auth-form > .password-validation-indicator.is-hidden,
+.account-auth-form > .account-password-validation-indicator.is-hidden {
+    display: none;
+}
+
+.account-auth-form .password-strength-progress {
+    position: relative;
+    width: 100%;
+    height: 6px;
+    margin-bottom: 16px;
+    border-radius: 999px;
+    background: #d7dde5;
+    overflow: hidden;
+}
+
+.account-auth-form .password-strength-progress-bar {
+    display: block;
+    width: 0;
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #d92d20, #f59e0b);
+    transition: width 220ms ease, background 220ms ease;
+}
+
+.account-auth-form .password-strength-progress-bar[data-strength="medium"] {
+    background: linear-gradient(90deg, #d49a18, #f0c35a);
+}
+
+.account-auth-form .password-strength-progress-bar[data-strength="strong"] {
+    background: linear-gradient(90deg, #2e8b57, #6fbe7b);
+}
+
+.account-auth-form .password-strength-alert {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.35;
+    color: #b42318;
+}
+
+.account-auth-form .password-strength-alert.is-hidden {
+    display: none;
+}
+
+.account-auth-form .password-strength-alert::before {
+    content: "";
+    flex: 0 0 10px;
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    background: currentColor;
+}
+
+.account-auth-form .password-strength-alert[data-strength="empty"],
+.account-auth-form .password-strength-alert[data-strength="weak"] {
+    color: #b42318;
+}
+
+.account-auth-form .password-strength-alert[data-strength="medium"] {
+    color: #b58112;
+}
+
+.account-auth-form .password-strength-alert[data-strength="strong"] {
+    color: #2e8b57;
+}
+
+.account-auth-form .password-validation-title {
+    margin-bottom: 12px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #163f7a;
+    letter-spacing: 0;
+    text-transform: none;
+}
+
+.account-auth-form .password-validation-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 9px;
+}
+
+.account-auth-form .password-validation-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    font-size: 12px;
+}
+
+.account-auth-form .validation-icon {
+    width: 18px;
+    height: 18px;
+    font-size: 10px;
+    background: transparent;
+    border: 2px solid currentColor;
+    box-shadow: none;
+}
+
+.account-auth-form .validation-icon-invalid {
+    color: #b8c0cb;
+}
+
+.account-auth-form .validation-icon-valid {
+    display: none;
+    color: #6fbe7b;
+}
+
+.account-auth-form .validation-text {
+    padding-top: 0;
+    font-size: 13px;
+    line-height: 1.45;
+    color: #7ebf73;
+    font-weight: 700;
+}
+
+.account-auth-form .password-validation-item:not(.is-valid) .validation-text {
+    color: #95a0ae;
+    font-weight: 600;
+}
+
+.account-auth-form .password-validation-item.is-valid .validation-icon-invalid {
+    display: none;
+}
+
+.account-auth-form .password-validation-item.is-valid .validation-icon-valid {
+    display: flex;
+}
+
+.account-auth-form .password-validation-item.is-valid .validation-text {
+    color: #6fbe7b;
+    font-weight: 700;
+}
+
 @media (max-width: 1024px) {
     .account-layout {
         grid-template-columns: 1fr;
@@ -2000,6 +2432,40 @@ tbody tr:hover {
         min-width: 0;
         width: 100%;
         text-align: left;
+    }
+
+    .account-office-icon {
+        margin-left: 0;
+    }
+
+    .account-auth-title {
+        font-size: 28px;
+    }
+}
+
+@media (max-width: 640px) {
+    .account-auth-shell {
+        padding: 22px 18px 22px;
+    }
+
+    .account-summary-strip {
+        grid-template-columns: 1fr;
+    }
+
+    .account-auth-title {
+        font-size: 26px;
+    }
+
+    .account-auth-input-wrap .login-input-shell {
+        min-height: 62px;
+        padding: 14px 18px;
+        border-radius: 16px;
+    }
+
+    .account-auth-submit {
+        min-height: 48px;
+        border-radius: 14px;
+        letter-spacing: 0.16em;
     }
 }
 

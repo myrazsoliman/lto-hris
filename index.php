@@ -33,6 +33,15 @@ $twoFaCodePrefill = '';
 
 function redirect_to_dashboard_by_roles($roles)
 {
+    $pendingEmailChangeToken = isset($_SESSION['pending_email_change_token'])
+        ? preg_replace('/[^a-f0-9]/i', '', (string) $_SESSION['pending_email_change_token'])
+        : '';
+    if ($pendingEmailChangeToken !== '' && strlen($pendingEmailChangeToken) >= 32) {
+        unset($_SESSION['pending_email_change_token']);
+        header('Location: confirm-email-change.php?token=' . rawurlencode($pendingEmailChangeToken));
+        exit;
+    }
+
     $normalizedRoles = array_map(
         static fn($role) => strtolower(trim((string) $role)),
         (array) $roles
