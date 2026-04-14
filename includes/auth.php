@@ -55,10 +55,13 @@ function ensure_auth_schema()
             middle_name VARCHAR(80) NULL,
             last_name VARCHAR(80) NOT NULL,
             email VARCHAR(150) NOT NULL UNIQUE,
+            profile_photo_path VARCHAR(255) NULL,
             password VARCHAR(255) NOT NULL,
             created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4'
     );
+
+    ensure_user_profile_photo_column();
 
     db()->exec(
         'CREATE TABLE IF NOT EXISTS roles (
@@ -83,6 +86,19 @@ function ensure_auth_schema()
     ensure_password_reset_requests_table();
     ensure_trusted_devices_table();
     ensure_base_roles_exist();
+}
+
+function ensure_user_profile_photo_column()
+{
+    if (auth_table_has_column('users', 'profile_photo_path')) {
+        return;
+    }
+
+    try {
+        db()->exec('ALTER TABLE users ADD COLUMN profile_photo_path VARCHAR(255) NULL AFTER email');
+    } catch (Throwable $e) {
+        // Ignore if another request added the column first.
+    }
 }
 
 function client_ip()
@@ -1398,6 +1414,7 @@ function current_user()
             'display_name' => 'User',
             'first_name' => 'User',
             'last_name' => '',
+            'profile_photo_path' => null,
             'roles' => ['superadmin', 'admin', 'hr_officer', 'employee'],
         ];
     }
@@ -1440,7 +1457,10 @@ function fetch_user_record($identifier)
     }
 
     $params = [$identifier];
-    $sql = 'SELECT id, email, password, first_name, last_name, created_at FROM users WHERE LOWER(email) = ?';
+    $photoSelect = auth_table_has_column('users', 'profile_photo_path')
+        ? ', profile_photo_path'
+        : '';
+    $sql = 'SELECT id, email' . $photoSelect . ', password, first_name, last_name, created_at FROM users WHERE LOWER(email) = ?';
 
     $stmt = db()->prepare($sql . ' LIMIT 1');
     $stmt->execute($params);
@@ -1500,6 +1520,7 @@ function login_user($user)
         'id' => $user['id'] ?? null,
         'email' => $user['email'] ?? null,
         'display_name' => $displayName,
+        'profile_photo_path' => $user['profile_photo_path'] ?? null,
         'roles' => $user['roles'] ?? [],
     ];
 

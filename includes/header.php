@@ -15,6 +15,8 @@ $userRoles = $user ? $user['roles'] : [];
 $navItems = get_nav_items($userRoles);
 $profileName = $user['display_name'] ?? 'User';
 $profileInitial = strtoupper(substr(trim((string) $profileName), 0, 1)) ?: 'U';
+$profilePhoto = trim((string) ($user['profile_photo_path'] ?? ''));
+$profilePhotoUrl = $profilePhoto !== '' ? str_replace(' ', '%20', str_replace('\\', '/', $profilePhoto)) : '';
 $userIdForNotifications = (int) ($user['id'] ?? 0);
 if ($user) {
     ensure_demo_notification_for_user($userIdForNotifications);
@@ -136,7 +138,13 @@ $navIconMap = [
                         </div>
                         <div class="profile-menu">
                             <button type="button" class="profile-summary" aria-label="Open profile menu">
-                                <span class="profile-avatar" aria-hidden="true"><?php echo htmlspecialchars($profileInitial); ?></span>
+                                <span class="profile-avatar<?php echo $profilePhotoUrl !== '' ? ' has-photo' : ''; ?>" aria-hidden="true">
+                                    <?php if ($profilePhotoUrl !== ''): ?>
+                                        <img src="<?php echo htmlspecialchars($profilePhotoUrl); ?>" alt="<?php echo htmlspecialchars($profileName); ?>">
+                                    <?php else: ?>
+                                        <?php echo htmlspecialchars($profileInitial); ?>
+                                    <?php endif; ?>
+                                </span>
                                 <i class="fas fa-chevron-down" aria-hidden="true"></i>
                             </button>
                             <div class="profile-dropdown">

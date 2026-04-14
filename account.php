@@ -8,6 +8,7 @@ require_once 'includes/notifications.php';
 $currentUser = current_user();
 $error = '';
 $success = '';
+$photoError = '';
 
 if (isset($_GET['verify_email_change'])) {
     $token = (string) $_GET['verify_email_change'];
@@ -32,7 +33,68 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
         $error = 'Security token expired. Please try again.';
     } elseif (isset($_POST['action'])) {
-        if ($_POST['action'] === 'update_email') {
+        if ($_POST['action'] === 'upload_photo') {
+            $upload = $_FILES['profile_photo'] ?? null;
+
+            if (!is_array($upload) || (int) ($upload['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
+                $photoError = 'Choose a photo to upload.';
+            } elseif ((int) ($upload['error'] ?? UPLOAD_ERR_OK) !== UPLOAD_ERR_OK) {
+                $photoError = 'Unable to upload your photo right now.';
+            } else {
+                $tmpPath = (string) ($upload['tmp_name'] ?? '');
+                $fileSize = (int) ($upload['size'] ?? 0);
+                $imageInfo = $tmpPath !== '' ? @getimagesize($tmpPath) : false;
+                $mimeType = is_array($imageInfo) ? (string) ($imageInfo['mime'] ?? '') : '';
+                $allowedTypes = [
+                    'image/jpeg' => 'jpg',
+                    'image/png' => 'png',
+                    'image/webp' => 'webp',
+                ];
+
+                if ($tmpPath === '' || !is_uploaded_file($tmpPath)) {
+                    $photoError = 'Invalid upload payload.';
+                } elseif ($fileSize <= 0 || $fileSize > 3 * 1024 * 1024) {
+                    $photoError = 'Profile photo must be 3 MB or smaller.';
+                } elseif (!isset($allowedTypes[$mimeType])) {
+                    $photoError = 'Use a JPG, PNG, or WEBP image.';
+                } else {
+                    $uploadDir = __DIR__ . '/uploads/profile-photos';
+                    if (!is_dir($uploadDir)) {
+                        @mkdir($uploadDir, 0775, true);
+                    }
+
+                    if (!is_dir($uploadDir) || !is_writable($uploadDir)) {
+                        $photoError = 'Profile photo folder is not writable.';
+                    } else {
+                        $extension = $allowedTypes[$mimeType];
+                        $fileName = 'user_' . (int) ($currentUser['id'] ?? 0) . '_' . bin2hex(random_bytes(8)) . '.' . $extension;
+                        $targetPath = $uploadDir . '/' . $fileName;
+                        $relativePath = 'uploads/profile-photos/' . $fileName;
+
+                        if (!@move_uploaded_file($tmpPath, $targetPath)) {
+                            $photoError = 'Failed to save your profile photo.';
+                        } else {
+                            $oldPhoto = (string) ($currentUser['profile_photo_path'] ?? '');
+                            db()->prepare('UPDATE users SET profile_photo_path = ? WHERE id = ?')
+                                ->execute([$relativePath, (int) ($currentUser['id'] ?? 0)]);
+
+                            $_SESSION['user']['profile_photo_path'] = $relativePath;
+                            $currentUser['profile_photo_path'] = $relativePath;
+                            $success = 'Profile photo updated successfully!';
+
+                            if ($oldPhoto !== '') {
+                                $oldPhotoPath = __DIR__ . '/' . ltrim(str_replace('\\', '/', $oldPhoto), '/');
+                                $normalizedOldPath = str_replace('\\', '/', $oldPhotoPath);
+                                $normalizedUploadRoot = str_replace('\\', '/', $uploadDir) . '/';
+                                if (str_starts_with($normalizedOldPath, $normalizedUploadRoot) && is_file($oldPhotoPath)) {
+                                    @unlink($oldPhotoPath);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } elseif ($_POST['action'] === 'update_email') {
             $newEmail = $_POST['new_email'] ?? '';
             $confirmEmail = $_POST['confirm_email'] ?? '';
             $currentPassword = $_POST['current_password'] ?? '';
@@ -171,6 +233,8 @@ $displayName = (string) ($currentUser['display_name'] ?? 'User');
 $initial = strtoupper(substr(trim($displayName), 0, 1)) ?: 'U';
 $requiresTwoFactor = requires_2fa($roles);
 $recentLoginCount = count($recentLogins);
+$profilePhoto = trim((string) ($currentUser['profile_photo_path'] ?? ''));
+$profilePhotoUrl = $profilePhoto !== '' ? str_replace(' ', '%20', str_replace('\\', '/', $profilePhoto)) : '';
 ?>
 
 <section class="card account-page-head">
@@ -209,14 +273,47 @@ $recentLoginCount = count($recentLogins);
 <div class="account-layout">
     <div class="account-col">
         <section class="card account-summary">
-            <div class="account-summary-head">
-                <div class="account-avatar" aria-hidden="true"><?php echo htmlspecialchars($initial); ?></div>
-                <div class="account-summary-meta">
-                    <div class="account-name"><?php echo htmlspecialchars($displayName); ?></div>
-                    <div class="role-badge"><?php echo htmlspecialchars($roleLabel); ?></div>
-                    <div class="account-summary-note">Authorized system user</div>
+            <form method="post" enctype="multipart/form-data" class="account-photo-form" id="accountPhotoForm">
+                <input type="hidden" name="action" value="upload_photo">
+                <input type="hidden" name="csrf_token" value="<?= csrf_token() ?>">
+                <input type="file" id="profilePhotoInput" name="profile_photo" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" required>
+
+                <div class="account-profile-hero">
+                    <div class="account-profile-cover" aria-hidden="true"></div>
+                    <div class="account-profile-body">
+                        <div class="account-avatar-wrap">
+                            <div class="account-avatar account-avatar--hero<?php echo $profilePhotoUrl !== '' ? ' has-photo' : ''; ?>" aria-hidden="true">
+                                <?php if ($profilePhotoUrl !== ''): ?>
+                                    <img src="<?php echo htmlspecialchars($profilePhotoUrl); ?>" alt="<?php echo htmlspecialchars($displayName); ?>">
+                                <?php else: ?>
+                                    <?php echo htmlspecialchars($initial); ?>
+                                <?php endif; ?>
+                            </div>
+                            <label class="account-avatar-edit" for="profilePhotoInput" title="Upload profile photo">
+                                <i class="fa-solid fa-pen" aria-hidden="true"></i>
+                                <span class="sr-only">Upload profile photo</span>
+                            </label>
+                        </div>
+                        <div class="account-summary-meta">
+                            <div class="account-name"><?php echo htmlspecialchars($displayName); ?></div>
+                            <div class="role-badge"><?php echo htmlspecialchars($roleLabel); ?></div>
+                            <div class="account-summary-note">Authorized system user</div>
+                        </div>
+                    </div>
                 </div>
-            </div>
+            </form>
+
+            <?php if ($photoError !== ''): ?>
+                <div class="notice notice--danger">
+                    <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+                    <div><?php echo htmlspecialchars($photoError); ?></div>
+                </div>
+            <?php elseif ($success === 'Profile photo updated successfully!'): ?>
+                <div class="notice notice--success">
+                    <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+                    <div><?php echo htmlspecialchars($success); ?></div>
+                </div>
+            <?php endif; ?>
 
             <div class="account-summary-strip">
                 <div class="account-summary-stat">
@@ -651,6 +748,20 @@ $recentLoginCount = count($recentLogins);
         }
 
         checkPasswordStrength();
+    }());
+</script>
+
+<script>
+    (function() {
+        var photoInput = document.getElementById('profilePhotoInput');
+        var photoForm = document.getElementById('accountPhotoForm');
+        if (!photoInput || !photoForm) return;
+
+        photoInput.addEventListener('change', function() {
+            if (photoInput.files && photoInput.files.length > 0) {
+                photoForm.submit();
+            }
+        });
     }());
 </script>
 
