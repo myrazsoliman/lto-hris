@@ -8,9 +8,13 @@
         </div>
         <div class="footer-col">
             <h4>LTO - PILA DISTRICT OFFICE</h4>
-            <p>Land Transportation Office (LTO)</p>
-            <p>Brgy. Sta. Clara Sur, Pila, Laguna</p>
-            <p><a href="tel:+63492501712">+63 49 250-1712</a></p>
+            <div class="footer-contact-list">
+                <p><img src="https://img.icons8.com/?size=100&id=H9LE4zr2fmNE&format=png&color=555555" alt="Office icon from Icons8" loading="lazy" decoding="async"><span>Land Transportation Office (LTO)</span></p>
+                <p><img src="https://img.icons8.com/?size=100&id=85149&format=png&color=555555" alt="Location icon from Icons8" loading="lazy" decoding="async"><span>Brgy. Sta. Clara Sur, Pila, Laguna</span></p>
+                <p><img src="https://img.icons8.com/?size=100&id=84908&format=png&color=555555" alt="Phone icon from Icons8" loading="lazy" decoding="async"><a href="tel:+63495590072">+63 49 559-0072</a></p>
+                <p><img src="https://img.icons8.com/?size=100&id=85500&format=png&color=555555" alt="Email icon from Icons8" loading="lazy" decoding="async"><a href="mailto:0476pilado@gmail.com">0476pilado@gmail.com</a></p>
+                <p><img src="https://img.icons8.com/?size=100&id=85500&format=png&color=555555" alt="Email icon from Icons8" loading="lazy" decoding="async"><a href="mailto:0476stacruzdo@gmail.com">0476stacruzdo@gmail.com</a></p>
+            </div>
         </div>
         <div class="footer-col">
             <h4>About LTO-HRIS</h4>
@@ -29,6 +33,10 @@
                 <li><a href="data-privacy-notice.php">Data Privacy Notice</a></li>
                 <li><a href="contact-us.php">Feedback and Complaints</a></li>
             </ul>
+        </div>
+        <div class="footer-badges" aria-label="Government transparency links">
+            <img src="assets/img/fip.png" alt="Freedom of Information">
+            <img src="assets/img/pts.png" alt="Philippine Transparency Seal">
         </div>
     </div>
 </footer>

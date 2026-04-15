@@ -548,134 +548,7 @@ $publicNavItems = [
 </head>
 
 <body class="landing-page<?php echo ($showLoginModal || $showRegisterModal || $showForgotModal || $show2faModal) ? ' login-modal-open' : ''; ?>">
-
-    <div class="gov-topbar">
-        <div class="gov-inner">
-            <div class="gov-left">LTO-HRIS</div>
-            <nav class="gov-nav">
-                <?php foreach ($publicNavItems as $item): ?>
-                    <?php if (!empty($item['children'])): ?>
-                        <div class="gov-nav-item has-dropdown">
-                            <a
-                                href="<?php echo htmlspecialchars($item['href']); ?>"
-                                class="<?php echo trim(($item['active'] ? 'active ' : '') . ($item['caret'] ? 'has-caret' : '')); ?>">
-                                <?php echo htmlspecialchars($item['label']); ?>
-                            </a>
-                            <div class="gov-dropdown">
-                                <?php foreach ($item['children'] as $child): ?>
-                                    <?php if (!empty($child['children'])): ?>
-                                        <div class="gov-dropdown-item has-submenu">
-                                            <a href="<?php echo htmlspecialchars($child['href'] ?? '#'); ?>" class="<?php echo !empty($child['active']) ? 'active' : ''; ?>">
-                                                <span><?php echo htmlspecialchars($child['label']); ?></span>
-                                                <span class="gov-submenu-caret" aria-hidden="true"></span>
-                                            </a>
-                                            <div class="gov-submenu">
-                                                <?php foreach ($child['children'] as $grandChild): ?>
-                                                    <a href="<?php echo htmlspecialchars($grandChild['href'] ?? '#'); ?>" class="<?php echo !empty($grandChild['active']) ? 'active' : ''; ?>"><?php echo htmlspecialchars($grandChild['label']); ?></a>
-                                                <?php endforeach; ?>
-                                            </div>
-                                        </div>
-                                    <?php else: ?>
-                                        <a href="<?php echo htmlspecialchars($child['href'] ?? '#'); ?>" class="<?php echo !empty($child['active']) ? 'active' : ''; ?>"><?php echo htmlspecialchars($child['label']); ?></a>
-                                    <?php endif; ?>
-                                <?php endforeach; ?>
-                            </div>
-                        </div>
-                    <?php else: ?>
-                        <a
-                            href="<?php echo htmlspecialchars($item['href']); ?>"
-                            class="<?php echo trim(($item['active'] ? 'active ' : '') . ($item['caret'] ? 'has-caret' : '')); ?>">
-                            <?php echo htmlspecialchars($item['label']); ?>
-                        </a>
-                    <?php endif; ?>
-                <?php endforeach; ?>
-            </nav>
-            <a href="contact-us.php" class="gov-contact-link <?php echo $currentPage === 'contact-us.php' ? 'active' : ''; ?>">Contact Us</a>
-            <div class="gov-search">
-                <input placeholder="Search...">
-            </div>
-            <div class="gov-actions">
-                <a class="btn btn-login js-login-trigger" href="login.php">Login</a>
-                <a class="btn btn-register js-register-trigger" href="register.php">Register</a>
-            </div>
-            <button class="gov-menu-toggle" type="button" aria-expanded="false" aria-controls="govMobilePanel" aria-label="Open navigation menu">
-                <span class="gov-menu-toggle-label">Menu</span>
-                <span class="gov-menu-toggle-box" aria-hidden="true">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </span>
-            </button>
-            <div class="gov-mobile-search">
-                <input placeholder="Search..." aria-label="Search">
-            </div>
-        </div>
-        <div class="gov-mobile-panel" id="govMobilePanel" hidden>
-            <nav class="gov-mobile-nav" aria-label="Mobile navigation">
-                <?php foreach ($publicNavItems as $item): ?>
-                    <?php if (!empty($item['children'])): ?>
-                        <div class="gov-mobile-group">
-                            <button class="gov-mobile-parent" type="button" data-submenu="<?php echo htmlspecialchars($item['label']); ?>">
-                                <span><?php echo htmlspecialchars($item['label']); ?></span>
-                            </button>
-                            <div class="gov-mobile-submenu-view" data-submenu-panel="<?php echo htmlspecialchars($item['label']); ?>" hidden>
-                                <button class="gov-mobile-back" type="button">
-                                    <span class="gov-mobile-back-icon" aria-hidden="true"></span>
-                                    <span>Back</span>
-                                </button>
-                                <div class="gov-mobile-submenu-title"><?php echo htmlspecialchars($item['label']); ?></div>
-                                <div class="gov-mobile-submenu">
-                                    <?php foreach ($item['children'] as $child): ?>
-                                        <?php if (!empty($child['children'])): ?>
-                                            <div class="gov-mobile-submenu-group">
-                                                <a href="<?php echo htmlspecialchars($child['href'] ?? '#'); ?>" class="gov-mobile-submenu-group-title-link <?php echo !empty($child['active']) ? 'active' : ''; ?>"><?php echo htmlspecialchars($child['label']); ?></a>
-                                                <?php foreach ($child['children'] as $grandChild): ?>
-                                                    <a href="<?php echo htmlspecialchars($grandChild['href'] ?? '#'); ?>" class="<?php echo !empty($grandChild['active']) ? 'active' : ''; ?>"><?php echo htmlspecialchars($grandChild['label']); ?></a>
-                                                <?php endforeach; ?>
-                                            </div>
-                                        <?php else: ?>
-                                            <a href="<?php echo htmlspecialchars($child['href'] ?? '#'); ?>" class="<?php echo !empty($child['active']) ? 'active' : ''; ?>"><?php echo htmlspecialchars($child['label']); ?></a>
-                                        <?php endif; ?>
-                                    <?php endforeach; ?>
-                                </div>
-                            </div>
-                        </div>
-                    <?php else: ?>
-                        <a href="<?php echo htmlspecialchars($item['href']); ?>" class="<?php echo !empty($item['active']) ? 'active' : ''; ?>">
-                            <?php echo htmlspecialchars($item['label']); ?>
-                        </a>
-                    <?php endif; ?>
-                <?php endforeach; ?>
-                <a href="contact-us.php" class="<?php echo $currentPage === 'contact-us.php' ? 'active' : ''; ?>">Contact Us</a>
-            </nav>
-            <div class="gov-mobile-actions">
-                <a class="btn btn-login js-login-trigger" href="login.php">Login</a>
-                <a class="btn btn-register js-register-trigger" href="register.php">Register</a>
-            </div>
-        </div>
-    </div>
-
-    <header class="site-header">
-        <div class="container header-wrap">
-            <div class="brand-group">
-                <div class="left-logos">
-                    <img src="assets/img/bph.png" alt="seal">
-                    <img src="assets/img/lto_logo.png" alt="LTO logo">
-                </div>
-                <div class="center-brand">
-                    <div class="govtext">Republic of the Philippines<br><strong>DEPARTMENT OF TRANSPORTATION</strong></div>
-                    <h1>LAND TRANSPORTATION OFFICE</h1>
-                </div>
-            </div>
-            <div class="right-info">
-                <div class="time">Philippine Standard Time:<br><span id="pstClock"></span></div>
-                <div class="icons">
-                    <img src="assets/img/fip.png" alt="Freedom of Information">
-                    <img src="assets/img/pts.png" alt="Philippine Transparency Seal">
-                </div>
-            </div>
-        </div>
-    </header>
+    <?php include __DIR__ . '/includes/public-header.php'; ?>
 
     <section class="news-updates">
         <div class="container">
@@ -741,38 +614,52 @@ $publicNavItems = [
         <div class="privacy-notice-wrap">
             <h2>Privacy Notice for Employees and Job Applicants</h2>
 
-            <div class="privacy-block">
-                <h3>Introduction</h3>
-                <p>In compliance with Republic Act No. 10173, or the Data Privacy Act of 2012, its Implementing Rules and Regulations, and other relevant issuances of the National Privacy Commission, the Land Transportation Office Human Resource Information System adopts this Privacy Notice to inform employees, job applicants, and authorized users how personal data is collected, used, stored, shared, and protected within the system.</p>
+            <div class="privacy-accordion">
+                <details class="privacy-block" open>
+                    <summary class="privacy-summary">Introduction</summary>
+                    <div class="privacy-content">
+                        <p>In compliance with Republic Act No. 10173, or the Data Privacy Act of 2012, its Implementing Rules and Regulations, and other relevant issuances of the National Privacy Commission, the Land Transportation Office Human Resource Information System adopts this Privacy Notice to inform employees, job applicants, and authorized users how personal data is collected, used, stored, shared, and protected within the system.</p>
 
-                <p>The LTO respects and upholds the right to data privacy of all personnel and applicants. Personal information collected through the HRIS is processed in accordance with the principles of transparency, legitimate purpose, and proportionality. This includes information submitted for recruitment, personnel administration, records management, leave processing, compliance monitoring, and other lawful human resource functions.</p>
+                        <p>The LTO respects and upholds the right to data privacy of all personnel and applicants. Personal information collected through the HRIS is processed in accordance with the principles of transparency, legitimate purpose, and proportionality. This includes information submitted for recruitment, personnel administration, records management, leave processing, compliance monitoring, and other lawful human resource functions.</p>
 
-                <p>In this notice, the terms “data” and “information” may be used interchangeably. References to “personal data” include personal information, sensitive personal information, and other information protected under applicable laws and regulations. This notice is intended to explain, in clear and practical language, how LTO HRIS handles your information in support of efficient, accountable, and secure HR service delivery.</p>
-            </div>
+                        <p>In this notice, the terms “data” and “information” may be used interchangeably. References to “personal data” include personal information, sensitive personal information, and other information protected under applicable laws and regulations. This notice is intended to explain, in clear and practical language, how LTO HRIS handles your information in support of efficient, accountable, and secure HR service delivery.</p>
+                    </div>
+                </details>
 
-            <div class="privacy-block">
-                <h3>Information We Collect, Acquire, or Generate</h3>
-                <p>The LTO HRIS may collect, receive, or generate personal data necessary for recruitment, employment administration, and organizational recordkeeping. This may include your full name, contact details, date of birth, civil status, government-issued identifiers, educational background, employment history, attendance records, leave data, payroll-related information, training records, performance evaluations, submitted forms, uploaded supporting documents, and system-generated logs associated with your use of the platform.</p>
-            </div>
+                <details class="privacy-block">
+                    <summary class="privacy-summary">Information We Collect, Acquire, or Generate</summary>
+                    <div class="privacy-content">
+                        <p>The LTO HRIS may collect, receive, or generate personal data necessary for recruitment, employment administration, and organizational recordkeeping. This may include your full name, contact details, date of birth, civil status, government-issued identifiers, educational background, employment history, attendance records, leave data, payroll-related information, training records, performance evaluations, submitted forms, uploaded supporting documents, and system-generated logs associated with your use of the platform.</p>
+                    </div>
+                </details>
 
-            <div class="privacy-block">
-                <h3>How We Share, Disclose, or Transfer Your Information</h3>
-                <p>Your information may be shared only when necessary for lawful HR functions, internal administrative processing, compliance with legal obligations, or coordination with authorized government offices, auditors, service providers, and oversight bodies. Any disclosure or transfer of personal data shall be limited to what is relevant and necessary, subject to appropriate safeguards, confidentiality controls, and applicable data privacy laws and regulations.</p>
-            </div>
+                <details class="privacy-block">
+                    <summary class="privacy-summary">How We Share, Disclose, or Transfer Your Information</summary>
+                    <div class="privacy-content">
+                        <p>Your information may be shared only when necessary for lawful HR functions, internal administrative processing, compliance with legal obligations, or coordination with authorized government offices, auditors, service providers, and oversight bodies. Any disclosure or transfer of personal data shall be limited to what is relevant and necessary, subject to appropriate safeguards, confidentiality controls, and applicable data privacy laws and regulations.</p>
+                    </div>
+                </details>
 
-            <div class="privacy-block">
-                <h3>How We Store and Retain Your Information</h3>
-                <p>LTO HRIS stores personal data in secured digital environments protected by access controls, role-based permissions, system monitoring, and administrative safeguards designed to prevent unauthorized access, alteration, disclosure, or loss. Personal data shall be retained only for as long as necessary to fulfill legitimate HR, legal, regulatory, audit, and operational requirements, after which records shall be archived, anonymized, or securely disposed of in accordance with approved records management and retention policies.</p>
-            </div>
+                <details class="privacy-block">
+                    <summary class="privacy-summary">How We Store and Retain Your Information</summary>
+                    <div class="privacy-content">
+                        <p>LTO HRIS stores personal data in secured digital environments protected by access controls, role-based permissions, system monitoring, and administrative safeguards designed to prevent unauthorized access, alteration, disclosure, or loss. Personal data shall be retained only for as long as necessary to fulfill legitimate HR, legal, regulatory, audit, and operational requirements, after which records shall be archived, anonymized, or securely disposed of in accordance with approved records management and retention policies.</p>
+                    </div>
+                </details>
 
-            <div class="privacy-block">
-                <h3>Your Rights with Respect to Your Personal Data</h3>
-                <p>Subject to the Data Privacy Act of 2012 and other applicable regulations, you may have the right to be informed, to access your personal data, to object to certain processing activities, to request correction of inaccurate or incomplete records, to request erasure or blocking when allowed by law, and to seek redress for privacy-related concerns. Requests involving your personal data shall be evaluated in accordance with lawful procedures, operational requirements, and the rights and obligations of the Land Transportation Office as a government agency.</p>
-            </div>
+                <details class="privacy-block">
+                    <summary class="privacy-summary">Your Rights with Respect to Your Personal Data</summary>
+                    <div class="privacy-content">
+                        <p>Subject to the Data Privacy Act of 2012 and other applicable regulations, you may have the right to be informed, to access your personal data, to object to certain processing activities, to request correction of inaccurate or incomplete records, to request erasure or blocking when allowed by law, and to seek redress for privacy-related concerns. Requests involving your personal data shall be evaluated in accordance with lawful procedures, operational requirements, and the rights and obligations of the Land Transportation Office as a government agency.</p>
+                    </div>
+                </details>
 
-            <div class="privacy-block">
-                <h3>Changing This Privacy Notice</h3>
-                <p>The LTO may update or revise this Privacy Notice from time to time to reflect changes in laws, regulations, policies, business processes, or system functionalities. Any updated version shall take effect upon posting within the HRIS portal or through other official communication channels. Users are encouraged to review this notice periodically to remain informed about how their personal data is handled.</p>
+                <details class="privacy-block">
+                    <summary class="privacy-summary">Changing This Privacy Notice</summary>
+                    <div class="privacy-content">
+                        <p>The LTO may update or revise this Privacy Notice from time to time to reflect changes in laws, regulations, policies, business processes, or system functionalities. Any updated version shall take effect upon posting within the HRIS portal or through other official communication channels. Users are encouraged to review this notice periodically to remain informed about how their personal data is handled.</p>
+                    </div>
+                </details>
             </div>
         </div>
     </section>
@@ -2078,6 +1965,23 @@ $publicNavItems = [
 
             update();
             start();
+        }());
+
+        (function() {
+            const accordion = document.querySelector('.privacy-accordion');
+            if (!accordion) return;
+
+            const sections = Array.from(accordion.querySelectorAll('details.privacy-block'));
+            sections.forEach((section) => {
+                section.addEventListener('toggle', () => {
+                    if (!section.open) return;
+
+                    sections.forEach((otherSection) => {
+                        if (otherSection === section) return;
+                        otherSection.open = false;
+                    });
+                });
+            });
         }());
 
         (function() {
