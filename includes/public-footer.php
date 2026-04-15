@@ -40,3 +40,4 @@
         </div>
     </div>
 </footer>
+<script src="assets/js/devtools-deterrent.js"></script>

@@ -30,7 +30,7 @@ if (!isset($modalFormAction) || $modalFormAction === '') $modalFormAction = base
                         <div class="login-modal-title-row">
                             <h2 id="loginModalTitle">Welcome to <span>LTO HRIS</span></h2>
                         </div>
-                        <p class="login-modal-subtitle">Land Transportation Office<br>Human Resource Information System</p>
+                            <p class="login-modal-subtitle"><span class="agency-line">Land Transportation Office</span><span class="system-line">Human Resource Information System</span></p>
                     </div>
                     <button class="login-modal-close" type="button" data-close-login-modal aria-label="Close login modal">
                         <span aria-hidden="true">&times;</span>
@@ -91,7 +91,7 @@ if (!isset($modalFormAction) || $modalFormAction === '') $modalFormAction = base
                         <div class="login-modal-title-row">
                             <h2 id="registerModalTitle">Create <span>Account</span></h2>
                         </div>
-                        <p class="login-modal-subtitle">Land Transportation Office<br>Human Resource Information System</p>
+                            <p class="login-modal-subtitle"><span class="agency-line">Land Transportation Office</span><span class="system-line">Human Resource Information System</span></p>
                     </div>
                     <button class="login-modal-close" type="button" data-close-register-modal aria-label="Close register modal">
                         <span aria-hidden="true">&times;</span>

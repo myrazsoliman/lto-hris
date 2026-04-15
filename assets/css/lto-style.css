@@ -95,15 +95,16 @@ body{font-family:Arial,Helvetica,sans-serif;margin:0;color:#111;background:var(-
   .gov-topbar.menu-open{--gov-mobile-menu-open-width:124px;--gov-mobile-panel-open-width:min(34vw,420px);--gov-mobile-search-open-width:min(var(--gov-mobile-panel-open-width),calc(100vw - var(--gov-mobile-menu-open-width)))}
   body{padding-top:var(--gov-height)}
   .gov-topbar{height:var(--gov-height);min-height:0}
-  .gov-inner{display:grid;grid-template-columns:auto 1fr auto;height:100%;padding-top:0;padding-bottom:0;column-gap:16px}
+  .gov-inner{display:grid;grid-template-columns:auto 1fr auto;height:100%;padding-top:0;padding-bottom:0;column-gap:16px;padding-left:8px;padding-right:0}
   .gov-left{display:flex;min-width:auto;padding:0;font-size:clamp(15px,3.2vw,22px);font-weight:700;letter-spacing:0.3px;justify-content:flex-start;white-space:nowrap}
   .gov-left-title{font-size:clamp(15px,3.2vw,22px)}
   .gov-left-subtitle{display:inline-flex;font-size:clamp(10px,1.6vw,13px)}
   .gov-nav,
   .gov-contact-link,
-  .gov-search,
-  .gov-actions{display:none}
-  .gov-menu-toggle{display:inline-flex;grid-column:3;justify-self:end;align-self:center;height:100%;min-width:max-content;gap:10px;margin-left:auto;padding-right:8px}
+  .gov-search{display:none}
+  .gov-actions{display:flex;grid-column:3;justify-self:end;align-items:center;gap:6px;height:100%;padding:0;border-right:0;margin-right:0}
+  .gov-actions .btn{padding:8px 14px;font-size:13px}
+  .gov-menu-toggle{display:none}
   .gov-menu-toggle-label{font-size:clamp(14px,3vw,24px);white-space:nowrap}
   .gov-menu-toggle-box{width:32px;height:28px;flex:0 0 auto}
   .gov-menu-toggle-box span{width:32px;height:4px}
@@ -124,10 +125,12 @@ body{font-family:Arial,Helvetica,sans-serif;margin:0;color:#111;background:var(-
 
 @media(max-width:640px){
   .gov-topbar.menu-open{--gov-mobile-menu-open-width:96px;--gov-mobile-panel-open-width:min(86vw,360px);--gov-mobile-search-open-width:min(var(--gov-mobile-panel-open-width),calc(100vw - var(--gov-mobile-menu-open-width)))}
-  .gov-inner{column-gap:10px}
-  .gov-left{font-size:clamp(14px,5vw,18px);gap:0}
+  .gov-inner{display:flex;align-items:center;column-gap:0;padding-left:8px;padding-right:8px}
+  .gov-left{font-size:clamp(14px,5vw,18px);gap:0;flex:0 1 auto;min-width:0}
   .gov-left-title{font-size:clamp(14px,5vw,18px)}
   .gov-left-subtitle{display:none}
+  .gov-actions{gap:4px;padding:0;flex:0 0 auto;margin-left:auto}
+  .gov-actions .btn{padding:7px 10px;font-size:12px}
   .gov-menu-toggle{gap:8px}
   .gov-menu-toggle-label{display:inline;white-space:nowrap}
   .gov-menu-toggle-box{width:30px;height:24px}
@@ -143,6 +146,9 @@ body{font-family:Arial,Helvetica,sans-serif;margin:0;color:#111;background:var(-
 
 @media(max-width:420px){
   .gov-topbar.menu-open{--gov-mobile-menu-open-width:64px;--gov-mobile-panel-open-width:min(86vw,360px);--gov-mobile-search-open-width:min(var(--gov-mobile-panel-open-width),calc(100vw - var(--gov-mobile-menu-open-width)))}
+  .gov-inner{display:flex;align-items:center;padding-left:8px;padding-right:8px}
+  .gov-actions{gap:3px;padding:0;flex:0 0 auto;margin-left:auto}
+  .gov-actions .btn{padding:7px 8px;font-size:11px}
   .gov-menu-toggle-label{display:none}
   .gov-menu-toggle{gap:0;padding-right:4px}
   .gov-topbar.menu-open .gov-menu-toggle{padding:0 6px;width:var(--gov-mobile-menu-open-width);min-width:var(--gov-mobile-menu-open-width)}
@@ -562,6 +568,8 @@ opacity:.9}
 .login-modal-agency-copy strong{font-size:15px;font-weight:700;letter-spacing:.04em;color:#fff}
 .login-modal-header h2{margin:0;font-size:42px;line-height:1;letter-spacing:-.04em;color:#fff}
 .login-modal-subtitle{margin:12px 0 0;max-width:28ch;font-size:14px;line-height:1.45;color:rgba(255,255,255,.88)}
+.login-modal-subtitle .agency-line,
+.login-modal-subtitle .system-line{display:block}
 .login-modal-body{position:relative;padding:26px 30px 30px}
 .login-modal-body::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.8),rgba(255,255,255,0) 32%);pointer-events:none}
 .login-form-modal{position:relative;z-index:1;gap:18px}
@@ -724,6 +732,77 @@ opacity:.9}
   .login-modal{padding:16px}
   .login-modal-dialog{width:100%;max-height:calc(100vh - 32px);overflow:hidden;border-radius:24px}
   .login-card-modal{border-radius:24px}
+  #loginModal .login-card-modal-split{display:block}
+  #loginModal .login-modal-visual{display:none}
+  #loginModal .login-modal-panel{display:flex;width:100%}
+  #loginModal .login-modal-header-plain{padding:18px 18px 12px}
+  #loginModal .login-modal-header-plain .login-modal-header-copy{max-width:100%;padding:0}
+  #loginModal .login-modal-title-row{display:block}
+  #loginModal .login-modal-header-plain h2{font-size:clamp(18px,7vw,30px);line-height:1.02;white-space:normal;text-wrap:balance}
+  #loginModal .login-modal-header-plain .login-modal-subtitle{margin-top:6px;font-size:10px;line-height:1.25;max-width:22ch;text-align:center;text-wrap:balance}
+  #loginModal .login-modal-header-plain .login-modal-subtitle .agency-line{white-space:nowrap}
+  #loginModal .login-modal-header-plain .login-modal-close{top:8px;right:8px;width:28px;height:28px;font-size:22px}
+  #loginModal .login-modal-panel > .login-modal-body-plain{width:min(calc(100% - 28px),640px)}
+  #loginModal .login-modal-body-plain{padding:10px 16px 18px}
+  #loginModal .login-modal-role-band{margin-bottom:10px;padding-bottom:8px;font-size:9px;letter-spacing:.18em}
+  #loginModal .login-input-shell{min-height:52px;padding:10px 14px;border-radius:12px}
+  #loginModal .login-input-wrap-modal input{min-height:20px;padding:10px 0 0;font-size:13px}
+  #loginModal .login-floating-label{left:50px;font-size:13px}
+  #loginModal .login-input-wrap-modal input:focus + .login-floating-label,
+  #loginModal .login-input-wrap-modal input:not(:placeholder-shown) + .login-floating-label{top:8px;font-size:9px}
+  #loginModal .login-password-toggle{right:10px;width:30px;height:30px}
+  #loginModal .login-forgot-under-password{padding:4px 2px}
+  #loginModal .login-forgot-link{font-size:12px}
+  #loginModal .login-captcha-block{margin-bottom:6px}
+  #loginModal .login-captcha-hint-row{margin-bottom:6px}
+  #loginModal .login-captcha-hint{font-size:12px}
+  #loginModal .login-captcha-row{gap:10px}
+  #loginModal .login-captcha-image-wrap{gap:8px}
+  #loginModal .login-captcha-image{width:160px;height:52px}
+  #loginModal .login-captcha-refresh{width:32px;height:32px}
+  #loginModal .login-captcha-refresh img{width:16px;height:16px}
+  #loginModal .login-captcha-input-wrap .login-input-shell{min-height:54px}
+  #loginModal .login-submit-btn-modal-split{min-height:48px;margin-top:8px;margin-bottom:0;border-radius:14px;font-size:14px;letter-spacing:.12em}
+  #registerModal .register-modal-dialog{max-height:calc(100vh - 32px);overflow:hidden}
+  #registerModal .register-card-modal.login-card-modal-split{display:block}
+  #registerModal .register-modal-visual{display:none}
+  #registerModal .register-modal-panel{display:flex;width:100%}
+  #registerModal .login-modal-header-plain,
+  #registerVerificationModal .login-modal-header-plain{padding:18px 18px 12px}
+  #registerModal .login-modal-header-plain .login-modal-header-copy,
+  #registerVerificationModal .login-modal-header-plain .login-modal-header-copy{max-width:100%;padding:0}
+  #registerModal .login-modal-title-row,
+  #registerVerificationModal .login-modal-title-row{display:block}
+  #registerModal .login-modal-header-plain h2,
+  #registerVerificationModal .login-modal-header-plain h2{font-size:clamp(18px,7vw,30px);line-height:1.02;white-space:normal;text-wrap:balance}
+  #registerModal .login-modal-header-plain .login-modal-subtitle,
+  #registerVerificationModal .login-modal-header-plain .login-modal-subtitle{margin-top:6px;font-size:10px;line-height:1.25;max-width:22ch;text-align:center;text-wrap:balance}
+  #registerModal .login-modal-header-plain .login-modal-subtitle .agency-line,
+  #registerVerificationModal .login-modal-header-plain .login-modal-subtitle .agency-line{white-space:nowrap}
+  #registerModal .login-modal-header-plain .login-modal-close,
+  #registerVerificationModal .login-modal-header-plain .login-modal-close{top:8px;right:8px;width:28px;height:28px;font-size:22px}
+  #registerModal .register-modal-panel > .register-modal-body{width:min(calc(100% - 24px),640px)}
+  #registerModal .register-modal-body{padding:6px 12px 10px}
+  #registerModal .register-form-modal{gap:6px}
+  #registerModal .register-input-wrap .login-input-shell{min-height:44px;padding:7px 12px;border-radius:11px}
+  #registerModal .register-input-wrap input{min-height:16px;padding:8px 0 0;font-size:12px}
+  #registerModal .register-input-wrap .login-floating-label{left:46px;font-size:12px}
+  #registerModal .register-input-wrap input:focus + .login-floating-label,
+  #registerModal .register-input-wrap input:not(:placeholder-shown) + .login-floating-label{top:7px;font-size:8px}
+  #registerModal .register-form-modal .login-password-toggle{right:8px;width:28px;height:28px}
+  #registerModal .register-form-modal .login-password-icon{width:16px;height:16px}
+  #registerModal .register-form-modal .login-password-icon svg{width:16px;height:16px}
+  #registerModal .register-login-row{margin-top:0;font-size:11px}
+  #registerModal .register-form-modal .password-validation-indicator{margin-top:0;padding-top:6px}
+  #registerModal .register-form-modal .password-strength-progress{height:4px;margin-bottom:6px}
+  #registerModal .register-form-modal .password-strength-alert{margin-bottom:6px;font-size:10px;gap:8px}
+  #registerModal .register-form-modal .password-strength-alert::before{width:8px;height:8px;flex-basis:8px}
+  #registerModal .register-form-modal .password-validation-title{margin-bottom:6px;font-size:11px}
+  #registerModal .register-form-modal .password-validation-list{gap:4px}
+  #registerModal .register-form-modal .password-validation-item{gap:6px;font-size:10px}
+  #registerModal .register-form-modal .validation-icon{width:14px;height:14px;font-size:8px}
+  #registerModal .register-form-modal .validation-text{font-size:10px;line-height:1.2}
+  #registerModal .register-submit-btn-modal{min-height:38px;margin-top:0;border-radius:11px;font-size:12px}
   .login-modal-header{padding:22px 22px 20px}
   .login-modal-header h2{font-size:36px}
   .login-modal-body{padding:22px 22px 24px}
@@ -738,6 +817,17 @@ opacity:.9}
   .login-modal-subtitle{font-size:13px}
   .login-modal-meta{gap:8px 14px}
   .register-form-grid{grid-template-columns:1fr}
+}
+
+@media(max-width:420px){
+  #registerModal .register-modal-body{padding:6px 10px 8px}
+  #registerModal .login-modal-header-plain{padding:16px 16px 10px}
+  #registerModal .login-modal-header-plain h2{font-size:clamp(17px,7.4vw,26px)}
+  #registerModal .login-modal-header-plain .login-modal-subtitle{font-size:9px;max-width:20ch;text-align:center;text-wrap:balance}
+  #registerModal .register-input-wrap .login-input-shell{min-height:42px;padding:6px 10px}
+  #registerModal .register-input-wrap .login-floating-label{left:42px;font-size:11px}
+  #registerModal .register-form-modal .validation-text{font-size:9px}
+  #registerModal .register-submit-btn-modal{min-height:36px;font-size:11px}
 }
 
 @media(max-width:980px){
