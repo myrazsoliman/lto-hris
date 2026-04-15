@@ -169,7 +169,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form_action'] ?? '') === '
 
             register_failed_attempt('login');
             log_auth_event('login_failed', null, $loginEmail);
-            
+
             // Check if the email exists to provide more specific error messages
             $existingUser = fetch_user_record($loginEmail);
             if ($existingUser) {
@@ -403,7 +403,7 @@ $registerOtpDigits = str_split($registerOtpPrefill);
 $currentPage = basename($_SERVER['PHP_SELF'] ?? 'index.php');
 $publicNavItems = [
     ['label' => 'Home', 'href' => 'index.php', 'active' => $currentPage === 'index.php', 'caret' => false],
-        [
+    [
         'label' => 'About Us',
         'href' => '#',
         'active' => in_array($currentPage, [
@@ -503,9 +503,9 @@ $publicNavItems = [
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>LTO-HRIS</title>
-    
+
     <?php require_once __DIR__ . '/includes/favicon-links.php'; ?>
-<link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="stylesheet" href="assets/css/styles.css">
     <link rel="stylesheet" href="assets/css/lto-style.css">
     <style>
         #twoFaModal .verification-form .verification-otp-row {
@@ -514,7 +514,8 @@ $publicNavItems = [
             justify-content: center !important;
             gap: 10px !important;
         }
-        #twoFaModal .verification-form .verification-otp-row > .verification-otp-digit {
+
+        #twoFaModal .verification-form .verification-otp-row>.verification-otp-digit {
             display: inline-block !important;
             flex: 0 0 42px !important;
             width: 42px !important;
@@ -529,11 +530,13 @@ $publicNavItems = [
             text-align: center !important;
             font-size: 36px !important;
         }
+
         #twoFaModal .verification-form .verification-remember-device {
             display: inline-flex !important;
             align-items: center !important;
             gap: 8px !important;
         }
+
         #twoFaModal .verification-form .verification-remember-checkbox[type="checkbox"] {
             appearance: auto !important;
             -webkit-appearance: checkbox !important;
@@ -548,7 +551,131 @@ $publicNavItems = [
 </head>
 
 <body class="landing-page<?php echo ($showLoginModal || $showRegisterModal || $showForgotModal || $show2faModal) ? ' login-modal-open' : ''; ?>">
-    <?php include __DIR__ . '/includes/public-header.php'; ?>
+
+    <div class="gov-topbar">
+        <div class="gov-inner">
+            <div class="gov-left">LTO-HRIS</div>
+            <nav class="gov-nav">
+                <?php foreach ($publicNavItems as $item): ?>
+                    <?php if (!empty($item['children'])): ?>
+                        <div class="gov-nav-item has-dropdown">
+                            <a
+                                href="<?php echo htmlspecialchars($item['href']); ?>"
+                                class="<?php echo trim(($item['active'] ? 'active ' : '') . ($item['caret'] ? 'has-caret' : '')); ?>">
+                                <?php echo htmlspecialchars($item['label']); ?>
+                            </a>
+                            <div class="gov-dropdown">
+                                <?php foreach ($item['children'] as $child): ?>
+                                    <?php if (!empty($child['children'])): ?>
+                                        <div class="gov-dropdown-item has-submenu">
+                                            <a href="<?php echo htmlspecialchars($child['href'] ?? '#'); ?>" class="<?php echo !empty($child['active']) ? 'active' : ''; ?>">
+                                                <span><?php echo htmlspecialchars($child['label']); ?></span>
+                                                <span class="gov-submenu-caret" aria-hidden="true"></span>
+                                            </a>
+                                            <div class="gov-submenu">
+                                                <?php foreach ($child['children'] as $grandChild): ?>
+                                                    <a href="<?php echo htmlspecialchars($grandChild['href'] ?? '#'); ?>" class="<?php echo !empty($grandChild['active']) ? 'active' : ''; ?>"><?php echo htmlspecialchars($grandChild['label']); ?></a>
+                                                <?php endforeach; ?>
+                                            </div>
+                                        </div>
+                                    <?php else: ?>
+                                        <a href="<?php echo htmlspecialchars($child['href'] ?? '#'); ?>" class="<?php echo !empty($child['active']) ? 'active' : ''; ?>"><?php echo htmlspecialchars($child['label']); ?></a>
+                                    <?php endif; ?>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                    <?php else: ?>
+                        <a
+                            href="<?php echo htmlspecialchars($item['href']); ?>"
+                            class="<?php echo trim(($item['active'] ? 'active ' : '') . ($item['caret'] ? 'has-caret' : '')); ?>">
+                            <?php echo htmlspecialchars($item['label']); ?>
+                        </a>
+                    <?php endif; ?>
+                <?php endforeach; ?>
+            </nav>
+            <a href="contact-us.php" class="gov-contact-link <?php echo $currentPage === 'contact-us.php' ? 'active' : ''; ?>">Contact Us</a>
+            <div class="gov-search">
+                <input placeholder="Search...">
+            </div>
+            <div class="gov-actions">
+                <a class="btn btn-login js-login-trigger" href="login.php">Login</a>
+                <a class="btn btn-register js-register-trigger" href="register.php">Register</a>
+            </div>
+            <button class="gov-menu-toggle" type="button" aria-expanded="false" aria-controls="govMobilePanel" aria-label="Open navigation menu">
+                <span class="gov-menu-toggle-label">Menu</span>
+                <span class="gov-menu-toggle-box" aria-hidden="true">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </span>
+            </button>
+            <div class="gov-mobile-search">
+                <input placeholder="Search..." aria-label="Search">
+            </div>
+        </div>
+        <div class="gov-mobile-panel" id="govMobilePanel" hidden>
+            <nav class="gov-mobile-nav" aria-label="Mobile navigation">
+                <?php foreach ($publicNavItems as $item): ?>
+                    <?php if (!empty($item['children'])): ?>
+                        <div class="gov-mobile-group">
+                            <button class="gov-mobile-parent" type="button" data-submenu="<?php echo htmlspecialchars($item['label']); ?>">
+                                <span><?php echo htmlspecialchars($item['label']); ?></span>
+                            </button>
+                            <div class="gov-mobile-submenu-view" data-submenu-panel="<?php echo htmlspecialchars($item['label']); ?>" hidden>
+                                <button class="gov-mobile-back" type="button">
+                                    <span class="gov-mobile-back-icon" aria-hidden="true"></span>
+                                    <span>Back</span>
+                                </button>
+                                <div class="gov-mobile-submenu-title"><?php echo htmlspecialchars($item['label']); ?></div>
+                                <div class="gov-mobile-submenu">
+                                    <?php foreach ($item['children'] as $child): ?>
+                                        <?php if (!empty($child['children'])): ?>
+                                            <div class="gov-mobile-submenu-group">
+                                                <a href="<?php echo htmlspecialchars($child['href'] ?? '#'); ?>" class="gov-mobile-submenu-group-title-link <?php echo !empty($child['active']) ? 'active' : ''; ?>"><?php echo htmlspecialchars($child['label']); ?></a>
+                                                <?php foreach ($child['children'] as $grandChild): ?>
+                                                    <a href="<?php echo htmlspecialchars($grandChild['href'] ?? '#'); ?>" class="<?php echo !empty($grandChild['active']) ? 'active' : ''; ?>"><?php echo htmlspecialchars($grandChild['label']); ?></a>
+                                                <?php endforeach; ?>
+                                            </div>
+                                        <?php else: ?>
+                                            <a href="<?php echo htmlspecialchars($child['href'] ?? '#'); ?>" class="<?php echo !empty($child['active']) ? 'active' : ''; ?>"><?php echo htmlspecialchars($child['label']); ?></a>
+                                        <?php endif; ?>
+                                    <?php endforeach; ?>
+                                </div>
+                            </div>
+                        </div>
+                    <?php else: ?>
+                        <a href="<?php echo htmlspecialchars($item['href']); ?>" class="<?php echo !empty($item['active']) ? 'active' : ''; ?>">
+                            <?php echo htmlspecialchars($item['label']); ?>
+                        </a>
+                    <?php endif; ?>
+                <?php endforeach; ?>
+                <a href="contact-us.php" class="<?php echo $currentPage === 'contact-us.php' ? 'active' : ''; ?>">Contact Us</a>
+            </nav>
+            <div class="gov-mobile-actions">
+                <a class="btn btn-login js-login-trigger" href="login.php">Login</a>
+                <a class="btn btn-register js-register-trigger" href="register.php">Register</a>
+            </div>
+        </div>
+    </div>
+
+    <header class="site-header">
+        <div class="container header-wrap">
+            <div class="brand-group">
+                <div class="left-logos">
+                    <img src="assets/img/bph.png" alt="seal">
+                    <img src="assets/img/lto_logo.png" alt="LTO logo">
+                </div>
+                <div class="center-brand">
+                    <div class="govtext">Republic of the Philippines<br><strong>DEPARTMENT OF TRANSPORTATION</strong></div>
+                    <h1>LAND TRANSPORTATION OFFICE</h1>
+                    <p class="office-address">East Avenue, Quezon City, 1100, Philippines</p>
+                </div>
+            </div>
+            <div class="right-info">
+                <div class="time">Philippine Standard Time:<br><span id="pstClock"></span></div>
+            </div>
+        </div>
+    </header>
 
     <section class="news-updates">
         <div class="container">
@@ -679,16 +806,16 @@ $publicNavItems = [
                 </div>
 
                 <div class="login-modal-panel">
-                        <div class="login-modal-header login-modal-header-plain">
-                            <div class="login-modal-header-copy">
-                                <div class="login-modal-title-row">
-                                    <h2 id="loginModalTitle">Welcome to <span>LTO HRIS</span></h2>
-                                </div>
-                                <p class="login-modal-subtitle">Land Transportation Office<br>Human Resource Information System</p>
+                    <div class="login-modal-header login-modal-header-plain">
+                        <div class="login-modal-header-copy">
+                            <div class="login-modal-title-row">
+                                <h2 id="loginModalTitle">Welcome to <span>LTO HRIS</span></h2>
                             </div>
-                            <button class="login-modal-close" type="button" data-close-login-modal aria-label="Close login modal">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
+                            <p class="login-modal-subtitle">Land Transportation Office<br>Human Resource Information System</p>
+                        </div>
+                        <button class="login-modal-close" type="button" data-close-login-modal aria-label="Close login modal">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
                     </div>
 
                     <div class="login-modal-body login-modal-body-plain">
@@ -711,82 +838,81 @@ $publicNavItems = [
                         <div class="login-modal-role-band">Authorized Access Only</div>
 
                         <form class="login-form-modern login-form-modal" method="post" action="index.php" novalidate>
-                        <input type="hidden" name="form_action" value="login_modal">
-                        <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken); ?>">
+                            <input type="hidden" name="form_action" value="login_modal">
+                            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken); ?>">
 
-                        <div class="login-input-wrap login-input-wrap-modal">
-                            <div class="login-input-shell">
-                                <span class="login-input-icon" aria-hidden="true">
-                                    <svg viewBox="0 0 24 24" fill="none">
-                                        <path d="M12 12c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5Z" fill="currentColor" />
-                                        <path d="M12 14c-4.42 0-8 2.24-8 5v1h16v-1c0-2.76-3.58-5-8-5Z" fill="currentColor" />
-                                    </svg>
-                                </span>
-                                <input type="email" id="loginModalEmail" name="email" placeholder=" " value="<?php echo htmlspecialchars($loginEmail ?? ''); ?>" autocomplete="email" spellcheck="false" maxlength="150" required>
-                                <label class="login-floating-label" for="loginModalEmail">Email</label>
+                            <div class="login-input-wrap login-input-wrap-modal">
+                                <div class="login-input-shell">
+                                    <span class="login-input-icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none">
+                                            <path d="M12 12c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5Z" fill="currentColor" />
+                                            <path d="M12 14c-4.42 0-8 2.24-8 5v1h16v-1c0-2.76-3.58-5-8-5Z" fill="currentColor" />
+                                        </svg>
+                                    </span>
+                                    <input type="email" id="loginModalEmail" name="email" placeholder=" " value="<?php echo htmlspecialchars($loginEmail ?? ''); ?>" autocomplete="email" spellcheck="false" maxlength="150" required>
+                                    <label class="login-floating-label" for="loginModalEmail">Email</label>
+                                </div>
                             </div>
-                        </div>
 
-                        <div class="login-input-wrap login-input-wrap-modal">
-                            <div class="login-input-shell">
-                                <span class="login-input-icon" aria-hidden="true">
-                                    <svg viewBox="0 0 24 24" fill="none">
-                                        <path d="M17 9h-1V7a4 4 0 0 0-8 0v2H7a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2Zm-6 0V7a2 2 0 1 1 4 0v2h-4Z" fill="currentColor" />
-                                    </svg>
-                                </span>
-                                <input type="password" id="loginModalPassword" name="password" placeholder=" " autocomplete="current-password" maxlength="128" required>
-                                <label class="login-floating-label" for="loginModalPassword">Password</label>
+                            <div class="login-input-wrap login-input-wrap-modal">
+                                <div class="login-input-shell">
+                                    <span class="login-input-icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none">
+                                            <path d="M17 9h-1V7a4 4 0 0 0-8 0v2H7a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2Zm-6 0V7a2 2 0 1 1 4 0v2h-4Z" fill="currentColor" />
+                                        </svg>
+                                    </span>
+                                    <input type="password" id="loginModalPassword" name="password" placeholder=" " autocomplete="current-password" maxlength="128" required>
+                                    <label class="login-floating-label" for="loginModalPassword">Password</label>
+                                </div>
+                                <button type="button" class="login-password-toggle" id="loginPasswordToggle" aria-label="Show password" aria-pressed="false">
+                                    <span class="login-password-icon login-password-icon-show" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none">
+                                            <path d="M12 5C6.5 5 2.1 8.6 1 12c1.1 3.4 5.5 7 11 7s9.9-3.6 11-7c-1.1-3.4-5.5-7-11-7Zm0 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8Z" fill="currentColor" />
+                                        </svg>
+                                    </span>
+                                    <span class="login-password-icon login-password-icon-hide" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none">
+                                            <path d="M2.6 3.9 20.1 21.4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                                            <path d="M10.6 6.3A11.2 11.2 0 0 1 12 6.2c5.3 0 9.6 3.3 10.8 5.8-.5 1.1-1.5 2.6-3 3.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                                            <path d="M7.2 7.4C4.8 8.5 3 10.4 1.9 12c1.3 2.7 5.5 5.8 10.1 5.8 1.6 0 3.2-.4 4.6-1.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                                            <path d="M9.9 9.1a4 4 0 0 1 5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                                        </svg>
+                                    </span>
+                                </button>
                             </div>
-                            <button type="button" class="login-password-toggle" id="loginPasswordToggle" aria-label="Show password" aria-pressed="false">
-                                <span class="login-password-icon login-password-icon-show" aria-hidden="true">
-                                    <svg viewBox="0 0 24 24" fill="none">
-                                        <path d="M12 5C6.5 5 2.1 8.6 1 12c1.1 3.4 5.5 7 11 7s9.9-3.6 11-7c-1.1-3.4-5.5-7-11-7Zm0 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8Z" fill="currentColor" />
-                                    </svg>
-                                </span>
-                                <span class="login-password-icon login-password-icon-hide" aria-hidden="true">
-                                    <svg viewBox="0 0 24 24" fill="none">
-                                        <path d="M2.6 3.9 20.1 21.4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-                                        <path d="M10.6 6.3A11.2 11.2 0 0 1 12 6.2c5.3 0 9.6 3.3 10.8 5.8-.5 1.1-1.5 2.6-3 3.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                                        <path d="M7.2 7.4C4.8 8.5 3 10.4 1.9 12c1.3 2.7 5.5 5.8 10.1 5.8 1.6 0 3.2-.4 4.6-1.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                                        <path d="M9.9 9.1a4 4 0 0 1 5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-                                    </svg>
-                                </span>
-                            </button>
-                        </div>
-                        <div class="login-forgot-under-password">
-                            <a href="#" class="login-forgot-link js-forgot-trigger">Forgot password?</a>
-                        </div>
+                            <div class="login-forgot-under-password">
+                                <a href="#" class="login-forgot-link js-forgot-trigger">Forgot password?</a>
+                            </div>
 
-                                <div class="login-captcha-block">
-                                    <div class="login-captcha-hint-row">
-                                        <div class="login-captcha-hint">What code is in the image?</div>
-                                    </div>
-                                    <div class="login-captcha-row">
-                                        <div class="login-captcha-image-wrap">
-                                            <div class="login-captcha-image-frame">
-                                                <img
-                                                    src="captcha-image.php?context=login_modal&amp;v=<?php echo urlencode($loginCaptchaNonce); ?>"
-                                                    alt="CAPTCHA image"
-                                                    class="login-captcha-image"
-                                                    id="loginCaptchaImage"
-                                                >
-                                            </div>
-                                            <button type="button" class="login-captcha-refresh" id="loginCaptchaRefresh" aria-label="Refresh captcha">
-                                                <img src="assets/img/captcha-refresh.png" alt="" width="18" height="18" loading="lazy" decoding="async">
-                                            </button>
+                            <div class="login-captcha-block">
+                                <div class="login-captcha-hint-row">
+                                    <div class="login-captcha-hint">What code is in the image?</div>
+                                </div>
+                                <div class="login-captcha-row">
+                                    <div class="login-captcha-image-wrap">
+                                        <div class="login-captcha-image-frame">
+                                            <img
+                                                src="captcha-image.php?context=login_modal&amp;v=<?php echo urlencode($loginCaptchaNonce); ?>"
+                                                alt="CAPTCHA image"
+                                                class="login-captcha-image"
+                                                id="loginCaptchaImage">
                                         </div>
+                                        <button type="button" class="login-captcha-refresh" id="loginCaptchaRefresh" aria-label="Refresh captcha">
+                                            <img src="assets/img/captcha-refresh.png" alt="" width="18" height="18" loading="lazy" decoding="async">
+                                        </button>
+                                    </div>
 
                                     <div class="login-input-wrap login-input-wrap-modal login-captcha-input-wrap">
                                         <div class="login-input-shell">
                                             <span class="login-input-icon" aria-hidden="true">
-                                                    <img src="assets/img/captcha-logo.png" alt="" width="26" height="26" loading="lazy" decoding="async">
-                                                </span>
-                                                <input type="text" id="loginModalCaptcha" name="captcha_answer" placeholder=" " value="<?php echo htmlspecialchars($loginCaptchaInput); ?>" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="5" required>
-                                                <label class="login-floating-label" for="loginModalCaptcha">Enter CAPTCHA</label>
-                                            </div>
+                                                <img src="assets/img/captcha-logo.png" alt="" width="26" height="26" loading="lazy" decoding="async">
+                                            </span>
+                                            <input type="text" id="loginModalCaptcha" name="captcha_answer" placeholder=" " value="<?php echo htmlspecialchars($loginCaptchaInput); ?>" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="5" required>
+                                            <label class="login-floating-label" for="loginModalCaptcha">Enter CAPTCHA</label>
                                         </div>
                                     </div>
                                 </div>
+                            </div>
 
 
                             <button type="submit" class="login-submit-btn login-submit-btn-modal login-submit-btn-modal-split" data-login-submit>
@@ -981,160 +1107,160 @@ $publicNavItems = [
                         <?php endif; ?>
 
                         <form class="login-form-modern login-form-modal register-form-modal" method="post" action="index.php">
-                        <input type="hidden" name="form_action" value="register_modal">
-                        <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken); ?>">
-                        <input type="hidden" name="register_verification_action" id="registerVerificationAction" value="send_code">
-                        <div class="register-honeypot" aria-hidden="true">
-                            <label for="registerWebsite">Website</label>
-                            <input type="text" id="registerWebsite" name="website" tabindex="-1" autocomplete="off">
-                        </div>
-
-                        <div class="login-input-wrap login-input-wrap-modal register-input-wrap">
-                            <div class="login-input-shell">
-                                <span class="login-input-icon" aria-hidden="true">
-                                    <svg viewBox="0 0 24 24" fill="none">
-                                        <path d="M12 12c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5Z" fill="currentColor" />
-                                        <path d="M12 14c-4.42 0-8 2.24-8 5v1h16v-1c0-2.76-3.58-5-8-5Z" fill="currentColor" />
-                                    </svg>
-                                </span>
-                                <input type="text" id="registerModalFirstName" name="first_name" placeholder=" " value="<?php echo htmlspecialchars($registerFirstName ?? ''); ?>" autocomplete="given-name" maxlength="80" required>
-                                <label class="login-floating-label" for="registerModalFirstName">First Name</label>
+                            <input type="hidden" name="form_action" value="register_modal">
+                            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken); ?>">
+                            <input type="hidden" name="register_verification_action" id="registerVerificationAction" value="send_code">
+                            <div class="register-honeypot" aria-hidden="true">
+                                <label for="registerWebsite">Website</label>
+                                <input type="text" id="registerWebsite" name="website" tabindex="-1" autocomplete="off">
                             </div>
-                        </div>
 
-                        <div class="login-input-wrap login-input-wrap-modal register-input-wrap">
-                            <div class="login-input-shell">
-                                <span class="login-input-icon" aria-hidden="true">
-                                    <svg viewBox="0 0 24 24" fill="none">
-                                        <path d="M12 12c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5Z" fill="currentColor" />
-                                        <path d="M12 14c-4.42 0-8 2.24-8 5v1h16v-1c0-2.76-3.58-5-8-5Z" fill="currentColor" />
-                                    </svg>
-                                </span>
-                                <input type="text" id="registerModalMiddleName" name="middle_name" placeholder=" " value="<?php echo htmlspecialchars($registerMiddleName ?? ''); ?>" autocomplete="additional-name" maxlength="80">
-                                <label class="login-floating-label" for="registerModalMiddleName">Middle Name</label>
-                            </div>
-                        </div>
-
-                        <div class="login-input-wrap login-input-wrap-modal register-input-wrap">
-                            <div class="login-input-shell">
-                                <span class="login-input-icon" aria-hidden="true">
-                                    <svg viewBox="0 0 24 24" fill="none">
-                                        <path d="M12 12c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5Z" fill="currentColor" />
-                                        <path d="M12 14c-4.42 0-8 2.24-8 5v1h16v-1c0-2.76-3.58-5-8-5Z" fill="currentColor" />
-                                    </svg>
-                                </span>
-                                <input type="text" id="registerModalLastName" name="last_name" placeholder=" " value="<?php echo htmlspecialchars($registerLastName ?? ''); ?>" autocomplete="family-name" maxlength="80" required>
-                                <label class="login-floating-label" for="registerModalLastName">Last Name</label>
-                            </div>
-                        </div>
-
-                        <div class="login-input-wrap login-input-wrap-modal register-input-wrap">
-                            <div class="login-input-shell">
-                                <span class="login-input-icon" aria-hidden="true">
-                                    <svg viewBox="0 0 24 24" fill="none">
-                                        <path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v11A2.5 2.5 0 0 1 17.5 20h-11A2.5 2.5 0 0 1 4 17.5v-11Z" stroke="currentColor" stroke-width="1.8" />
-                                        <path d="m6 8 6 4 6-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-                                    </svg>
-                                </span>
-                                <input type="email" id="registerModalEmail" name="email" placeholder=" " value="<?php echo htmlspecialchars($registerEmail); ?>" autocomplete="email" maxlength="150" required>
-                                <label class="login-floating-label" for="registerModalEmail">Email</label>
-                            </div>
-                        </div>
-
-
-                        <div class="login-input-wrap login-input-wrap-modal register-input-wrap">
-                            <div class="login-input-shell">
-                                <span class="login-input-icon" aria-hidden="true">
-                                    <svg viewBox="0 0 24 24" fill="none">
-                                        <path d="M17 9h-1V7a4 4 0 0 0-8 0v2H7a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2Zm-6 0V7a2 2 0 1 1 4 0v2h-4Z" fill="currentColor" />
-                                    </svg>
-                                </span>
-                                <input type="password" id="registerModalPassword" name="register_password" placeholder=" " autocomplete="new-password" minlength="10" maxlength="128" required>
-                                <label class="login-floating-label" for="registerModalPassword">Password</label>
-                            </div>
-                            <button type="button" class="login-password-toggle" id="registerPasswordToggle" aria-label="Show password" aria-pressed="false">
-                                <span class="login-password-icon login-password-icon-show" aria-hidden="true">
-                                    <svg viewBox="0 0 24 24" fill="none">
-                                        <path d="M12 5C6.5 5 2.1 8.6 1 12c1.1 3.4 5.5 7 11 7s9.9-3.6 11-7c-1.1-3.4-5.5-7-11-7Zm0 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8Z" fill="currentColor" />
-                                    </svg>
-                                </span>
-                                <span class="login-password-icon login-password-icon-hide" aria-hidden="true">
-                                    <svg viewBox="0 0 24 24" fill="none">
-                                        <path d="M2.6 3.9 20.1 21.4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-                                        <path d="M10.6 6.3A11.2 11.2 0 0 1 12 6.2c5.3 0 9.6 3.3 10.8 5.8-.5 1.1-1.5 2.6-3 3.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                                        <path d="M7.2 7.4C4.8 8.5 3 10.4 1.9 12c1.3 2.7 5.5 5.8 10.1 5.8 1.6 0 3.2-.4 4.6-1.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                                        <path d="M9.9 9.1a4 4 0 0 1 5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-                                    </svg>
-                                </span>
-                            </button>
-                        </div>
-
-                        <div class="login-input-wrap login-input-wrap-modal register-input-wrap">
-                            <div class="login-input-shell">
-                                <span class="login-input-icon" aria-hidden="true">
-                                    <svg viewBox="0 0 24 24" fill="none">
-                                        <path d="M17 9h-1V7a4 4 0 0 0-8 0v2H7a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2Zm-6 0V7a2 2 0 1 1 4 0v2h-4Z" fill="currentColor" />
-                                    </svg>
-                                </span>
-                                <input type="password" id="registerModalConfirmPassword" name="register_confirm_password" placeholder=" " autocomplete="new-password" minlength="10" maxlength="128" required>
-                                <label class="login-floating-label" for="registerModalConfirmPassword">Confirm Password</label>
-                            </div>
-                            <button type="button" class="login-password-toggle" id="registerConfirmPasswordToggle" aria-label="Show password" aria-pressed="false">
-                                <span class="login-password-icon login-password-icon-show" aria-hidden="true">
-                                    <svg viewBox="0 0 24 24" fill="none">
-                                        <path d="M12 5C6.5 5 2.1 8.6 1 12c1.1 3.4 5.5 7 11 7s9.9-3.6 11-7c-1.1-3.4-5.5-7-11-7Zm0 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8Z" fill="currentColor" />
-                                    </svg>
-                                </span>
-                                <span class="login-password-icon login-password-icon-hide" aria-hidden="true">
-                                    <svg viewBox="0 0 24 24" fill="none">
-                                        <path d="M2.6 3.9 20.1 21.4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-                                        <path d="M10.6 6.3A11.2 11.2 0 0 1 12 6.2c5.3 0 9.6 3.3 10.8 5.8-.5 1.1-1.5 2.6-3 3.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                                        <path d="M7.2 7.4C4.8 8.5 3 10.4 1.9 12c1.3 2.7 5.5 5.8 10.1 5.8 1.6 0 3.2-.4 4.6-1.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                                        <path d="M9.9 9.1a4 4 0 0 1 5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-                                    </svg>
-                                </span>
-                            </button>
-                        </div>
-
-                        <div class="register-login-row">
-                            <span>Already have an account?</span>
-                            <a href="login.php" class="register-login-link js-login-trigger">Login</a>
-                        </div>
-
-                        <div class="password-validation-indicator<?php echo $showRegisterVerificationStep ? ' is-hidden' : ' is-hidden'; ?>" id="passwordValidationIndicator">
-                            <div class="password-strength-progress" aria-hidden="true">
-                                <span class="password-strength-progress-bar" id="passwordStrengthProgressBar"></span>
-                            </div>
-                            <div class="password-strength-alert is-hidden" id="passwordStrengthAlert" data-strength="empty">Password strength: weak.</div>
-                            <div class="password-validation-title">Your password must contain:</div>
-                            <div class="password-validation-list">
-                                <div class="password-validation-item" data-validation="length">
-                                    <span class="validation-icon validation-icon-invalid">✕</span>
-                                    <span class="validation-icon validation-icon-valid">✓</span>
-                                    <span class="validation-text">At least 10 characters</span>
-                                </div>
-                                <div class="password-validation-item" data-validation="lowercase">
-                                    <span class="validation-icon validation-icon-invalid">✕</span>
-                                    <span class="validation-icon validation-icon-valid">✓</span>
-                                    <span class="validation-text">Lower case letters (a-z)</span>
-                                </div>
-                                <div class="password-validation-item" data-validation="uppercase">
-                                    <span class="validation-icon validation-icon-invalid">✕</span>
-                                    <span class="validation-icon validation-icon-valid">✓</span>
-                                    <span class="validation-text">Upper case letters (A-Z)</span>
-                                </div>
-                                <div class="password-validation-item" data-validation="number">
-                                    <span class="validation-icon validation-icon-invalid">✕</span>
-                                    <span class="validation-icon validation-icon-valid">✓</span>
-                                    <span class="validation-text">Numbers (0-9)</span>
-                                </div>
-                                <div class="password-validation-item" data-validation="special">
-                                    <span class="validation-icon validation-icon-invalid">✕</span>
-                                    <span class="validation-icon validation-icon-valid">✓</span>
-                                    <span class="validation-text">Special characters (e.g. !@#$%^&amp;*)</span>
+                            <div class="login-input-wrap login-input-wrap-modal register-input-wrap">
+                                <div class="login-input-shell">
+                                    <span class="login-input-icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none">
+                                            <path d="M12 12c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5Z" fill="currentColor" />
+                                            <path d="M12 14c-4.42 0-8 2.24-8 5v1h16v-1c0-2.76-3.58-5-8-5Z" fill="currentColor" />
+                                        </svg>
+                                    </span>
+                                    <input type="text" id="registerModalFirstName" name="first_name" placeholder=" " value="<?php echo htmlspecialchars($registerFirstName ?? ''); ?>" autocomplete="given-name" maxlength="80" required>
+                                    <label class="login-floating-label" for="registerModalFirstName">First Name</label>
                                 </div>
                             </div>
-                        </div>
+
+                            <div class="login-input-wrap login-input-wrap-modal register-input-wrap">
+                                <div class="login-input-shell">
+                                    <span class="login-input-icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none">
+                                            <path d="M12 12c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5Z" fill="currentColor" />
+                                            <path d="M12 14c-4.42 0-8 2.24-8 5v1h16v-1c0-2.76-3.58-5-8-5Z" fill="currentColor" />
+                                        </svg>
+                                    </span>
+                                    <input type="text" id="registerModalMiddleName" name="middle_name" placeholder=" " value="<?php echo htmlspecialchars($registerMiddleName ?? ''); ?>" autocomplete="additional-name" maxlength="80">
+                                    <label class="login-floating-label" for="registerModalMiddleName">Middle Name</label>
+                                </div>
+                            </div>
+
+                            <div class="login-input-wrap login-input-wrap-modal register-input-wrap">
+                                <div class="login-input-shell">
+                                    <span class="login-input-icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none">
+                                            <path d="M12 12c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5Z" fill="currentColor" />
+                                            <path d="M12 14c-4.42 0-8 2.24-8 5v1h16v-1c0-2.76-3.58-5-8-5Z" fill="currentColor" />
+                                        </svg>
+                                    </span>
+                                    <input type="text" id="registerModalLastName" name="last_name" placeholder=" " value="<?php echo htmlspecialchars($registerLastName ?? ''); ?>" autocomplete="family-name" maxlength="80" required>
+                                    <label class="login-floating-label" for="registerModalLastName">Last Name</label>
+                                </div>
+                            </div>
+
+                            <div class="login-input-wrap login-input-wrap-modal register-input-wrap">
+                                <div class="login-input-shell">
+                                    <span class="login-input-icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none">
+                                            <path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v11A2.5 2.5 0 0 1 17.5 20h-11A2.5 2.5 0 0 1 4 17.5v-11Z" stroke="currentColor" stroke-width="1.8" />
+                                            <path d="m6 8 6 4 6-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                                        </svg>
+                                    </span>
+                                    <input type="email" id="registerModalEmail" name="email" placeholder=" " value="<?php echo htmlspecialchars($registerEmail); ?>" autocomplete="email" maxlength="150" required>
+                                    <label class="login-floating-label" for="registerModalEmail">Email</label>
+                                </div>
+                            </div>
+
+
+                            <div class="login-input-wrap login-input-wrap-modal register-input-wrap">
+                                <div class="login-input-shell">
+                                    <span class="login-input-icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none">
+                                            <path d="M17 9h-1V7a4 4 0 0 0-8 0v2H7a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2Zm-6 0V7a2 2 0 1 1 4 0v2h-4Z" fill="currentColor" />
+                                        </svg>
+                                    </span>
+                                    <input type="password" id="registerModalPassword" name="register_password" placeholder=" " autocomplete="new-password" minlength="10" maxlength="128" required>
+                                    <label class="login-floating-label" for="registerModalPassword">Password</label>
+                                </div>
+                                <button type="button" class="login-password-toggle" id="registerPasswordToggle" aria-label="Show password" aria-pressed="false">
+                                    <span class="login-password-icon login-password-icon-show" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none">
+                                            <path d="M12 5C6.5 5 2.1 8.6 1 12c1.1 3.4 5.5 7 11 7s9.9-3.6 11-7c-1.1-3.4-5.5-7-11-7Zm0 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8Z" fill="currentColor" />
+                                        </svg>
+                                    </span>
+                                    <span class="login-password-icon login-password-icon-hide" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none">
+                                            <path d="M2.6 3.9 20.1 21.4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                                            <path d="M10.6 6.3A11.2 11.2 0 0 1 12 6.2c5.3 0 9.6 3.3 10.8 5.8-.5 1.1-1.5 2.6-3 3.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                                            <path d="M7.2 7.4C4.8 8.5 3 10.4 1.9 12c1.3 2.7 5.5 5.8 10.1 5.8 1.6 0 3.2-.4 4.6-1.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                                            <path d="M9.9 9.1a4 4 0 0 1 5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                                        </svg>
+                                    </span>
+                                </button>
+                            </div>
+
+                            <div class="login-input-wrap login-input-wrap-modal register-input-wrap">
+                                <div class="login-input-shell">
+                                    <span class="login-input-icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none">
+                                            <path d="M17 9h-1V7a4 4 0 0 0-8 0v2H7a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2Zm-6 0V7a2 2 0 1 1 4 0v2h-4Z" fill="currentColor" />
+                                        </svg>
+                                    </span>
+                                    <input type="password" id="registerModalConfirmPassword" name="register_confirm_password" placeholder=" " autocomplete="new-password" minlength="10" maxlength="128" required>
+                                    <label class="login-floating-label" for="registerModalConfirmPassword">Confirm Password</label>
+                                </div>
+                                <button type="button" class="login-password-toggle" id="registerConfirmPasswordToggle" aria-label="Show password" aria-pressed="false">
+                                    <span class="login-password-icon login-password-icon-show" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none">
+                                            <path d="M12 5C6.5 5 2.1 8.6 1 12c1.1 3.4 5.5 7 11 7s9.9-3.6 11-7c-1.1-3.4-5.5-7-11-7Zm0 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8Z" fill="currentColor" />
+                                        </svg>
+                                    </span>
+                                    <span class="login-password-icon login-password-icon-hide" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" fill="none">
+                                            <path d="M2.6 3.9 20.1 21.4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                                            <path d="M10.6 6.3A11.2 11.2 0 0 1 12 6.2c5.3 0 9.6 3.3 10.8 5.8-.5 1.1-1.5 2.6-3 3.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                                            <path d="M7.2 7.4C4.8 8.5 3 10.4 1.9 12c1.3 2.7 5.5 5.8 10.1 5.8 1.6 0 3.2-.4 4.6-1.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                                            <path d="M9.9 9.1a4 4 0 0 1 5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                                        </svg>
+                                    </span>
+                                </button>
+                            </div>
+
+                            <div class="register-login-row">
+                                <span>Already have an account?</span>
+                                <a href="login.php" class="register-login-link js-login-trigger">Login</a>
+                            </div>
+
+                            <div class="password-validation-indicator<?php echo $showRegisterVerificationStep ? ' is-hidden' : ' is-hidden'; ?>" id="passwordValidationIndicator">
+                                <div class="password-strength-progress" aria-hidden="true">
+                                    <span class="password-strength-progress-bar" id="passwordStrengthProgressBar"></span>
+                                </div>
+                                <div class="password-strength-alert is-hidden" id="passwordStrengthAlert" data-strength="empty">Password strength: weak.</div>
+                                <div class="password-validation-title">Your password must contain:</div>
+                                <div class="password-validation-list">
+                                    <div class="password-validation-item" data-validation="length">
+                                        <span class="validation-icon validation-icon-invalid">✕</span>
+                                        <span class="validation-icon validation-icon-valid">✓</span>
+                                        <span class="validation-text">At least 10 characters</span>
+                                    </div>
+                                    <div class="password-validation-item" data-validation="lowercase">
+                                        <span class="validation-icon validation-icon-invalid">✕</span>
+                                        <span class="validation-icon validation-icon-valid">✓</span>
+                                        <span class="validation-text">Lower case letters (a-z)</span>
+                                    </div>
+                                    <div class="password-validation-item" data-validation="uppercase">
+                                        <span class="validation-icon validation-icon-invalid">✕</span>
+                                        <span class="validation-icon validation-icon-valid">✓</span>
+                                        <span class="validation-text">Upper case letters (A-Z)</span>
+                                    </div>
+                                    <div class="password-validation-item" data-validation="number">
+                                        <span class="validation-icon validation-icon-invalid">✕</span>
+                                        <span class="validation-icon validation-icon-valid">✓</span>
+                                        <span class="validation-text">Numbers (0-9)</span>
+                                    </div>
+                                    <div class="password-validation-item" data-validation="special">
+                                        <span class="validation-icon validation-icon-invalid">✕</span>
+                                        <span class="validation-icon validation-icon-valid">✓</span>
+                                        <span class="validation-text">Special characters (e.g. !@#$%^&amp;*)</span>
+                                    </div>
+                                </div>
+                            </div>
 
                             <button type="submit" class="login-submit-btn login-submit-btn-modal login-submit-btn-modal-split register-submit-btn-modal" data-register-send-code onclick="document.getElementById('registerVerificationAction').value='send_code';">
                                 <span>Register</span>
@@ -1263,7 +1389,9 @@ $publicNavItems = [
                             group.classList.remove('is-open');
                             const toggle = group.querySelector('.gov-mobile-submenu-toggle');
                             if (toggle) toggle.setAttribute('aria-expanded', 'false');
-                            group.querySelectorAll(':scope > a:not(.gov-mobile-submenu-group-title-link)').forEach((link) => { link.hidden = true; });
+                            group.querySelectorAll(':scope > a:not(.gov-mobile-submenu-group-title-link)').forEach((link) => {
+                                link.hidden = true;
+                            });
                         });
                     };
                     const initializeNestedGroups = () => {
@@ -1286,14 +1414,20 @@ $publicNavItems = [
                                         sibling.classList.remove('is-open');
                                         const siblingToggle = sibling.querySelector('.gov-mobile-submenu-toggle');
                                         if (siblingToggle) siblingToggle.setAttribute('aria-expanded', 'false');
-                                        sibling.querySelectorAll(':scope > a:not(.gov-mobile-submenu-group-title-link)').forEach((link) => { link.hidden = true; });
+                                        sibling.querySelectorAll(':scope > a:not(.gov-mobile-submenu-group-title-link)').forEach((link) => {
+                                            link.hidden = true;
+                                        });
                                     });
                                     group.classList.toggle('is-open', willOpen);
                                     toggleBtn.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
-                                    childLinks.forEach((link) => { link.hidden = !willOpen; });
+                                    childLinks.forEach((link) => {
+                                        link.hidden = !willOpen;
+                                    });
                                 });
                             }
-                            childLinks.forEach((link) => { link.hidden = true; });
+                            childLinks.forEach((link) => {
+                                link.hidden = true;
+                            });
                         });
                     };
 
@@ -1992,7 +2126,7 @@ $publicNavItems = [
             const progressBar = document.getElementById('passwordStrengthProgressBar');
             const confirmPasswordField = document.getElementById('registerModalConfirmPassword');
             const registerForm = passwordField ? passwordField.closest('form') : null;
-            
+
             if (!passwordField || !validationIndicator || !strengthAlert || !progressBar) return;
 
             function validatePassword(password) {
@@ -2134,7 +2268,7 @@ $publicNavItems = [
                     validateConfirmPassword();
                 });
             }
-            
+
             // Initial check
             checkPasswordStrength();
         }());
@@ -2142,14 +2276,14 @@ $publicNavItems = [
         (function() {
             // Login Form Custom Validation
             const loginForm = document.querySelector('form[action="index.php"][novalidate]');
-            
+
             if (!loginForm) return;
 
             loginForm.addEventListener('submit', function(e) {
                 const emailField = document.getElementById('loginModalEmail');
                 const passwordField = document.getElementById('loginModalPassword');
                 const captchaField = document.getElementById('loginModalCaptcha');
-                
+
                 // Clear any previous custom validation messages
                 const existingAlert = loginForm.querySelector('.alert-error');
                 if (existingAlert) {
@@ -2179,18 +2313,18 @@ $publicNavItems = [
 
                 if (!isValid) {
                     e.preventDefault();
-                    
+
                     // Create and show professional error message
                     const errorDiv = document.createElement('div');
                     errorDiv.className = 'alert alert-error';
                     errorDiv.textContent = errorMessage;
-                    
+
                     // Insert error message at the top of the form
                     const formBody = loginForm.querySelector('.login-modal-body');
                     if (formBody) {
                         formBody.insertBefore(errorDiv, formBody.firstChild);
                     }
-                    
+
                     // Focus on the first invalid field
                     if (!emailField.value.trim() || !emailField.validity.valid) {
                         emailField.focus();
@@ -2203,11 +2337,11 @@ $publicNavItems = [
             });
 
             const captchaField = document.getElementById('loginModalCaptcha');
-                if (captchaField) {
-                    captchaField.addEventListener('input', function() {
-                        this.value = this.value.replace(/[^A-Za-z0-9]/g, '').slice(0, 5);
-                    });
-                }
+            if (captchaField) {
+                captchaField.addEventListener('input', function() {
+                    this.value = this.value.replace(/[^A-Za-z0-9]/g, '').slice(0, 5);
+                });
+            }
 
             const captchaRefreshBtn = document.getElementById('loginCaptchaRefresh');
             const captchaImage = document.getElementById('loginCaptchaImage');
@@ -2226,14 +2360,3 @@ $publicNavItems = [
 </body>
 
 </html>
-
-
-
-
-
-
-
-
-
-
-
