@@ -122,7 +122,7 @@ if (!isset($currentPage) || $currentPage === '') {
             <div class="center-brand">
                 <div class="govtext">Republic of the Philippines<br><strong>DEPARTMENT OF TRANSPORTATION</strong></div>
                 <h1>LAND TRANSPORTATION OFFICE</h1>
-                <p class="office-address">Brgy. Sta. Clara Sur, Pila, Laguna</p>
+                <p class="office-address">Brgy. Sta. Clara Sur, Pila, Laguna, Philippines</p>
             </div>
         </div>
         <div class="right-info">

@@ -671,8 +671,7 @@ $publicNavItems = [
                 <div class="center-brand">
                     <div class="govtext">Republic of the Philippines<br><strong>DEPARTMENT OF TRANSPORTATION</strong></div>
                     <h1>LAND TRANSPORTATION OFFICE</h1>
-                    <p class="office-subtitle">Human Resources Information System</p>
-                    <p class="office-address">East Avenue, Quezon City, 1100, Philippines</p>
+                    <p class="office-address">Brgy. Sta. Clara Sur, Pila, Laguna, Philippines</p>
                 </div>
             </div>
             <div class="right-info">
