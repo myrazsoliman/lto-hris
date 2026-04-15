@@ -22,7 +22,7 @@
             <ul class="flat-links">
                 <li><a href="index.php">Home</a></li>
                 <li><a href="contact-us.php">Contact Us</a></li>
-                <li><a href="data-privacy-notice.php">Data Privacy Notice</a></li>
+                <li><a href="https://privacy.gov.ph/data-privacy-act/" target="_blank" rel="noopener noreferrer">Data Privacy Notice</a></li>
             </ul>
         </div>
         <div class="footer-col">
@@ -30,7 +30,7 @@
             <ul class="flat-links">
                 <li><a href="citizens-charter.php">Citizen&rsquo;s Charter</a></li>
                 <li><a href="downloadable-forms.php">Downloadable Forms</a></li>
-                <li><a href="data-privacy-notice.php">Data Privacy Notice</a></li>
+                <li><a href="https://privacy.gov.ph/data-privacy-act/" target="_blank" rel="noopener noreferrer">Data Privacy Notice</a></li>
                 <li><a href="contact-us.php">Feedback and Complaints</a></li>
             </ul>
         </div>
