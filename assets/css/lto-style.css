@@ -16,8 +16,9 @@ body{font-family:Arial,Helvetica,sans-serif;margin:0;color:#111;background:var(-
 .gov-topbar{background:rgba(15,56,110,0.98);border-bottom:1px solid rgba(255,255,255,0.14);position:fixed;top:0;left:0;right:0;z-index:1050;height:var(--gov-height);backdrop-filter:blur(4px);box-shadow:0 6px 20px rgba(11,28,56,0.24)}
 .gov-inner{max-width:1360px;margin:0 auto;display:grid;grid-template-columns:auto minmax(0,1fr) auto auto auto;align-items:center;column-gap:0;padding-left:8px;padding-right:8px;height:100%}
 .gov-left{font-weight:400;color:#f8fbff;font-size:18px;display:flex;align-items:center;justify-content:center;gap:0;margin:0;padding:0 18px;min-width:var(--gov-left-slot);height:100%;white-space:nowrap}
-.gov-left-title{font-size:18px;font-weight:400;color:#f8fbff}
-.gov-left-subtitle{font-size:14px;font-weight:400;color:#dbe9ff;margin-left:16px;padding-left:16px;border-left:1px solid rgba(255,255,255,0.22)}
+.gov-left-title{font-size:18px;font-weight:400;color:#f8fbff;text-decoration:none;display:inline-flex;align-items:center}
+.gov-left-title:hover{color:#ffffff}
+.gov-left-subtitle{display:inline-flex;align-items:center;font-size:14px;font-weight:400;color:#dbe9ff;margin-left:16px;padding-left:16px;border-left:1px solid rgba(255,255,255,0.22)}
 .gov-privacy-link{color:#dbe9ff;text-decoration:none;font-size:14px;font-weight:700;white-space:nowrap;display:inline-flex;align-items:center;padding:8px 0}
 .gov-privacy-link:hover{text-decoration:underline}
 .gov-nav{display:none;align-items:stretch;justify-content:flex-start;min-width:0;height:100%}
@@ -97,7 +98,7 @@ body{font-family:Arial,Helvetica,sans-serif;margin:0;color:#111;background:var(-
   .gov-inner{display:grid;grid-template-columns:auto 1fr auto;height:100%;padding-top:0;padding-bottom:0;column-gap:16px}
   .gov-left{display:flex;min-width:auto;padding:0;font-size:clamp(15px,3.2vw,22px);font-weight:700;letter-spacing:0.3px;justify-content:flex-start;white-space:nowrap}
   .gov-left-title{font-size:clamp(15px,3.2vw,22px)}
-  .gov-left-subtitle{display:none}
+  .gov-left-subtitle{display:inline-flex;font-size:clamp(10px,1.6vw,13px)}
   .gov-nav,
   .gov-contact-link,
   .gov-search,
