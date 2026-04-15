@@ -554,7 +554,10 @@ $publicNavItems = [
 
     <div class="gov-topbar">
         <div class="gov-inner">
-            <div class="gov-left">LTO-HRIS</div>
+            <div class="gov-left">
+                <a href="index.php" class="gov-left-title">LTO-HRIS</a>
+                <span class="gov-left-subtitle">Human Resources Information System</span>
+            </div>
             <nav class="gov-nav">
                 <?php foreach ($publicNavItems as $item): ?>
                     <?php if (!empty($item['children'])): ?>
@@ -668,6 +671,7 @@ $publicNavItems = [
                 <div class="center-brand">
                     <div class="govtext">Republic of the Philippines<br><strong>DEPARTMENT OF TRANSPORTATION</strong></div>
                     <h1>LAND TRANSPORTATION OFFICE</h1>
+                    <p class="office-subtitle">Human Resources Information System</p>
                     <p class="office-address">East Avenue, Quezon City, 1100, Philippines</p>
                 </div>
             </div>

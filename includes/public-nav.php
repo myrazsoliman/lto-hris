@@ -33,7 +33,10 @@ $contactLink = ['label' => 'Contact Us', 'href' => 'contact-us.php', 'active' =>
 ?>
 <div class="gov-topbar">
     <div class="gov-inner">
-        <div class="gov-left">LTO HRIS</div>
+        <div class="gov-left">
+            <a href="index.php" class="gov-left-title">LTO-HRIS</a>
+            <span class="gov-left-subtitle">Human Resources Information System</span>
+        </div>
         <nav class="gov-nav">
             <?php foreach ($publicNavItems as $item): ?>
                 <?php if (!empty($item['children'])): ?>
