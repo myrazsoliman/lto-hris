@@ -50,9 +50,15 @@ body{font-family:Arial,Helvetica,sans-serif;margin:0;color:#111;background:var(-
 .gov-actions{display:flex;align-items:center;justify-content:center;gap:8px;height:100%;padding:0 10px;border-right:1px solid rgba(0,0,0,0.08)}
 .gov-actions .btn{display:inline-flex;align-items:center;justify-content:center;padding:8px 14px;height:auto;border-radius:4px;text-decoration:none;font-weight:700;font-size:13px}
 .btn-login{background:var(--brand);color:#fff;border:1px solid rgba(11,95,165,0.12)}
-.btn-login:hover{background:#254f8f}
+.btn-login:hover{background:#254f8f;color:#fff;border-color:#254f8f}
 .btn-register{background:#fff;color:var(--brand);border:1px solid var(--brand)}
-.btn-register:hover{background:rgba(43,95,165,0.06)}
+.btn-register:hover{background:var(--brand);color:#fff;border-color:var(--brand)}
+.gov-actions:has(.btn-register:hover) .btn-login,
+.gov-actions:has(.btn-register:focus-visible) .btn-login{
+  background:#fff;
+  color:var(--brand);
+  border-color:var(--brand);
+}
 .gov-actions .gov-privacy-link{display:inline-flex;align-items:center;justify-content:center;height:auto;padding:0;color:#dbe9ff}
 .gov-actions .gov-privacy-link:hover{color:#ffffff;text-decoration:underline}
 .gov-menu-toggle{display:none;align-items:center;justify-content:center;gap:14px;height:50px;padding:0;border:0;background:transparent;color:#f8fbff;cursor:pointer}
@@ -1127,6 +1133,18 @@ opacity:.9}
   #loginModal .login-modal-visual{display:none}
   #loginModal .login-modal-panel{display:flex;width:100%}
   #loginModal .login-modal-header-plain{padding:18px 18px 12px}
+  #loginModal .login-modal-header-plain{
+    min-height:128px !important;
+    padding:10px 40px 10px 14px !important;
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+  }
+  #loginModal .login-modal-header-plain .login-modal-header-copy{
+    width:100% !important;
+    margin:0 auto !important;
+    text-align:center !important;
+  }
   #loginModal .login-modal-header-plain .login-modal-header-copy{max-width:100%;padding:0}
   #loginModal .login-modal-title-row{display:block}
   #loginModal .login-modal-header-plain h2{font-size:clamp(18px,7vw,30px);line-height:1.02;white-space:normal;text-wrap:balance}
@@ -3496,7 +3514,7 @@ body.public-page-contact-us .contact-gov-info .contact-gov-note{
   background:transparent !important;
 }
 
-@media (max-width:1024px), (max-height:820px){
+@media (max-width:1024px), (max-height:700px){
   .login-card-modal-split,
   .register-card-modal.login-card-modal-split{
     grid-template-columns:1fr;
@@ -3548,8 +3566,39 @@ body.public-page-contact-us .contact-gov-info .contact-gov-note{
   background:transparent !important;
 }
 
-/* On zoom/reduced viewport, show form-only mode for login/register modals */
-@media (max-width:1366px), (max-height:860px){
+/* Login modal sizing: keep visible margins and avoid near full-screen coverage */
+#loginModal.login-modal{
+  align-items:center;
+  padding:clamp(16px,3vw,34px);
+}
+#loginModal .login-modal-dialog{
+  width:min(100%,860px) !important;
+  max-height:min(calc(100dvh - 52px),820px) !important;
+}
+#loginModal .login-modal-header-plain{
+  min-height:156px;
+}
+#loginModal .login-modal-body-plain{
+  padding:10px 28px 18px;
+}
+#loginModal .login-input-shell{
+  min-height:58px;
+  padding:14px 16px;
+}
+@media (min-width:641px){
+  #loginModal .login-modal-header-plain{
+    padding-left:56px !important;
+    padding-right:56px !important;
+  }
+  #loginModal .login-modal-header-plain .login-modal-header-copy{
+    margin-left:auto;
+    margin-right:auto;
+    text-align:center;
+  }
+}
+
+/* Keep split layout on normal laptop sizes; collapse only on very constrained viewports */
+@media (max-width:900px), (max-height:700px){
   #loginModal .login-card-modal-split,
   #registerModal .register-card-modal.login-card-modal-split{
     grid-template-columns:1fr !important;
@@ -3561,5 +3610,566 @@ body.public-page-contact-us .contact-gov-info .contact-gov-note{
   #loginModal .login-modal-dialog,
   #registerModal .register-modal-dialog{
     width:min(100%,760px) !important;
+  }
+}
+
+/* Prevent white edge bleed on zoom: dialog shell stays transparent, card is the only surface */
+#loginModal .login-modal-dialog,
+#forgotPasswordModal .forgot-modal-dialog,
+#registerModal .register-modal-dialog{
+  background:transparent !important;
+}
+
+#loginModal .login-card-modal-split,
+#forgotPasswordModal .forgot-card-modal.login-card-modal-split,
+#registerModal .register-card-modal.login-card-modal-split{
+  border-radius:inherit;
+  overflow:hidden;
+}
+
+/* Remove right-edge white strip at high zoom: suppress visible scrollbar gutters/tracks */
+#loginModal .login-modal-dialog,
+#forgotPasswordModal .forgot-modal-dialog,
+#registerModal .register-modal-dialog{
+  overflow:hidden !important;
+  scrollbar-width:none !important;
+  -ms-overflow-style:none !important;
+}
+
+#loginModal .login-modal-dialog::-webkit-scrollbar,
+#forgotPasswordModal .forgot-modal-dialog::-webkit-scrollbar,
+#registerModal .register-modal-dialog::-webkit-scrollbar,
+#loginModal .login-modal-panel::-webkit-scrollbar,
+#forgotPasswordModal .forgot-modal-panel::-webkit-scrollbar,
+#registerModal .register-modal-panel::-webkit-scrollbar{
+  width:0 !important;
+  height:0 !important;
+  background:transparent !important;
+}
+
+#loginModal .login-modal-panel,
+#forgotPasswordModal .forgot-modal-panel,
+#registerModal .register-modal-panel{
+  scrollbar-width:none !important;
+  -ms-overflow-style:none !important;
+}
+
+/* Register header breathing room: prevent subtitle from sitting too close to bottom edge */
+#registerModal .login-modal-header-plain{
+  padding-bottom:22px !important;
+}
+#registerModal .login-modal-header-plain .login-modal-header-copy{
+  padding-bottom:4px;
+}
+#registerModal .login-modal-header-plain .login-modal-subtitle{
+  margin-bottom:4px;
+  line-height:1.32;
+}
+
+/* Keep title/subtitle mathematically centered at any zoom level */
+#loginModal .login-modal-header-plain,
+#forgotPasswordModal .login-modal-header-plain,
+#registerModal .login-modal-header-plain{
+  padding-left:clamp(16px,3vw,56px) !important;
+  padding-right:clamp(16px,3vw,56px) !important;
+}
+
+#loginModal .login-modal-header-plain .login-modal-header-copy,
+#forgotPasswordModal .login-modal-header-plain .login-modal-header-copy,
+#registerModal .login-modal-header-plain .login-modal-header-copy{
+  margin-left:auto !important;
+  margin-right:auto !important;
+  text-align:center !important;
+  max-width:100% !important;
+}
+
+/* Keep header inside the same scroll flow on zoom (not sticky/fixed) */
+#loginModal .login-modal-panel,
+#forgotPasswordModal .forgot-modal-panel,
+#registerModal .register-modal-panel{
+  justify-content:flex-start !important;
+}
+
+#loginModal .login-modal-header-plain,
+#forgotPasswordModal .login-modal-header-plain,
+#registerModal .login-modal-header-plain{
+  position:relative !important;
+  top:auto !important;
+}
+
+/* Zoom consistency: avoid oversized blue header area and excess bottom gap */
+@media (max-width:1366px), (max-height:860px){
+  #loginModal .login-modal-header-plain,
+  #forgotPasswordModal .login-modal-header-plain,
+  #registerModal .login-modal-header-plain{
+    min-height:132px !important;
+    padding-top:10px !important;
+    padding-bottom:12px !important;
+  }
+
+  #loginModal .login-modal-header-plain h2,
+  #forgotPasswordModal .login-modal-header-plain h2,
+  #registerModal .login-modal-header-plain h2{
+    font-size:clamp(24px,3vw,38px) !important;
+    line-height:1.06 !important;
+    max-width:11ch !important;
+  }
+
+  #loginModal .login-modal-header-plain .login-modal-subtitle,
+  #forgotPasswordModal .login-modal-header-plain .login-modal-subtitle,
+  #registerModal .login-modal-header-plain .login-modal-subtitle{
+    margin-top:6px !important;
+    margin-bottom:0 !important;
+    font-size:clamp(11px,1.8vw,14px) !important;
+    line-height:1.26 !important;
+  }
+}
+
+/* Keep login submit button reachable on zoom: dialog scrolls as one container */
+#loginModal .login-modal-dialog{
+  overflow-y:auto !important;
+  overflow-x:hidden !important;
+}
+
+#loginModal .login-modal-panel{
+  overflow:visible !important;
+  max-height:none !important;
+}
+
+#loginModal .login-modal-panel > .login-modal-body-plain{
+  padding-bottom:max(24px, env(safe-area-inset-bottom)) !important;
+}
+
+/* Same zoom-safe scroll behavior for register modal */
+#registerModal .register-modal-dialog{
+  overflow-y:auto !important;
+  overflow-x:hidden !important;
+}
+
+#registerModal .register-modal-panel{
+  overflow:visible !important;
+  max-height:none !important;
+}
+
+#registerModal .register-modal-panel > .register-modal-body{
+  padding-bottom:max(24px, env(safe-area-inset-bottom)) !important;
+}
+
+/* Register floating labels: center by default, float only on focus/value */
+#registerModal .register-input-wrap .login-floating-label{
+  top:50% !important;
+  transform:translateY(-50%) !important;
+}
+
+#registerModal .register-input-wrap input:focus + .login-floating-label,
+#registerModal .register-input-wrap input:not(:placeholder-shown) + .login-floating-label{
+  top:10px !important;
+  transform:none !important;
+  font-size:11px !important;
+}
+
+/* Login floating labels: center by default, float only on focus/value */
+#loginModal .login-input-wrap-modal .login-floating-label{
+  top:50% !important;
+  transform:translateY(-50%) !important;
+}
+
+#loginModal .login-input-wrap-modal input:focus + .login-floating-label,
+#loginModal .login-input-wrap-modal input:not(:placeholder-shown) + .login-floating-label{
+  top:10px !important;
+  transform:none !important;
+  font-size:11px !important;
+}
+
+/* Forgot-password floating label: center by default, float on focus/value */
+#forgotPasswordModal .login-input-wrap-modal .login-floating-label{
+  top:50% !important;
+  transform:translateY(-50%) !important;
+}
+
+#forgotPasswordModal .login-input-wrap-modal input:focus + .login-floating-label,
+#forgotPasswordModal .login-input-wrap-modal input:not(:placeholder-shown) + .login-floating-label{
+  top:10px !important;
+  transform:none !important;
+  font-size:11px !important;
+}
+
+/* Mobile register modal: centered and compact so full form + password rules remain visible */
+@media (max-width:640px){
+  #registerModal.login-modal{
+    align-items:center !important;
+    justify-content:center !important;
+    padding:10px !important;
+  }
+
+  #registerModal .register-modal-dialog{
+    width:min(100%,470px) !important;
+    max-height:calc(100dvh - 20px) !important;
+    margin:0 auto !important;
+    overflow:hidden !important;
+    border-radius:22px !important;
+  }
+
+  #registerModal .register-modal-panel{
+    display:flex !important;
+    flex-direction:column !important;
+    justify-content:flex-start !important;
+    overflow-y:auto !important;
+    overflow-x:hidden !important;
+    max-height:calc(100dvh - 20px) !important;
+  }
+
+  #registerModal .login-modal-header-plain{
+    min-height:0 !important;
+    padding:12px 40px 8px 40px !important;
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    min-height:128px !important;
+  }
+
+  #registerModal .login-modal-header-plain .login-modal-header-copy{
+    width:100% !important;
+    max-width:100% !important;
+    padding:0 14px !important;
+    margin:0 auto !important;
+    text-align:center !important;
+  }
+
+  #registerModal .login-modal-title-row{
+    display:flex !important;
+    justify-content:center !important;
+  }
+
+  #registerModal .login-modal-header-plain h2{
+    font-size:clamp(16px,8vw,28px) !important;
+    line-height:1.04 !important;
+    margin-left:auto !important;
+    margin-right:auto !important;
+    text-align:center !important;
+  }
+
+  #registerModal .login-modal-header-plain .login-modal-subtitle{
+    margin-top:4px !important;
+    font-size:clamp(9px,2.8vw,12px) !important;
+    line-height:1.2 !important;
+    margin-left:auto !important;
+    margin-right:auto !important;
+    text-align:center !important;
+  }
+
+  #registerModal .register-modal-panel > .register-modal-body{
+    width:min(calc(100% - 28px),560px) !important;
+  }
+
+  #registerModal .register-modal-body{
+    padding:6px 14px 14px !important;
+  }
+
+  #registerModal .register-form-modal{
+    gap:5px !important;
+  }
+
+  #registerModal .register-input-wrap .login-input-shell{
+    min-height:40px !important;
+    padding:6px 10px !important;
+    border-radius:10px !important;
+  }
+
+  #registerModal .register-input-wrap input{
+    min-height:14px !important;
+    font-size:11px !important;
+    padding-top:8px !important;
+  }
+
+  #registerModal .register-form-modal .password-validation-indicator{
+    margin-top:0 !important;
+    padding-top:4px !important;
+  }
+
+  #registerModal .register-form-modal .password-strength-progress{
+    height:4px !important;
+    margin-bottom:5px !important;
+  }
+
+  #registerModal .register-form-modal .password-strength-alert{
+    margin-bottom:5px !important;
+    font-size:10px !important;
+    line-height:1.2 !important;
+  }
+
+  #registerModal .register-form-modal .password-validation-title{
+    margin-bottom:5px !important;
+    font-size:10px !important;
+  }
+
+  #registerModal .register-form-modal .password-validation-list{
+    gap:3px !important;
+  }
+
+  #registerModal .register-form-modal .password-validation-item{
+    gap:5px !important;
+  }
+
+  #registerModal .register-form-modal .validation-icon{
+    width:12px !important;
+    height:12px !important;
+    font-size:7px !important;
+  }
+
+  #registerModal .register-form-modal .validation-text{
+    font-size:9px !important;
+    line-height:1.15 !important;
+  }
+
+  #registerModal .register-submit-btn-modal{
+    min-height:36px !important;
+    margin-top:0 !important;
+    border-radius:10px !important;
+    font-size:11px !important;
+  }
+}
+
+/* Desktop/web: keep "Create Account" title on a single line */
+@media (min-width:641px){
+  #loginModal .login-modal-header-plain h2,
+  #registerModal .login-modal-header-plain h2{
+    white-space:nowrap !important;
+    max-width:none !important;
+  }
+}
+
+/* Mobile: reduce modal icon sizes across login/forgot/register/verification */
+@media (max-width:640px){
+  #loginModal .login-input-wrap-modal .login-input-icon,
+  #forgotPasswordModal .login-input-wrap-modal .login-input-icon,
+  #registerModal .register-input-wrap .login-input-icon{
+    flex:0 0 18px !important;
+    width:18px !important;
+    height:18px !important;
+  }
+
+  #loginModal .login-input-wrap-modal .login-input-icon svg,
+  #loginModal .login-input-wrap-modal .login-input-icon img,
+  #forgotPasswordModal .login-input-wrap-modal .login-input-icon svg,
+  #forgotPasswordModal .login-input-wrap-modal .login-input-icon img,
+  #registerModal .register-input-wrap .login-input-icon svg,
+  #registerModal .register-input-wrap .login-input-icon img{
+    width:18px !important;
+    height:18px !important;
+  }
+
+  #loginModal .login-password-icon,
+  #forgotPasswordModal .login-password-icon,
+  #registerModal .register-form-modal .login-password-icon{
+    width:14px !important;
+    height:14px !important;
+  }
+
+  #loginModal .login-password-icon svg,
+  #forgotPasswordModal .login-password-icon svg,
+  #registerModal .register-form-modal .login-password-icon svg{
+    width:14px !important;
+    height:14px !important;
+  }
+
+  #loginModal .login-captcha-refresh,
+  #forgotPasswordModal .login-captcha-refresh{
+    width:28px !important;
+    height:28px !important;
+  }
+
+  #loginModal .login-captcha-refresh img,
+  #forgotPasswordModal .login-captcha-refresh img{
+    width:14px !important;
+    height:14px !important;
+  }
+
+  #twoFaModal .verification-hero-icon svg,
+  #registerVerificationModal .verification-hero-icon svg{
+    width:86px !important;
+  }
+
+  #twoFaModal .verification-otp-ready,
+  #registerVerificationModal .verification-otp-ready{
+    width:22px !important;
+    height:22px !important;
+    font-size:14px !important;
+  }
+
+  /* Mobile forgot-password modal must stay centered (not pinned to top) */
+  #forgotPasswordModal.login-modal{
+    align-items:center !important;
+    justify-content:center !important;
+    padding:10px !important;
+  }
+
+  #forgotPasswordModal .forgot-modal-dialog{
+    margin:0 auto !important;
+    max-height:calc(100dvh - 20px) !important;
+  }
+
+  #forgotPasswordModal .login-modal-header-plain{
+    min-height:104px !important;
+    padding:10px 40px !important;
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+  }
+
+  #forgotPasswordModal .login-modal-header-plain .login-modal-header-copy{
+    margin:0 auto !important;
+    text-align:center !important;
+  }
+
+  #forgotPasswordModal .login-modal-header-plain .login-modal-subtitle{
+    margin-top:4px !important;
+    margin-bottom:0 !important;
+    line-height:1.2 !important;
+  }
+
+  #forgotPasswordModal .forgot-modal-panel > .login-modal-body-plain{
+    width:min(calc(100% - 28px),560px) !important;
+  }
+
+  #forgotPasswordModal .login-modal-body-plain{
+    padding:8px 14px 14px !important;
+  }
+
+  #forgotPasswordModal .login-input-shell{
+    min-height:44px !important;
+    padding:7px 12px !important;
+    border-radius:11px !important;
+  }
+
+  #forgotPasswordModal .login-input-wrap-modal input{
+    min-height:16px !important;
+    padding-top:8px !important;
+    font-size:12px !important;
+  }
+
+  #forgotPasswordModal .login-floating-label{
+    left:46px !important;
+    font-size:12px !important;
+  }
+
+  #forgotPasswordModal .login-input-wrap-modal input:focus + .login-floating-label,
+  #forgotPasswordModal .login-input-wrap-modal input:not(:placeholder-shown) + .login-floating-label{
+    top:7px !important;
+    font-size:9px !important;
+  }
+}
+
+/* Desktop/web forgot-password modal spacing tune */
+@media (min-width:641px){
+  #forgotPasswordModal .forgot-modal-dialog{
+    width:min(100%,620px) !important;
+  }
+
+  #forgotPasswordModal .login-modal-header-plain{
+    min-height:130px !important;
+    padding-top:16px !important;
+    padding-bottom:12px !important;
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+  }
+
+  #forgotPasswordModal .login-modal-header-plain .login-modal-header-copy{
+    margin:0 auto !important;
+    text-align:center !important;
+  }
+
+  #forgotPasswordModal .login-modal-header-plain .login-modal-subtitle{
+    margin-top:6px !important;
+    margin-bottom:0 !important;
+    line-height:1.22 !important;
+  }
+
+  #forgotPasswordModal .forgot-modal-panel > .login-modal-body-plain{
+    width:min(calc(100% - 24px),620px) !important;
+  }
+
+  #forgotPasswordModal .login-modal-body-plain{
+    padding-bottom:28px !important;
+  }
+
+  #forgotPasswordModal .login-submit-btn-modal-split{
+    margin-bottom:8px !important;
+  }
+}
+
+/* Web zoom: forgot-password modal should switch to form-only view */
+@media (min-width:641px) and ((max-width:1366px) or (max-height:860px)){
+  #forgotPasswordModal .forgot-card-modal.login-card-modal-split{
+    grid-template-columns:1fr !important;
+  }
+
+  #forgotPasswordModal .login-modal-visual{
+    display:none !important;
+  }
+
+  #forgotPasswordModal .forgot-modal-dialog{
+    width:min(100%,620px) !important;
+  }
+}
+
+/* Password eye toggle color behavior (login/register): blue by default, orange only on input focus */
+#loginModal .login-input-wrap-modal:has(.login-password-toggle) .login-password-toggle,
+#registerModal .register-input-wrap:has(.login-password-toggle) .login-password-toggle{
+  color:#2b5fa5 !important;
+  background:transparent !important;
+}
+
+#loginModal .login-input-wrap-modal:has(.login-password-toggle) .login-password-toggle:hover,
+#registerModal .register-input-wrap:has(.login-password-toggle) .login-password-toggle:hover,
+#loginModal .login-input-wrap-modal:has(.login-password-toggle) .login-password-toggle.is-active,
+#registerModal .register-input-wrap:has(.login-password-toggle) .login-password-toggle.is-active{
+  color:#2b5fa5 !important;
+  background:transparent !important;
+}
+
+#loginModal .login-input-wrap-modal:has(.login-password-toggle):focus-within .login-password-toggle,
+#registerModal .register-input-wrap:has(.login-password-toggle):focus-within .login-password-toggle,
+#loginModal .login-input-wrap-modal:has(.login-password-toggle):focus-within .login-password-toggle:hover,
+#registerModal .register-input-wrap:has(.login-password-toggle):focus-within .login-password-toggle:hover,
+#loginModal .login-input-wrap-modal:has(.login-password-toggle):focus-within .login-password-toggle.is-active,
+#registerModal .register-input-wrap:has(.login-password-toggle):focus-within .login-password-toggle.is-active{
+  color:#b67812 !important;
+  background:transparent !important;
+}
+
+/* Desktop/web: keep login header copy away from top edge */
+@media (min-width:641px){
+  #loginModal .login-modal-header-plain{
+    min-height:136px !important;
+    padding-top:16px !important;
+    padding-bottom:12px !important;
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+  }
+
+  #loginModal .login-modal-header-plain .login-modal-header-copy{
+    margin:0 auto !important;
+    text-align:center !important;
+  }
+
+  #loginModal .login-modal-header-plain .login-modal-subtitle{
+    margin-top:6px !important;
+    margin-bottom:0 !important;
+    line-height:1.22 !important;
+  }
+}
+
+@media (max-width:640px){
+  #forgotPasswordModal .login-modal-actions-row,
+  #forgotPasswordModal .login-modal-actions-row-split{
+    justify-content:flex-end !important;
+  }
+
+  #forgotPasswordModal .login-forgot-link{
+    margin-left:auto;
+    text-align:right;
   }
 }
