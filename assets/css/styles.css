@@ -1974,7 +1974,7 @@ tbody tr:hover {
 
 .account-profile-body .account-summary-meta {
     padding-bottom: 8px;
-    padding-top: 64px;
+    padding-top: 10px;
 }
 
 .account-avatar-wrap {
@@ -2554,7 +2554,7 @@ tbody tr:hover {
     }
 
     .account-profile-body .account-summary-meta {
-        padding-top: 48px;
+        padding-top: 8px;
     }
 
     .account-avatar--hero {

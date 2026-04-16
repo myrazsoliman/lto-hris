@@ -559,9 +559,6 @@ $publicNavItems = [
                 <span class="gov-left-subtitle">Human Resources Information System</span>
             </div>
             <a href="contact-us.php" class="gov-contact-link <?php echo $currentPage === 'contact-us.php' ? 'active' : ''; ?>">Contact Us</a>
-            <div class="gov-search">
-                <input placeholder="Search...">
-            </div>
             <div class="gov-actions">
                 <a class="btn btn-login js-login-trigger" href="login.php">Login</a>
                 <a class="btn btn-register js-register-trigger" href="register.php">Register</a>
@@ -653,7 +650,7 @@ $publicNavItems = [
             <h2>Privacy Notice for Employees and Job Applicants</h2>
 
             <div class="privacy-accordion">
-                <details class="privacy-block" open>
+                <details class="privacy-block">
                     <summary class="privacy-summary">Introduction</summary>
                     <div class="privacy-content">
                         <p>In compliance with Republic Act No. 10173, or the Data Privacy Act of 2012, its Implementing Rules and Regulations, and other relevant issuances of the National Privacy Commission, the Land Transportation Office Human Resource Information System adopts this Privacy Notice to inform employees, job applicants, and authorized users how personal data is collected, used, stored, shared, and protected within the system.</p>

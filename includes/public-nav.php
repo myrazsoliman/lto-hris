@@ -66,9 +66,6 @@ $contactLink = ['label' => 'Contact Us', 'href' => 'contact-us.php', 'active' =>
             class="<?php echo trim('gov-contact-link ' . ($contactLink['active'] ? 'active ' : '') . ($contactLink['caret'] ? 'has-caret' : '')); ?>">
             <?php echo htmlspecialchars($contactLink['label']); ?>
         </a>
-        <div class="gov-search">
-            <input placeholder="Search..." aria-label="Search">
-        </div>
         <div class="gov-actions">
             <a class="btn btn-login js-login-trigger" href="<?php echo htmlspecialchars($loginHref); ?>">Login</a>
             <a class="btn btn-register js-register-trigger" href="<?php echo htmlspecialchars($registerHref); ?>">Register</a>
@@ -80,9 +77,6 @@ $contactLink = ['label' => 'Contact Us', 'href' => 'contact-us.php', 'active' =>
                 <span></span>
             </span>
         </button>
-        <div class="gov-mobile-search">
-            <input placeholder="Search..." aria-label="Search">
-        </div>
     </div>
     <div class="gov-mobile-panel" id="govMobilePanel" hidden>
         <nav class="gov-mobile-nav" aria-label="Mobile navigation">

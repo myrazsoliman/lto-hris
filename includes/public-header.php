@@ -10,9 +10,6 @@ if (!isset($currentPage) || $currentPage === '') {
             <span class="gov-left-subtitle">Human Resources Information System</span>
         </div>
         <a href="contact-us.php" class="gov-contact-link <?php echo $currentPage === 'contact-us.php' ? 'active' : ''; ?>">Contact Us</a>
-        <div class="gov-search">
-            <input placeholder="Search..." aria-label="Search">
-        </div>
         <div class="gov-actions">
             <a class="btn btn-login js-login-trigger" href="login.php">Login</a>
             <a class="btn btn-register js-register-trigger" href="register.php">Register</a>

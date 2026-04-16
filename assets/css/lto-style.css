@@ -483,21 +483,21 @@ body{font-family:Arial,Helvetica,sans-serif;margin:0;color:#111;background:var(-
 .hris-action-card:hover .hris-action-cta::after{transform:translateX(3px);background:rgba(24,77,151,0.14);box-shadow:inset 0 0 0 1px rgba(24,77,151,0.24)}
 
 .login-modal-open{overflow:hidden}
-.login-modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;opacity:0;visibility:hidden;pointer-events:none;z-index:2000;transition:opacity 280ms ease,visibility 280ms ease}
+.login-modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;opacity:0;visibility:hidden;pointer-events:none;z-index:2000;overflow:hidden;overscroll-behavior:contain;transition:opacity 280ms ease,visibility 280ms ease}
 .login-modal.is-open{opacity:1;visibility:visible;pointer-events:auto}
 .login-modal-backdrop{position:absolute;inset:0;background:rgba(11,30,54,0.78)}
-.login-modal-dialog{position:relative;z-index:1;width:min(100%,920px);max-height:calc(100vh - 48px);overflow:hidden;scrollbar-width:none;-ms-overflow-style:none;border-radius:34px;background:linear-gradient(135deg,#163f7a 0%,#2b5fa5 55%,#6f95c9 100%);transform:translateY(28px) scale(.97);opacity:0;transition:transform 320ms cubic-bezier(.2,.8,.2,1),opacity 320ms ease}
+.login-modal-dialog{position:relative;z-index:1;width:min(100%,920px);max-height:calc(100dvh - 48px);margin:auto 0;overflow:hidden;scrollbar-width:none;-ms-overflow-style:none;border-radius:34px;background:#ffffff;transform:translateY(28px) scale(.97);opacity:0;transition:transform 320ms cubic-bezier(.2,.8,.2,1),opacity 320ms ease}
 .login-modal-dialog::-webkit-scrollbar{width:0;height:0}
 .login-modal.is-open .login-modal-dialog{transform:translateY(0) scale(1);opacity:1}
 .login-card-modal{display:block;width:100%;padding:0;border-radius:34px;overflow:hidden;background:transparent;box-shadow:none;border:0}
-.login-card-modal-split{position:relative;display:grid;grid-template-columns:.8fr 1fr;width:100%;min-height:auto;border-radius:34px;overflow:hidden;background:#fff;box-shadow:0 28px 70px rgba(32,43,78,.18)}
+.login-card-modal-split{position:relative;display:grid;grid-template-columns:minmax(300px,360px) minmax(0,1fr);width:100%;min-height:auto;border-radius:34px;overflow:hidden;background:#fff;box-shadow:0 28px 70px rgba(32,43,78,.18)}
 #loginModal .login-card-modal-split{margin-top:-4px}
 .login-card-modal-split::after{display:none}
 .login-card-modal-split::before{display:none}
 .login-modal-visual{position:relative;display:flex;align-items:center;justify-content:center;order:1;padding:22px 24px;background:
   radial-gradient(circle at top right,rgba(255,255,255,.20),rgba(255,255,255,0) 32%),
   radial-gradient(circle at bottom left,rgba(255,255,255,.12),rgba(255,255,255,0) 34%),
-  linear-gradient(135deg,#163f7a 0%,#2b5fa5 48%,#6f95c9 100%);overflow:hidden;clip-path:none}
+  linear-gradient(135deg,#163f7a 0%,#2b5fa5 48%,#6f95c9 100%);overflow:hidden;clip-path:none;min-width:0}
 .login-modal-visual::before{content:"";position:absolute;inset:0;background:
   radial-gradient(circle at 18% 22%,rgba(255,255,255,.10),rgba(255,255,255,0) 22%),
   radial-gradient(circle at 82% 14%,rgba(255,255,255,.08),rgba(255,255,255,0) 18%),
@@ -509,24 +509,24 @@ opacity:.9}
 .login-modal-visual-overlay{position:absolute;inset:0;background:
   radial-gradient(circle at center,rgba(255,255,255,.08),rgba(255,255,255,0) 42%),
   linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.02))}
-.login-modal-visual-content{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;justify-content:center;width:min(100%,280px);min-height:320px;padding:8px 8px 0;text-align:center;color:#fff}
+.login-modal-visual-content{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;justify-content:center;width:min(100%,290px);min-height:320px;padding:8px 8px 0;text-align:center;color:#fff}
 .login-modal-visual-logo{width:200px;height:200px;object-fit:contain;filter:drop-shadow(0 18px 30px rgba(20,17,80,.30))}
-.login-modal-visual-title{margin:14px 0 6px;font-family:'Oswald',sans-serif;font-size:44px;line-height:.92;font-weight:700;letter-spacing:.04em;color:#fff;white-space:nowrap}
-.login-modal-visual-subtitle{margin:0;font-size:13px;line-height:1.1;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.94);font-weight:700;white-space:nowrap}
-.login-modal-visual-kicker{margin-top:18px;padding:10px 16px;border-radius:999px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.16);font-size:9px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#ffffff;white-space:nowrap}
-.login-modal-panel{position:relative;display:flex;flex-direction:column;justify-content:center;order:2;padding:0;background:#fff}
+.login-modal-visual-title{margin:14px 0 6px;font-family:'Oswald',sans-serif;font-size:clamp(32px,3vw,40px);line-height:.96;font-weight:700;letter-spacing:.03em;color:#fff;white-space:normal;text-wrap:balance;overflow-wrap:anywhere}
+.login-modal-visual-subtitle{margin:0;font-size:12px;line-height:1.25;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.94);font-weight:700;white-space:normal;text-wrap:balance}
+.login-modal-visual-kicker{margin-top:18px;padding:10px 16px;border-radius:999px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.16);font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#ffffff;white-space:normal;text-wrap:balance}
+.login-modal-panel{position:relative;display:flex;flex-direction:column;justify-content:center;order:2;padding:0;background:#fff;min-height:0;overflow-y:auto;overflow-x:hidden}
 .login-modal-panel::before{display:none}
 .login-modal-panel > .login-modal-header-plain{width:100%;margin:0}
 .login-modal-panel > .login-modal-body-plain{width:min(calc(100% - 40px),520px);margin:0 auto}
-.login-modal-header-plain{position:relative;display:flex;align-items:center;justify-content:center;padding:28px 20px 14px 20px;margin-top:0;background:linear-gradient(135deg,#163f7a 0%,#2b5fa5 55%,#6f95c9 100%);color:#fff;border-bottom:1px solid rgba(255,255,255,.10);overflow:hidden}
+.login-modal-header-plain{position:relative;display:flex;align-items:center;justify-content:center;min-height:180px;padding:26px 56px 22px 20px;margin-top:0;background:linear-gradient(135deg,#163f7a 0%,#2b5fa5 55%,#6f95c9 100%);color:#fff;border-bottom:1px solid rgba(255,255,255,.10);overflow:hidden}
 .login-modal-header-plain::before,.login-modal-header-plain::after{display:none}
-.login-modal-header-plain .login-modal-header-copy{width:100%;max-width:calc(100% - 72px);margin:0 auto;text-align:center}
+.login-modal-header-plain .login-modal-header-copy{width:100%;max-width:calc(100% - 44px);margin:0 auto;text-align:center}
 .login-modal-title-row{display:flex;justify-content:center}
 .login-modal-panel-kicker{display:inline-flex;align-items:center;gap:8px;margin-bottom:10px;color:#7a879a;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase}
 .login-modal-panel-kicker::before{content:"";width:30px;height:2px;background:linear-gradient(90deg,#b27a12,#e0bf73)}
-.login-modal-header-plain h2{color:#ffffff;font-size:24px;letter-spacing:-.04em;font-weight:800;text-transform:none;line-height:1.08;text-shadow:0 4px 14px rgba(12,28,58,.18);max-width:none;white-space:nowrap;margin:0}
+.login-modal-header-plain h2{color:#ffffff;font-size:clamp(34px,4vw,52px);letter-spacing:-.04em;font-weight:800;text-transform:none;line-height:1.04;text-shadow:0 4px 14px rgba(12,28,58,.18);max-width:12ch;white-space:normal;text-wrap:balance;overflow-wrap:anywhere;margin:0}
 .login-modal-header-plain h2 span{color:#f0c35a}
-.login-modal-header-plain .login-modal-subtitle{margin:10px auto 0;color:rgba(255,255,255,.88);font-size:12px;line-height:1.4;max-width:22ch;text-align:center}
+.login-modal-header-plain .login-modal-subtitle{margin:12px auto 0;color:rgba(255,255,255,.88);font-size:clamp(12px,1.2vw,15px);line-height:1.3;max-width:24ch;text-align:center;text-wrap:balance}
 .login-modal-body-plain{padding:12px 32px 22px}
 .login-modal-body-plain::before{display:none}
 .login-modal-role-band{margin:0 0 18px;padding:0 0 12px;border:0;border-bottom:1px solid rgba(43,95,165,.14);border-radius:0;background:transparent;text-align:center;font-size:11px;font-weight:800;letter-spacing:.24em;text-transform:uppercase;color:#7f8ca2}
@@ -549,7 +549,7 @@ opacity:.9}
 .login-submit-btn-modal-split{margin-top:6px;min-height:48px;border-radius:14px;background:linear-gradient(135deg,#163f7a,#2b5fa5);box-shadow:0 14px 26px rgba(22,63,122,.18)}
 .login-submit-btn-modal-split:hover{box-shadow:0 16px 28px rgba(22,63,122,.22);filter:none}
 .login-modal-meta-split{margin-top:14px;padding-top:14px;font-size:11px;border-top:1px solid rgba(43,95,165,.12)}
-.login-modal-header-plain .login-modal-close{position:absolute;top:10px;right:8px;width:30px;height:30px;padding:0;background:transparent;color:#dfe8f7;border:0;box-shadow:none;display:inline-flex;align-items:center;justify-content:center;font-size:24px;line-height:1}
+.login-modal-header-plain .login-modal-close{position:absolute;top:10px;right:4px;width:30px;height:30px;padding:0;background:transparent;color:#dfe8f7;border:0;box-shadow:none;display:inline-flex;align-items:center;justify-content:center;font-size:24px;line-height:1}
 .login-modal-header-plain .login-modal-close:hover{background:transparent;color:#ffffff;transform:none}
 .login-modal-header{position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:18px;padding:28px 30px 24px;background:linear-gradient(135deg,#163f7a 0%,#2b5fa5 55%,#5f88c2 100%);color:#fff;overflow:hidden}
 .login-modal-header::before{content:"";position:absolute;inset:auto auto -64px -58px;width:180px;height:180px;border-radius:999px;background:radial-gradient(circle,rgba(255,255,255,.22),rgba(255,255,255,0) 70%)}
@@ -622,24 +622,25 @@ opacity:.9}
 .login-modal-meta-link:hover{text-decoration:underline}
 .login-modal-close{-webkit-appearance:none;appearance:none;position:absolute;top:18px;right:18px;z-index:3;width:42px;height:42px;padding:0;border:0;border-radius:999px;background:rgba(255,255,255,.14);color:#fff;font-size:30px;line-height:1;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:background-color 180ms ease,transform 180ms ease}
 .login-modal-close:hover{background:rgba(240,161,40,.22);transform:rotate(90deg)}
-.register-modal-dialog{width:min(100%,940px);max-height:calc(100vh - 32px);overflow:visible}
+.register-modal-dialog{width:min(100%,940px);max-height:calc(100dvh - 32px);overflow:hidden}
 .register-modal-header{background:linear-gradient(135deg,#0f4c81 0%,#2b5fa5 55%,#7aa1d0 100%)}
 .register-card-modal{border-color:rgba(15,76,129,.18)}
-.register-card-modal.login-card-modal-split{grid-template-columns:.76fr 1fr;min-height:auto}
+.register-card-modal.login-card-modal-split{grid-template-columns:minmax(300px,360px) minmax(0,1fr);min-height:auto}
 .forgot-card-modal.login-card-modal-split{min-height:auto}
 .forgot-modal-panel{justify-content:flex-start}
-.register-modal-visual .login-modal-visual-content{width:min(100%,250px);min-height:280px;padding:8px 8px 0}
+.register-modal-visual .login-modal-visual-content{width:min(100%,290px);min-height:280px;padding:8px 8px 0}
 .register-modal-visual .login-modal-visual-logo{width:180px;height:180px}
-.register-modal-visual .login-modal-visual-title{margin:12px 0 5px;font-size:40px}
-.register-modal-visual .login-modal-visual-subtitle{font-size:12px}
+.register-modal-visual .login-modal-visual-title{margin:12px 0 5px;font-size:clamp(30px,2.8vw,38px);line-height:.96}
+.register-modal-visual .login-modal-visual-subtitle{font-size:11px;line-height:1.2}
 .register-modal-visual .login-modal-visual-kicker{margin-top:14px;padding:8px 14px}
 .register-modal-panel > .register-modal-header-plain{width:100%;margin:0}
 .register-modal-panel > .register-modal-body{width:min(calc(100% - 36px),560px);margin:0 auto}
 .register-modal-header-plain{background:linear-gradient(135deg,#163f7a 0%,#2b5fa5 55%,#6f95c9 100%)}
-.register-modal-header-plain{padding:22px 20px 12px}
-.register-modal-header-plain h2{font-size:36px;line-height:1}
-.register-modal-header-plain .login-modal-subtitle{margin-top:8px;font-size:11px;line-height:1.3}
+.register-modal-header-plain{min-height:186px;padding:26px 56px 22px 20px}
+.register-modal-header-plain h2{font-size:clamp(34px,4vw,50px);line-height:1.04;white-space:normal;text-wrap:balance;max-width:12ch}
+.register-modal-header-plain .login-modal-subtitle{margin-top:12px;font-size:clamp(12px,1.2vw,15px);line-height:1.3;max-width:24ch;text-wrap:balance}
 .register-modal-body{padding:10px 28px 18px}
+.register-modal-panel{min-height:0;overflow-y:auto;overflow-x:hidden}
 .verification-modal-dialog{width:min(100%,760px);max-height:none !important;overflow:visible !important}
 .verification-card-modal.login-card-modal-split{grid-template-columns:.72fr 1fr;min-height:460px}
 .verification-modal-visual .login-modal-visual-content{width:min(100%,240px);min-height:280px}
@@ -729,7 +730,7 @@ opacity:.9}
 .register-login-link:hover{text-decoration:underline}
 .register-honeypot{position:absolute !important;left:-9999px !important;top:auto !important;width:1px !important;height:1px !important;overflow:hidden !important}
 
-@media (min-width:641px) and ((max-width:980px) or (max-height:720px)){
+@media (min-width:641px) and (max-width:980px){
   .login-modal{
     align-items:flex-start;
   }
@@ -828,7 +829,7 @@ opacity:.9}
   }
 }
 
-@media (min-width:641px) and ((max-width:760px) or (max-height:560px)){
+@media (min-width:641px) and (max-width:760px){
   .login-modal{
     align-items:flex-start;
     padding:12px;
@@ -1230,7 +1231,7 @@ opacity:.9}
   #registerModal .register-submit-btn-modal{min-height:36px;font-size:11px}
 }
 
-@media (max-height:720px){
+@media (max-height:720px) and (max-width:980px){
   .login-modal{
     align-items:flex-start;
     padding:12px;
@@ -1302,6 +1303,299 @@ opacity:.9}
   .verification-form .verification-primary-btn{margin-top:8px}
   .register-form-modal{grid-template-columns:1fr}
   .register-form-modal .password-validation-list{grid-template-columns:1fr}
+}
+
+@media (min-width:521px) and (max-width:760px) and (hover:hover) and (pointer:fine){
+  .login-card-modal-split,
+  .register-card-modal.login-card-modal-split,
+  .forgot-card-modal.login-card-modal-split{
+    display:grid !important;
+    grid-template-columns:minmax(300px,360px) minmax(0,1fr) !important;
+    min-height:auto;
+  }
+
+  #loginModal .login-modal-visual,
+  #forgotPasswordModal .login-modal-visual,
+  #registerModal .register-modal-visual{
+    display:flex !important;
+    min-height:auto;
+    padding:22px 24px;
+  }
+
+  #loginModal .login-modal-panel,
+  #forgotPasswordModal .forgot-modal-panel,
+  #registerModal .register-modal-panel{
+    display:flex;
+    width:auto;
+  }
+
+  #loginModal .login-modal-header-plain,
+  #forgotPasswordModal .login-modal-header-plain,
+  #registerModal .login-modal-header-plain{
+    min-height:180px;
+    padding:26px 42px 22px 20px;
+  }
+
+  #registerModal .register-modal-header-plain{
+    min-height:186px;
+  }
+
+  #loginModal .login-modal-header-plain .login-modal-header-copy,
+  #forgotPasswordModal .login-modal-header-plain .login-modal-header-copy,
+  #registerModal .login-modal-header-plain .login-modal-header-copy{
+    max-width:calc(100% - 36px);
+    padding:0;
+  }
+
+  #loginModal .login-modal-header-plain h2,
+  #forgotPasswordModal .login-modal-header-plain h2,
+  #registerModal .login-modal-header-plain h2{
+    font-size:clamp(34px,4vw,52px);
+    line-height:1.04;
+    white-space:normal;
+    text-wrap:balance;
+  }
+
+  #registerModal .login-modal-header-plain h2{
+    font-size:clamp(34px,4vw,50px);
+  }
+
+  #loginModal .login-modal-header-plain .login-modal-subtitle,
+  #forgotPasswordModal .login-modal-header-plain .login-modal-subtitle,
+  #registerModal .login-modal-header-plain .login-modal-subtitle{
+    margin-top:12px;
+    font-size:clamp(12px,1.2vw,15px);
+    line-height:1.3;
+    max-width:24ch;
+    text-align:center;
+    text-wrap:balance;
+  }
+
+  #loginModal .login-modal-header-plain .login-modal-close,
+  #forgotPasswordModal .login-modal-header-plain .login-modal-close,
+  #registerModal .login-modal-header-plain .login-modal-close{
+    top:10px;
+    right:4px;
+    width:30px;
+    height:30px;
+    font-size:24px;
+  }
+
+  #loginModal .login-modal-body-plain,
+  #forgotPasswordModal .login-modal-body-plain,
+  #registerModal .register-modal-body{
+    padding-left:32px;
+    padding-right:32px;
+  }
+
+  #loginModal .login-modal-visual-logo,
+  #forgotPasswordModal .login-modal-visual-logo{
+    width:200px;
+    height:200px;
+  }
+
+  #registerModal .register-modal-visual-logo{
+    width:180px;
+    height:180px;
+  }
+
+  #loginModal .login-modal-visual-title,
+  #forgotPasswordModal .login-modal-visual-title{
+    font-size:clamp(32px,3vw,40px);
+    line-height:.96;
+  }
+
+  #registerModal .register-modal-visual-title{
+    font-size:clamp(30px,2.8vw,38px);
+    line-height:.96;
+  }
+}
+
+@media (max-width:520px){
+  .login-modal{
+    align-items:flex-start;
+    padding:8px;
+  }
+
+  .login-modal-dialog,
+  .register-modal-dialog,
+  .verification-modal-dialog{
+    width:100%;
+    max-height:calc(100dvh - 16px) !important;
+    margin:0;
+    border-radius:18px;
+    background:#fff;
+    overflow:hidden !important;
+    scrollbar-width:none;
+    -ms-overflow-style:none;
+  }
+
+  .login-modal-dialog::-webkit-scrollbar,
+  .register-modal-dialog::-webkit-scrollbar,
+  .verification-modal-dialog::-webkit-scrollbar{
+    width:0;
+    height:0;
+  }
+
+  .login-card-modal,
+  .login-card-modal-split,
+  .register-card-modal.login-card-modal-split,
+  .forgot-card-modal.login-card-modal-split,
+  .verification-card-modal.login-card-modal-split{
+    display:block !important;
+    width:100%;
+    border-radius:18px;
+    overflow:hidden;
+    background:#fff;
+    box-shadow:none;
+  }
+
+  #loginModal .login-modal-visual,
+  #forgotPasswordModal .login-modal-visual,
+  #registerModal .register-modal-visual,
+  #twoFaModal .verification-modal-visual,
+  #registerVerificationModal .verification-modal-visual{
+    display:none !important;
+  }
+
+  #loginModal .login-modal-panel,
+  #forgotPasswordModal .forgot-modal-panel,
+  #registerModal .register-modal-panel,
+  #twoFaModal .verification-modal-panel,
+  #registerVerificationModal .verification-modal-panel{
+    display:flex;
+    flex-direction:column;
+    width:100%;
+    max-height:calc(100dvh - 16px);
+    overflow-y:auto;
+    overflow-x:hidden;
+    scrollbar-width:none;
+    -ms-overflow-style:none;
+    scrollbar-gutter:auto;
+    background:transparent;
+  }
+
+  #loginModal .login-modal-panel::-webkit-scrollbar,
+  #forgotPasswordModal .forgot-modal-panel::-webkit-scrollbar,
+  #registerModal .register-modal-panel::-webkit-scrollbar,
+  #twoFaModal .verification-modal-panel::-webkit-scrollbar,
+  #registerVerificationModal .verification-modal-panel::-webkit-scrollbar{
+    width:0;
+    height:0;
+  }
+
+  #loginModal .login-modal-header-plain,
+  #forgotPasswordModal .login-modal-header-plain,
+  #registerModal .login-modal-header-plain,
+  #twoFaModal .verification-modal-header-plain,
+  #registerVerificationModal .verification-modal-header-plain{
+    position:sticky;
+    top:0;
+    left:0;
+    right:0;
+    width:100%;
+    box-sizing:border-box;
+    z-index:6;
+    min-height:unset;
+    padding:14px 36px 12px 12px;
+    margin:0;
+    border-top-left-radius:18px;
+    border-top-right-radius:18px;
+    background:linear-gradient(135deg,#163f7a 0%,#2b5fa5 55%,#6f95c9 100%);
+    overflow:visible;
+  }
+
+  #loginModal .login-modal-header-plain::after,
+  #forgotPasswordModal .login-modal-header-plain::after,
+  #registerModal .login-modal-header-plain::after,
+  #twoFaModal .verification-modal-header-plain::after,
+  #registerVerificationModal .verification-modal-header-plain::after{
+    content:"";
+    position:absolute;
+    top:0;
+    right:-18px;
+    width:18px;
+    height:100%;
+    background:inherit;
+  }
+
+  #loginModal .login-modal-header-plain .login-modal-header-copy,
+  #forgotPasswordModal .login-modal-header-plain .login-modal-header-copy,
+  #registerModal .login-modal-header-plain .login-modal-header-copy,
+  #twoFaModal .verification-modal-header-plain .login-modal-header-copy,
+  #registerVerificationModal .verification-modal-header-plain .login-modal-header-copy{
+    max-width:100%;
+  }
+
+  #loginModal .login-modal-title-row,
+  #forgotPasswordModal .login-modal-title-row,
+  #registerModal .login-modal-title-row,
+  #twoFaModal .login-modal-title-row,
+  #registerVerificationModal .login-modal-title-row{
+    display:flex;
+    justify-content:center;
+  }
+
+  #loginModal .login-modal-header-plain h2,
+  #forgotPasswordModal .login-modal-header-plain h2,
+  #registerModal .login-modal-header-plain h2,
+  #twoFaModal .verification-modal-header-plain h2,
+  #registerVerificationModal .verification-modal-header-plain h2{
+    max-width:12ch;
+    font-size:clamp(18px,7vw,28px);
+    line-height:1.08;
+    overflow-wrap:normal;
+    word-break:normal;
+    hyphens:none;
+  }
+
+  #loginModal .login-modal-header-plain .login-modal-subtitle,
+  #forgotPasswordModal .login-modal-header-plain .login-modal-subtitle,
+  #registerModal .login-modal-header-plain .login-modal-subtitle,
+  #twoFaModal .verification-modal-header-plain .login-modal-subtitle,
+  #registerVerificationModal .verification-modal-header-plain .login-modal-subtitle{
+    margin-top:6px;
+    max-width:none;
+    font-size:clamp(10px,3.2vw,13px);
+    line-height:1.25;
+  }
+
+  #loginModal .login-modal-header-plain .login-modal-close,
+  #forgotPasswordModal .login-modal-header-plain .login-modal-close,
+  #registerModal .login-modal-header-plain .login-modal-close,
+  #twoFaModal .verification-modal-header-plain .login-modal-close,
+  #registerVerificationModal .verification-modal-header-plain .login-modal-close{
+    top:8px;
+    right:0;
+    width:28px;
+    height:28px;
+    font-size:22px;
+  }
+
+  #loginModal .login-modal-panel,
+  #forgotPasswordModal .forgot-modal-panel,
+  #registerModal .register-modal-panel,
+  #twoFaModal .verification-modal-panel,
+  #registerVerificationModal .verification-modal-panel{
+    background:#ffffff;
+  }
+
+  #loginModal .login-modal-panel > .login-modal-body-plain,
+  #forgotPasswordModal .forgot-modal-panel > .login-modal-body-plain,
+  #registerModal .register-modal-panel > .register-modal-body,
+  #twoFaModal .verification-modal-panel > .verification-modal-body,
+  #registerVerificationModal .verification-modal-panel > .verification-modal-body{
+    width:min(calc(100% - 20px),640px);
+    background:#fff;
+  }
+
+  #loginModal .login-modal-body-plain,
+  #forgotPasswordModal .login-modal-body-plain,
+  #registerModal .register-modal-body,
+  #twoFaModal .verification-modal-body,
+  #registerVerificationModal .verification-modal-body{
+    padding:10px 10px 14px;
+  }
 }
 
 @media(max-width:1180px){
@@ -3088,4 +3382,184 @@ body.public-page-contact-us .contact-gov-info .contact-gov-note{
   .transparency-note-plain{padding:14px 12px;border-radius:14px}
   .transparency-note-plain h3{font-size:16px}
   .transparency-note-plain p{font-size:14px;line-height:1.58}
+}
+
+/* Modal accessibility overrides: prevent overlap and keep content readable on zoom */
+.login-modal{
+  align-items:flex-start;
+  padding:clamp(10px,2.6vw,24px);
+}
+.login-modal-dialog,
+.register-modal-dialog{
+  width:min(100%,940px);
+  max-height:calc(100dvh - 20px) !important;
+  overflow:hidden !important;
+  background:#ffffff !important;
+  scrollbar-width:thin;
+}
+.login-card-modal,
+.login-card-modal-split,
+.register-card-modal.login-card-modal-split{
+  min-height:0;
+}
+.login-modal-panel,
+.register-modal-panel{
+  overflow-y:auto !important;
+  overflow-x:hidden !important;
+  scrollbar-width:thin;
+}
+.login-modal-header-plain{
+  min-height:auto;
+  padding-right:72px;
+}
+.login-modal-header-plain .login-modal-header-copy{
+  max-width:100%;
+}
+.login-modal-header-plain::after,
+#loginModal .login-modal-header-plain::after,
+#forgotPasswordModal .login-modal-header-plain::after,
+#registerModal .login-modal-header-plain::after,
+#twoFaModal .verification-modal-header-plain::after,
+#registerVerificationModal .verification-modal-header-plain::after{
+  display:none !important;
+  content:none !important;
+}
+.login-modal-subtitle .agency-line,
+.login-modal-subtitle .system-line{
+  white-space:normal !important;
+  overflow-wrap:anywhere;
+}
+.login-modal-header-plain h2,
+#loginModal .login-modal-header-plain h2,
+#registerModal .login-modal-header-plain h2{
+  max-width:none;
+  white-space:normal;
+  text-wrap:balance;
+  overflow-wrap:normal;
+  word-break:keep-all;
+  hyphens:none;
+}
+#loginModal .login-modal-header-plain h2{
+  font-size:clamp(30px,3.4vw,46px);
+  max-width:12ch;
+}
+
+/* Keep labels above user input so text is never covered when zoomed */
+.login-modal .login-input-shell{
+  min-height:64px;
+  padding:16px 18px;
+}
+.login-modal .login-input-wrap-modal input,
+#registerModal .register-input-wrap input{
+  min-height:24px;
+  padding-top:22px;
+  padding-bottom:4px;
+  font-size:16px;
+  line-height:1.35;
+}
+.login-modal .login-floating-label,
+#registerModal .register-input-wrap .login-floating-label{
+  top:10px;
+  transform:none;
+  font-size:11px;
+  line-height:1.2;
+  max-width:calc(100% - 90px);
+  white-space:normal;
+}
+.login-modal .login-input-wrap-modal input:focus + .login-floating-label,
+.login-modal .login-input-wrap-modal input:not(:placeholder-shown) + .login-floating-label,
+#registerModal .register-input-wrap input:focus + .login-floating-label,
+#registerModal .register-input-wrap input:not(:placeholder-shown) + .login-floating-label{
+  top:10px;
+  transform:none;
+  font-size:11px;
+}
+
+/* Remove blue edge/highlight around close button */
+.login-modal-close,
+.login-modal-header-plain .login-modal-close{
+  background:transparent !important;
+  border:0 !important;
+  box-shadow:none !important;
+  outline:none !important;
+  -webkit-tap-highlight-color:transparent;
+}
+.login-modal-close:hover,
+.login-modal-header-plain .login-modal-close:hover{
+  background:transparent !important;
+  transform:none !important;
+}
+.login-modal-close:focus,
+.login-modal-close:focus-visible{
+  outline:none !important;
+  box-shadow:none !important;
+  background:transparent !important;
+}
+
+@media (max-width:1024px), (max-height:820px){
+  .login-card-modal-split,
+  .register-card-modal.login-card-modal-split{
+    grid-template-columns:1fr;
+  }
+  #loginModal .login-card-modal-split{
+    grid-template-columns:1fr !important;
+  }
+  #loginModal .login-modal-visual,
+  #registerModal .register-modal-visual{
+    display:none;
+  }
+  .login-modal-dialog,
+  .register-modal-dialog{
+    border-radius:20px;
+  }
+  #loginModal .login-modal-header-plain h2,
+  #registerModal .login-modal-header-plain h2{
+    font-size:clamp(20px,5.2vw,34px);
+    line-height:1.08;
+  }
+  #loginModal .login-modal-header-plain .login-modal-subtitle,
+  #registerModal .login-modal-header-plain .login-modal-subtitle{
+    max-width:30ch;
+    font-size:clamp(11px,2.1vw,14px);
+  }
+}
+
+@media (max-width:520px){
+  #registerModal .register-modal-dialog,
+  #registerModal .register-modal-panel{
+    background:#ffffff !important;
+  }
+  #registerModal .register-modal-panel > .register-modal-body{
+    width:100% !important;
+    background:#ffffff !important;
+  }
+}
+
+/* Remove form panel fills inside auth modals */
+.login-modal .login-input-shell,
+#registerModal .register-input-wrap .login-input-shell{
+  background:transparent !important;
+  box-shadow:none !important;
+}
+.login-modal .login-input-wrap-modal:hover .login-input-shell,
+.login-modal .login-input-wrap-modal:focus-within .login-input-shell,
+#registerModal .register-input-wrap:hover .login-input-shell,
+#registerModal .register-input-wrap:focus-within .login-input-shell{
+  background:transparent !important;
+}
+
+/* On zoom/reduced viewport, show form-only mode for login/register modals */
+@media (max-width:1366px), (max-height:860px){
+  #loginModal .login-card-modal-split,
+  #registerModal .register-card-modal.login-card-modal-split{
+    grid-template-columns:1fr !important;
+  }
+  #loginModal .login-modal-visual,
+  #registerModal .register-modal-visual{
+    display:none !important;
+  }
+  #loginModal .login-modal-dialog,
+  #registerModal .register-modal-dialog{
+    width:min(100%,760px) !important;
+  }
 }
