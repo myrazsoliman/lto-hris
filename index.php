@@ -550,7 +550,7 @@ $publicNavItems = [
     </style>
 </head>
 
-<body class="landing-page<?php echo ($showLoginModal || $showRegisterModal || $showForgotModal || $show2faModal) ? ' login-modal-open' : ''; ?>">
+<body class="landing-page<?php echo ($showLoginModal || $showRegisterModal || $showForgotModal || $show2faModal || $showRegisterVerificationModal) ? ' login-modal-open' : ''; ?>">
 
     <div class="gov-topbar">
         <div class="gov-inner">
@@ -921,7 +921,7 @@ $publicNavItems = [
                     <div class="login-modal-header login-modal-header-plain verification-modal-header-plain">
                         <div class="login-modal-header-copy">
                             <div class="login-modal-title-row">
-                                <h2>Secure <span>Sign-In</span></h2>
+                                <h2>Email <span>Verification</span></h2>
                             </div>
                             <p class="login-modal-subtitle">Enter your 6-digit authentication code to continue.</p>
                         </div>
@@ -1198,7 +1198,7 @@ $publicNavItems = [
                     <div class="login-modal-header login-modal-header-plain verification-modal-header-plain">
                         <div class="login-modal-header-copy">
                             <div class="login-modal-title-row">
-                                <h2>Verify <span>Email</span></h2>
+                                <h2>Email <span>Verification</span></h2>
                             </div>
                             <p class="login-modal-subtitle">Enter the 6-digit code we sent to your email.</p>
                         </div>

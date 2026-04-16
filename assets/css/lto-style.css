@@ -13,6 +13,17 @@ html,body{height:100%}
 body{font-family:Arial,Helvetica,sans-serif;margin:0;color:#111;background:var(--bg);padding-top:var(--gov-height)}
 .container{max-width:1360px;margin:0 auto;padding:0 18px}
 
+/* Public pages sticky footer layout */
+body.landing-page{
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+}
+
+body.landing-page .site-footer.gov-footer{
+  margin-top:auto;
+}
+
 .gov-topbar{background:rgba(15,56,110,0.98);border-bottom:1px solid rgba(255,255,255,0.14);position:fixed;top:0;left:0;right:0;z-index:1050;height:var(--gov-height);backdrop-filter:blur(4px);box-shadow:0 6px 20px rgba(11,28,56,0.24)}
 .gov-inner{max-width:1360px;margin:0 auto;display:grid;grid-template-columns:auto minmax(0,1fr) auto auto auto;align-items:center;column-gap:0;padding-left:8px;padding-right:8px;height:100%}
 .gov-left{font-weight:400;color:#f8fbff;font-size:18px;display:flex;align-items:center;justify-content:center;gap:0;margin:0;padding:0 18px;min-width:var(--gov-left-slot);height:100%;white-space:nowrap}
@@ -1135,7 +1146,7 @@ opacity:.9}
   #loginModal .login-modal-header-plain{padding:18px 18px 12px}
   #loginModal .login-modal-header-plain{
     min-height:128px !important;
-    padding:10px 40px 10px 14px !important;
+    padding:10px 40px !important;
     display:flex !important;
     align-items:center !important;
     justify-content:center !important;
@@ -3616,13 +3627,17 @@ body.public-page-contact-us .contact-gov-info .contact-gov-note{
 /* Prevent white edge bleed on zoom: dialog shell stays transparent, card is the only surface */
 #loginModal .login-modal-dialog,
 #forgotPasswordModal .forgot-modal-dialog,
-#registerModal .register-modal-dialog{
+#registerModal .register-modal-dialog,
+#twoFaModal .verification-modal-dialog,
+#registerVerificationModal .verification-modal-dialog{
   background:transparent !important;
 }
 
 #loginModal .login-card-modal-split,
 #forgotPasswordModal .forgot-card-modal.login-card-modal-split,
-#registerModal .register-card-modal.login-card-modal-split{
+#registerModal .register-card-modal.login-card-modal-split,
+#twoFaModal .verification-card-modal.login-card-modal-split,
+#registerVerificationModal .verification-card-modal.login-card-modal-split{
   border-radius:inherit;
   overflow:hidden;
 }
@@ -3630,7 +3645,9 @@ body.public-page-contact-us .contact-gov-info .contact-gov-note{
 /* Remove right-edge white strip at high zoom: suppress visible scrollbar gutters/tracks */
 #loginModal .login-modal-dialog,
 #forgotPasswordModal .forgot-modal-dialog,
-#registerModal .register-modal-dialog{
+#registerModal .register-modal-dialog,
+#twoFaModal .verification-modal-dialog,
+#registerVerificationModal .verification-modal-dialog{
   overflow:hidden !important;
   scrollbar-width:none !important;
   -ms-overflow-style:none !important;
@@ -3641,7 +3658,11 @@ body.public-page-contact-us .contact-gov-info .contact-gov-note{
 #registerModal .register-modal-dialog::-webkit-scrollbar,
 #loginModal .login-modal-panel::-webkit-scrollbar,
 #forgotPasswordModal .forgot-modal-panel::-webkit-scrollbar,
-#registerModal .register-modal-panel::-webkit-scrollbar{
+#registerModal .register-modal-panel::-webkit-scrollbar,
+#twoFaModal .verification-modal-dialog::-webkit-scrollbar,
+#registerVerificationModal .verification-modal-dialog::-webkit-scrollbar,
+#twoFaModal .verification-modal-panel::-webkit-scrollbar,
+#registerVerificationModal .verification-modal-panel::-webkit-scrollbar{
   width:0 !important;
   height:0 !important;
   background:transparent !important;
@@ -3649,9 +3670,17 @@ body.public-page-contact-us .contact-gov-info .contact-gov-note{
 
 #loginModal .login-modal-panel,
 #forgotPasswordModal .forgot-modal-panel,
-#registerModal .register-modal-panel{
+#registerModal .register-modal-panel,
+#twoFaModal .verification-modal-panel,
+#registerVerificationModal .verification-modal-panel{
   scrollbar-width:none !important;
   -ms-overflow-style:none !important;
+  background:transparent !important;
+}
+
+#twoFaModal .verification-modal-panel > .verification-modal-body,
+#registerVerificationModal .verification-modal-panel > .verification-modal-body{
+  background:transparent !important;
 }
 
 /* Register header breathing room: prevent subtitle from sitting too close to bottom edge */
@@ -3755,6 +3784,21 @@ body.public-page-contact-us .contact-gov-info .contact-gov-note{
   padding-bottom:max(24px, env(safe-area-inset-bottom)) !important;
 }
 
+/* Same zoom-safe scroll behavior for forgot-password modal */
+#forgotPasswordModal .forgot-modal-dialog{
+  overflow-y:auto !important;
+  overflow-x:hidden !important;
+}
+
+#forgotPasswordModal .forgot-modal-panel{
+  overflow:visible !important;
+  max-height:none !important;
+}
+
+#forgotPasswordModal .forgot-modal-panel > .login-modal-body-plain{
+  padding-bottom:max(24px, env(safe-area-inset-bottom)) !important;
+}
+
 /* Register floating labels: center by default, float only on focus/value */
 #registerModal .register-input-wrap .login-floating-label{
   top:50% !important;
@@ -3799,12 +3843,12 @@ body.public-page-contact-us .contact-gov-info .contact-gov-note{
   #registerModal.login-modal{
     align-items:center !important;
     justify-content:center !important;
-    padding:10px !important;
+    padding:14px !important;
   }
 
   #registerModal .register-modal-dialog{
     width:min(100%,470px) !important;
-    max-height:calc(100dvh - 20px) !important;
+    max-height:calc(100dvh - 40px) !important;
     margin:0 auto !important;
     overflow:hidden !important;
     border-radius:22px !important;
@@ -3816,7 +3860,7 @@ body.public-page-contact-us .contact-gov-info .contact-gov-note{
     justify-content:flex-start !important;
     overflow-y:auto !important;
     overflow-x:hidden !important;
-    max-height:calc(100dvh - 20px) !important;
+    max-height:calc(100dvh - 40px) !important;
   }
 
   #registerModal .login-modal-header-plain{
@@ -3825,7 +3869,7 @@ body.public-page-contact-us .contact-gov-info .contact-gov-note{
     display:flex !important;
     align-items:center !important;
     justify-content:center !important;
-    min-height:128px !important;
+    min-height:112px !important;
   }
 
   #registerModal .login-modal-header-plain .login-modal-header-copy{
@@ -3871,15 +3915,39 @@ body.public-page-contact-us .contact-gov-info .contact-gov-note{
   }
 
   #registerModal .register-input-wrap .login-input-shell{
-    min-height:40px !important;
-    padding:6px 10px !important;
+    min-height:46px !important;
+    padding:8px 10px !important;
     border-radius:10px !important;
+    grid-template-columns:18px minmax(0,1fr) !important;
+    column-gap:14px !important;
   }
 
   #registerModal .register-input-wrap input{
-    min-height:14px !important;
+    min-height:18px !important;
     font-size:11px !important;
-    padding-top:8px !important;
+    padding-top:15px !important;
+    padding-bottom:4px !important;
+    line-height:1.3 !important;
+  }
+
+  #registerModal .register-input-wrap:has(.login-password-toggle) input{
+    padding-top:15px !important;
+    padding-bottom:4px !important;
+  }
+
+  #registerModal .register-input-wrap .login-floating-label{
+    left:42px !important;
+    top:50% !important;
+    transform:translateY(-50%) !important;
+    font-size:11px !important;
+  }
+
+  #registerModal .register-input-wrap input:focus + .login-floating-label,
+  #registerModal .register-input-wrap input:not(:placeholder-shown) + .login-floating-label{
+    top:6px !important;
+    transform:none !important;
+    font-size:8px !important;
+    line-height:1.1 !important;
   }
 
   #registerModal .register-form-modal .password-validation-indicator{
@@ -3930,12 +3998,16 @@ body.public-page-contact-us .contact-gov-info .contact-gov-note{
   }
 }
 
-/* Desktop/web: keep "Create Account" title on a single line */
+/* Desktop/web: keep only register title on a single line */
 @media (min-width:641px){
-  #loginModal .login-modal-header-plain h2,
   #registerModal .login-modal-header-plain h2{
     white-space:nowrap !important;
     max-width:none !important;
+  }
+
+  #loginModal .login-modal-header-plain h2{
+    white-space:normal !important;
+    max-width:12ch !important;
   }
 }
 
@@ -4063,7 +4135,25 @@ body.public-page-contact-us .contact-gov-info .contact-gov-note{
 /* Desktop/web forgot-password modal spacing tune */
 @media (min-width:641px){
   #forgotPasswordModal .forgot-modal-dialog{
-    width:min(100%,620px) !important;
+    width:min(100%,860px) !important;
+  }
+
+  #forgotPasswordModal .forgot-card-modal.login-card-modal-split{
+    grid-template-columns:minmax(300px,360px) minmax(0,1fr) !important;
+  }
+
+  /* Match forgot-password input box sizing to login modal on web view */
+  #forgotPasswordModal .login-input-shell{
+    min-height:58px !important;
+    padding:14px 16px !important;
+  }
+
+  #forgotPasswordModal .login-input-wrap-modal input{
+    min-height:24px !important;
+    padding-top:22px !important;
+    padding-bottom:4px !important;
+    font-size:16px !important;
+    line-height:1.35 !important;
   }
 
   #forgotPasswordModal .login-modal-header-plain{
@@ -4102,15 +4192,15 @@ body.public-page-contact-us .contact-gov-info .contact-gov-note{
 /* Web zoom: forgot-password modal should switch to form-only view */
 @media (min-width:641px) and ((max-width:1366px) or (max-height:860px)){
   #forgotPasswordModal .forgot-card-modal.login-card-modal-split{
-    grid-template-columns:1fr !important;
+    grid-template-columns:minmax(300px,360px) minmax(0,1fr) !important;
   }
 
   #forgotPasswordModal .login-modal-visual{
-    display:none !important;
+    display:flex !important;
   }
 
   #forgotPasswordModal .forgot-modal-dialog{
-    width:min(100%,620px) !important;
+    width:min(100%,860px) !important;
   }
 }
 
@@ -4160,6 +4250,7 @@ body.public-page-contact-us .contact-gov-info .contact-gov-note{
     margin-bottom:0 !important;
     line-height:1.22 !important;
   }
+
 }
 
 @media (max-width:640px){
@@ -4171,5 +4262,599 @@ body.public-page-contact-us .contact-gov-info .contact-gov-note{
   #forgotPasswordModal .login-forgot-link{
     margin-left:auto;
     text-align:right;
+  }
+
+  /* Match login modal bottom padding behavior on zoom-collapsed layout */
+  #registerModal .register-modal-panel > .register-modal-body{
+    padding-bottom:max(30px, env(safe-area-inset-bottom)) !important;
+  }
+
+  #registerModal .register-submit-btn-modal{
+    margin-bottom:10px !important;
+  }
+
+  /* Mobile: keep "Create Account" title in one line */
+  #registerModal .login-modal-header-plain h2{
+    white-space:nowrap !important;
+    max-width:none !important;
+  }
+
+  /* Mobile: keep "Welcome to LTO HRIS" title in one line */
+  #loginModal .login-modal-header-plain h2{
+    white-space:nowrap !important;
+    max-width:none !important;
+  }
+
+  /* Mobile: tighten login header vertical spacing */
+  #loginModal .login-modal-header-plain{
+    min-height:96px !important;
+    padding:8px 36px 6px !important;
+  }
+
+  #loginModal .login-modal-header-plain .login-modal-subtitle{
+    margin-top:3px !important;
+    line-height:1.15 !important;
+  }
+
+  #loginModal .login-modal-header-plain .login-modal-close{
+    top:4px !important;
+  }
+
+  /* Mobile: tighten register header vertical spacing */
+  #registerModal .login-modal-header-plain{
+    min-height:96px !important;
+    padding:8px 36px 6px !important;
+  }
+
+  #registerModal .login-modal-header-plain .login-modal-subtitle{
+    margin-top:3px !important;
+    line-height:1.15 !important;
+  }
+
+  #registerModal .login-modal-header-plain .login-modal-close{
+    top:4px !important;
+  }
+
+  /* Mobile: tighten forgot-password header vertical spacing */
+  #forgotPasswordModal .login-modal-header-plain{
+    min-height:96px !important;
+    padding:8px 36px 6px !important;
+  }
+
+  #forgotPasswordModal .login-modal-header-plain .login-modal-subtitle{
+    margin-top:3px !important;
+    line-height:1.15 !important;
+  }
+
+  #forgotPasswordModal .login-modal-header-plain .login-modal-close{
+    top:4px !important;
+  }
+}
+
+/* Keep login heading truly centered across high zoom levels */
+#loginModal .login-modal-title-row{
+  display:block !important;
+  width:100% !important;
+  text-align:center !important;
+}
+
+#loginModal .login-modal-header-plain h2{
+  display:block !important;
+  margin-left:auto !important;
+  margin-right:auto !important;
+  text-align:center !important;
+}
+
+/* Login header anti-overlap guard: keep title/subtitle stacked with stable spacing on all zoom levels */
+#loginModal .login-modal-header-plain .login-modal-header-copy{
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:6px !important;
+}
+
+#loginModal .login-modal-header-plain h2{
+  margin:0 !important;
+  line-height:1.08 !important;
+}
+
+#loginModal .login-modal-header-plain .login-modal-subtitle{
+  margin:0 !important;
+  line-height:1.24 !important;
+}
+
+@media (max-width:640px){
+  #loginModal .login-modal-header-plain .login-modal-header-copy{
+    gap:4px !important;
+  }
+
+  /* Match login/forgot input text alignment and breathing room to register modal */
+  #loginModal .login-input-shell,
+  #forgotPasswordModal .login-input-shell{
+    grid-template-columns:18px minmax(0,1fr) !important;
+    column-gap:14px !important;
+  }
+
+  #loginModal .login-input-wrap-modal input,
+  #forgotPasswordModal .login-input-wrap-modal input{
+    padding-top:14px !important;
+    padding-bottom:2px !important;
+    line-height:1.3 !important;
+  }
+
+  #loginModal .login-floating-label{
+    left:46px !important;
+    top:50% !important;
+    transform:translateY(-50%) !important;
+  }
+
+  #forgotPasswordModal .login-floating-label{
+    left:44px !important;
+    top:50% !important;
+    transform:translateY(-50%) !important;
+  }
+
+  #loginModal .login-input-wrap-modal input:focus + .login-floating-label,
+  #loginModal .login-input-wrap-modal input:not(:placeholder-shown) + .login-floating-label,
+  #forgotPasswordModal .login-input-wrap-modal input:focus + .login-floating-label,
+  #forgotPasswordModal .login-input-wrap-modal input:not(:placeholder-shown) + .login-floating-label{
+    top:6px !important;
+    transform:none !important;
+  }
+
+  /* Mobile: compact verification modals (2FA + register verification) */
+  #twoFaModal.login-modal,
+  #registerVerificationModal.login-modal{
+    padding:12px !important;
+    align-items:center !important;
+    justify-content:center !important;
+  }
+
+  #twoFaModal .verification-modal-dialog,
+  #registerVerificationModal .verification-modal-dialog{
+    width:min(100%,520px) !important;
+    max-height:calc(100dvh - 36px) !important;
+    overflow:hidden !important;
+    border-radius:20px !important;
+  }
+
+  #twoFaModal .verification-modal-panel,
+  #registerVerificationModal .verification-modal-panel{
+    max-height:calc(100dvh - 36px) !important;
+    overflow-y:auto !important;
+    overflow-x:hidden !important;
+  }
+
+  #twoFaModal .verification-modal-header-plain,
+  #registerVerificationModal .verification-modal-header-plain{
+    min-height:86px !important;
+    padding:0 34px !important;
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+  }
+
+  #twoFaModal .verification-modal-header-plain .login-modal-header-copy,
+  #registerVerificationModal .verification-modal-header-plain .login-modal-header-copy{
+    margin:0 auto !important;
+    text-align:center !important;
+    display:flex !important;
+    flex-direction:column !important;
+    justify-content:center !important;
+    width:100% !important;
+  }
+
+  #twoFaModal .verification-modal-header-plain .login-modal-subtitle,
+  #registerVerificationModal .verification-modal-header-plain .login-modal-subtitle{
+    margin-top:2px !important;
+    line-height:1.15 !important;
+  }
+
+  #twoFaModal .verification-modal-body,
+  #registerVerificationModal .verification-modal-body{
+    padding:10px 14px 14px !important;
+  }
+
+  #twoFaModal .verification-modal-role-band,
+  #registerVerificationModal .verification-modal-role-band{
+    margin-bottom:8px !important;
+    padding-bottom:6px !important;
+  }
+
+  #twoFaModal .verification-hero-image,
+  #registerVerificationModal .verification-hero-image{
+    width:90px !important;
+  }
+
+  #twoFaModal .verification-otp-row,
+  #registerVerificationModal .verification-otp-row{
+    gap:6px !important;
+    margin:0 0 4px !important;
+  }
+
+  #twoFaModal .verification-form input.verification-otp-digit,
+  #registerVerificationModal .verification-form input.verification-otp-digit{
+    width:34px !important;
+    min-width:34px !important;
+    max-width:34px !important;
+    height:48px !important;
+    min-height:48px !important;
+    max-height:48px !important;
+    font-size:28px !important;
+  }
+
+  #twoFaModal .verification-title,
+  #registerVerificationModal .verification-title{
+    margin:0 0 2px !important;
+    font-size:22px !important;
+    line-height:1.08 !important;
+  }
+
+  #twoFaModal .verification-description,
+  #registerVerificationModal .verification-description{
+    margin:0 auto 4px !important;
+    font-size:11px !important;
+    line-height:1.35 !important;
+  }
+
+  #twoFaModal .verification-form .verification-primary-btn,
+  #registerVerificationModal .verification-form .verification-primary-btn{
+    margin-top:6px !important;
+    min-height:44px !important;
+  }
+}
+
+@media (min-width:641px){
+  /* Match login modal bottom padding behavior on web zoom */
+  #registerModal .register-modal-panel > .register-modal-body{
+    padding-bottom:max(24px, env(safe-area-inset-bottom)) !important;
+  }
+
+  /* Match login modal web-view sizing/scroll rules for verification modals */
+  #twoFaModal.login-modal,
+  #registerVerificationModal.login-modal{
+    align-items:center;
+    padding:clamp(16px,3vw,34px);
+  }
+
+  #twoFaModal .verification-modal-dialog,
+  #registerVerificationModal .verification-modal-dialog{
+    width:min(100%,860px) !important;
+    max-height:min(calc(100dvh - 52px),820px) !important;
+    overflow-y:auto !important;
+    overflow-x:hidden !important;
+  }
+
+  #twoFaModal .verification-modal-header-plain,
+  #registerVerificationModal .verification-modal-header-plain{
+    min-height:156px;
+    padding-left:clamp(16px,3vw,56px) !important;
+    padding-right:clamp(16px,3vw,56px) !important;
+    position:relative !important;
+    top:auto !important;
+  }
+
+  #twoFaModal .verification-modal-header-plain .login-modal-header-copy,
+  #registerVerificationModal .verification-modal-header-plain .login-modal-header-copy{
+    margin-left:auto !important;
+    margin-right:auto !important;
+    text-align:center !important;
+    max-width:100% !important;
+  }
+
+  #twoFaModal .verification-modal-body,
+  #registerVerificationModal .verification-modal-body{
+    padding:10px 28px 18px !important;
+    background:transparent !important;
+  }
+
+  #twoFaModal .verification-modal-panel,
+  #registerVerificationModal .verification-modal-panel{
+    overflow:visible !important;
+    max-height:none !important;
+    justify-content:flex-start !important;
+  }
+
+  #twoFaModal .verification-modal-panel > .verification-modal-body,
+  #registerVerificationModal .verification-modal-panel > .verification-modal-body{
+    width:100% !important;
+    max-width:none !important;
+    background:transparent !important;
+    padding-bottom:max(24px, env(safe-area-inset-bottom)) !important;
+  }
+
+}
+
+/* Keep split layout on normal laptop sizes; collapse only on very constrained viewports */
+@media (min-width:641px) and ((max-width:900px) or (max-height:700px)){
+  #twoFaModal .verification-card-modal.login-card-modal-split,
+  #registerVerificationModal .verification-card-modal.login-card-modal-split{
+    grid-template-columns:1fr !important;
+  }
+
+  #twoFaModal .verification-modal-visual,
+  #registerVerificationModal .verification-modal-visual{
+    display:none !important;
+  }
+
+  #twoFaModal .verification-modal-dialog,
+  #registerVerificationModal .verification-modal-dialog{
+    width:min(100%,760px) !important;
+  }
+}
+
+/* Zoom consistency parity with login modal for verification headers */
+@media (min-width:641px) and ((max-width:1366px) or (max-height:860px)){
+  #twoFaModal .verification-modal-header-plain,
+  #registerVerificationModal .verification-modal-header-plain{
+    min-height:132px !important;
+    padding-top:10px !important;
+    padding-bottom:12px !important;
+  }
+
+  #twoFaModal .verification-modal-header-plain h2,
+  #registerVerificationModal .verification-modal-header-plain h2{
+    font-size:clamp(24px,3vw,38px) !important;
+    line-height:1.06 !important;
+    max-width:11ch !important;
+  }
+
+  #twoFaModal .verification-modal-header-plain .login-modal-subtitle,
+  #registerVerificationModal .verification-modal-header-plain .login-modal-subtitle{
+    margin-top:6px !important;
+    margin-bottom:0 !important;
+    font-size:clamp(11px,1.8vw,14px) !important;
+    line-height:1.26 !important;
+  }
+}
+
+/* Desktop zoom-out consistency: keep login header layout same as normal view */
+@media (min-width:1200px){
+  #loginModal .login-modal-header-plain{
+    min-height:172px !important;
+    padding:18px clamp(78px,6.2vw,124px) 16px clamp(62px,5.2vw,108px) !important;
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+  }
+
+  #loginModal .login-modal-header-plain .login-modal-header-copy{
+    width:100% !important;
+    max-width:980px !important;
+    margin:0 auto !important;
+    padding:0 24px !important;
+    box-sizing:border-box !important;
+    display:flex !important;
+    flex-direction:column !important;
+    align-items:center !important;
+    justify-content:center !important;
+    gap:10px !important;
+    text-align:center !important;
+  }
+
+  #loginModal .login-modal-title-row{
+    display:flex !important;
+    justify-content:center !important;
+    width:100% !important;
+    padding:0 clamp(10px,1.4vw,22px) !important;
+    box-sizing:border-box !important;
+  }
+
+  #loginModal .login-modal-header-plain h2{
+    white-space:nowrap !important;
+    max-width:calc(100% - 48px) !important;
+    font-size:clamp(36px,2.55vw,46px) !important;
+    line-height:1.02 !important;
+    padding:0 clamp(12px,1.8vw,26px) !important;
+    box-sizing:border-box !important;
+    margin:0 auto !important;
+    text-align:center !important;
+  }
+
+  #loginModal .login-modal-header-plain .login-modal-subtitle{
+    max-width:30ch !important;
+    margin:0 auto !important;
+    text-align:center !important;
+    line-height:1.2 !important;
+  }
+
+  #loginModal .login-modal-header-plain .login-modal-subtitle .agency-line,
+  #loginModal .login-modal-header-plain .login-modal-subtitle .system-line{
+    white-space:nowrap !important;
+  }
+
+  #loginModal .login-modal-header-plain .login-modal-close{
+    top:10px !important;
+    right:12px !important;
+  }
+
+  /* Register modal parity for wide web zoom (25%-90%) */
+  #registerModal .login-modal-header-plain{
+    min-height:172px !important;
+    padding:18px clamp(78px,6.2vw,124px) 16px clamp(62px,5.2vw,108px) !important;
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+  }
+
+  #registerModal .login-modal-header-plain .login-modal-header-copy{
+    width:100% !important;
+    max-width:980px !important;
+    margin:0 auto !important;
+    padding:0 24px !important;
+    box-sizing:border-box !important;
+    display:flex !important;
+    flex-direction:column !important;
+    align-items:center !important;
+    justify-content:center !important;
+    gap:10px !important;
+    text-align:center !important;
+  }
+
+  #registerModal .login-modal-title-row{
+    display:flex !important;
+    justify-content:center !important;
+    width:100% !important;
+    overflow:visible !important;
+  }
+
+  #registerModal .login-modal-header-plain h2{
+    max-width:none !important;
+    white-space:nowrap !important;
+    text-wrap:nowrap !important;
+    overflow-wrap:normal !important;
+    font-size:clamp(24px,2.35vw,46px) !important;
+    line-height:1.05 !important;
+    margin:0 auto !important;
+    text-align:center !important;
+  }
+
+  #registerModal .login-modal-header-plain .login-modal-subtitle{
+    margin:6px auto 0 !important;
+    max-width:24ch !important;
+    text-align:center !important;
+    line-height:1.2 !important;
+  }
+
+  #registerModal .login-modal-header-plain .login-modal-close{
+    top:10px !important;
+    right:12px !important;
+  }
+}
+
+/* Desktop/web edge breathing room: prevent login title from touching left/right edges on zoom-out */
+@media (min-width:641px) and (max-width:1199px){
+  #loginModal .login-modal-header-plain{
+    padding-left:clamp(24px,4vw,64px) !important;
+    padding-right:clamp(44px,5vw,84px) !important;
+  }
+
+  #loginModal .login-modal-header-plain .login-modal-header-copy{
+    width:100% !important;
+    max-width:calc(100% - 12px) !important;
+    padding:0 clamp(8px,1.4vw,18px) !important;
+    box-sizing:border-box !important;
+  }
+
+  #loginModal .login-modal-header-plain h2{
+    max-width:100% !important;
+    padding-left:clamp(10px,1.6vw,20px) !important;
+    padding-right:clamp(10px,1.6vw,20px) !important;
+    box-sizing:border-box !important;
+  }
+
+  #loginModal .login-modal-header-plain .login-modal-close{
+    right:8px !important;
+  }
+}
+
+/* Web view safeguard: keep login header title in one line */
+@media (min-width:641px){
+  #loginModal .login-modal-header-plain .login-modal-header-copy{
+    padding-right:clamp(18px,2.2vw,34px) !important;
+  }
+
+  #loginModal .login-modal-title-row{
+    overflow:visible !important;
+  }
+
+  #loginModal .login-modal-header-plain h2{
+    max-width:none !important;
+    white-space:nowrap !important;
+    text-wrap:nowrap !important;
+    overflow-wrap:normal !important;
+    font-size:clamp(24px,2.35vw,46px) !important;
+    line-height:1.05 !important;
+  }
+
+  #registerModal .login-modal-header-plain{
+    padding-left:clamp(24px,4vw,64px) !important;
+    padding-right:clamp(44px,5vw,84px) !important;
+  }
+
+  #registerModal .login-modal-header-plain .login-modal-header-copy{
+    width:100% !important;
+    max-width:calc(100% - 12px) !important;
+    margin:0 auto !important;
+    padding:0 clamp(8px,1.4vw,18px) !important;
+    box-sizing:border-box !important;
+    text-align:center !important;
+  }
+
+  #registerModal .login-modal-title-row{
+    display:flex !important;
+    justify-content:center !important;
+    width:100% !important;
+    overflow:visible !important;
+  }
+
+  #registerModal .login-modal-header-plain h2{
+    max-width:none !important;
+    white-space:nowrap !important;
+    text-wrap:nowrap !important;
+    overflow-wrap:normal !important;
+    font-size:clamp(24px,2.35vw,46px) !important;
+    line-height:1.05 !important;
+    margin:0 auto !important;
+    text-align:center !important;
+  }
+
+  #registerModal .login-modal-header-plain .login-modal-subtitle{
+    margin:6px auto 0 !important;
+    max-width:24ch !important;
+    text-align:center !important;
+  }
+
+  #registerModal .login-modal-header-plain .login-modal-close{
+    right:8px !important;
+  }
+
+  /* Verification modals: keep title in one line on web view */
+  #twoFaModal .verification-modal-header-plain h2,
+  #registerVerificationModal .verification-modal-header-plain h2{
+    max-width:none !important;
+    white-space:nowrap !important;
+    text-wrap:nowrap !important;
+    overflow-wrap:normal !important;
+  }
+}
+
+/* Final lock: keep login title font-size consistent on wide web zoom-out (25%-90%) */
+@media (min-width:1200px){
+  #loginModal .login-modal-header-plain h2{
+    font-size:40px !important;
+    line-height:1.05 !important;
+  }
+}
+
+/* High-zoom fallback: keep login title one-line, centered, and always visible */
+@media (min-width:641px) and ((max-width:1100px) or (max-height:760px)){
+  #loginModal .login-modal-header-plain .login-modal-header-copy{
+    width:100% !important;
+    max-width:100% !important;
+    margin:0 auto !important;
+    padding:0 clamp(10px,2vw,20px) !important;
+    box-sizing:border-box !important;
+    text-align:center !important;
+  }
+
+  #loginModal .login-modal-title-row{
+    width:100% !important;
+    display:flex !important;
+    justify-content:center !important;
+    overflow:visible !important;
+  }
+
+  #loginModal .login-modal-header-plain h2{
+    max-width:calc(100% - 56px) !important;
+    white-space:nowrap !important;
+    text-wrap:nowrap !important;
+    overflow-wrap:normal !important;
+    word-break:normal !important;
+    margin:0 auto !important;
+    text-align:center !important;
+    font-size:clamp(8px,1.6vw,16px) !important;
+    line-height:1.05 !important;
   }
 }
