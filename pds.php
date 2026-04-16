@@ -349,6 +349,11 @@ require_once 'includes/header.php';
                 <?php endif; ?>
             </div>
         </div>
+        <?php if ($templateAvailable && !$templateIsFillable): ?>
+            <div class="alert alert-danger" style="margin: 16px 20px 0;">
+                The active admin template is not fillable. Please ask admin to upload a fillable PDF template with editable fields.
+            </div>
+        <?php endif; ?>
         <div style="background: #eef3f8;">
             <div style="background: #eef3f8;">
                 <?php if ($templateAvailable): ?>
