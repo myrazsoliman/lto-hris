@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 $pageTitle = 'Personal Data Sheet (CSC Form No. 212)';
 $activePage = 'pds.php';
 require_once 'includes/auth.php';
@@ -269,11 +269,8 @@ require_once 'includes/header.php';
     <div class="pds-header">
         <div class="pds-header-main">
             <div class="pds-header-brand">
-                <div class="pds-header-badge">PDS</div>
-                <div class="pds-header-agency">
-                    <span class="pds-eyebrow">Republic of the Philippines</span>
-                    <strong>Land Transportation Office Human Resource Information System</strong>
-                    <span class="pds-agency-subline">Human Resource Management Division</span>
+                <div class="pds-header-badge">
+                    <img src="assets/img/pds-badge.png" alt="PDS icon">
                 </div>
             </div>
             <div class="pds-header-copy">
@@ -282,31 +279,30 @@ require_once 'includes/header.php';
                 <p>CSC Form No. 212 (Revised 2017)</p>
             </div>
         </div>
-        <div class="pds-header-panel" aria-label="PDS filing overview">
-            <div class="pds-header-panel-title">Filing Overview</div>
-            <div class="pds-header-meta">
-                <span class="pds-meta-pill"><i class="fa-solid fa-calendar" aria-hidden="true"></i> Filing year: <?php echo (int) $currentYear; ?></span>
-                <span class="pds-meta-pill"><i class="fa-solid fa-id-card" aria-hidden="true"></i> Employee ID: <?php echo (int) $employeeId; ?></span>
-                <span class="pds-meta-pill"><i class="fa-solid fa-asterisk" aria-hidden="true"></i> Required fields marked *</span>
-                <span class="pds-meta-pill"><i class="fa-solid fa-file-shield" aria-hidden="true"></i> Status: <?php echo $pdsExists ? 'On file' : 'For completion'; ?></span>
-            </div>
-        </div>
     </div>
 
     <div class="pds-top-grid">
         <div class="pds-warning-bar">
-            <div class="pds-info-icon"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i></div>
+            <div class="pds-info-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" focusable="false">
+                    <path d="M12 2l8 3v6c0 5.25-3.4 10.02-8 11.59C7.4 21.02 4 16.25 4 11V5l8-3zm0 2.12L6 6.34V11c0 4.23 2.66 8.28 6 9.57 3.34-1.29 6-5.34 6-9.57V6.34l-6-2.22z"></path>
+                </svg>
+            </div>
             <div class="pds-info-copy">
                 <strong>Warning</strong>
                 <span>Any misrepresentation made in the Personal Data Sheet and the Work Experience Sheet shall cause the filing of administrative/criminal case/s against the person concerned.</span>
             </div>
         </div>
         <div class="pds-document-note">
-            <div class="pds-info-icon"><i class="fa-solid fa-book-open-reader" aria-hidden="true"></i></div>
+            <div class="pds-info-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" focusable="false">
+                    <path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H11a3 3 0 0 1 2.4 1.2A3 3 0 0 1 15.8 2H20a2 2 0 0 1 2 2v14.5a1.5 1.5 0 0 1-2.45 1.16L16 16.72l-3.55 2.94a.75.75 0 0 1-.9 0L8 16.72l-3.55 2.94A1.5 1.5 0 0 1 2 18.5V7a2.5 2.5 0 0 1 2-2.45V4.5zM6 5v11.9l1.52-1.26a.75.75 0 0 1 .96 0L12 18.5l3.52-2.86a.75.75 0 0 1 .96 0L18 16.9V4h-2.2A1.8 1.8 0 0 0 14 5.8V14h-2V5.8A1.8 1.8 0 0 0 10.2 4H6v1z"></path>
+                </svg>
+            </div>
             <div class="pds-info-copy">
                 <div class="pds-document-note-title">Official form guide</div>
                 <?php if ($templateAvailable): ?>
-                    <p>Review the CSC Form 212 guide before completing this form. <a href="<?php echo htmlspecialchars($officialTemplateHref); ?>" target="_blank" rel="noopener">Open blank CSC PDF</a></p>
+                    <p>Review the CSC Form 212 guide before completing this form. Fill out the fields in the PDF viewer below, then use the document action buttons to open, print, or download your accomplished form.</p>
                 <?php else: ?>
                     <p>The admin-uploaded PDS template is not available yet. Please contact HR/Admin to upload one.</p>
                 <?php endif; ?>
@@ -1780,4 +1776,5 @@ if (shouldFocusDocumentPanel) {
 <?php endif; ?>
 
 <?php require_once 'includes/footer.php'; ?>
+
 

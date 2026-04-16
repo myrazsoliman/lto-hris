@@ -1,0 +1,19 @@
+<svg width="116" height="116" viewBox="0 0 116 116" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="pdsBadgeBg" x1="58" y1="12" x2="58" y2="104" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F4D693"/>
+      <stop offset="1" stop-color="#D8A842"/>
+    </linearGradient>
+  </defs>
+  <rect x="12" y="12" width="92" height="92" rx="24" fill="url(#pdsBadgeBg)"/>
+  <text
+    x="58"
+    y="66"
+    text-anchor="middle"
+    fill="#14324B"
+    font-family="Arial, sans-serif"
+    font-size="33"
+    font-weight="900"
+    letter-spacing="6"
+  >PDS</text>
+</svg>

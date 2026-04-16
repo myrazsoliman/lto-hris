@@ -368,6 +368,75 @@ function build_verification_email_html($title, $code, $expiresMinutes, $subtitle
         . '</html>';
 }
 
+function app_base_url()
+{
+    if (defined('APP_BASE_URL') && is_string(APP_BASE_URL) && APP_BASE_URL !== '') {
+        return rtrim(APP_BASE_URL, '/');
+    }
+
+    $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+        || (isset($_SERVER['SERVER_PORT']) && (int) $_SERVER['SERVER_PORT'] === 443);
+    $scheme = $isHttps ? 'https' : 'http';
+    $host = (string) ($_SERVER['HTTP_HOST'] ?? 'localhost');
+    $scriptName = str_replace('\\', '/', (string) ($_SERVER['SCRIPT_NAME'] ?? ''));
+    $dir = trim(str_replace('\\', '/', dirname($scriptName)), '/');
+
+    if ($dir === '' || $dir === '.') {
+        return $scheme . '://' . $host;
+    }
+
+    return $scheme . '://' . $host . '/' . $dir;
+}
+
+function build_email_change_verification_url($token)
+{
+    $base = app_base_url();
+    $query = http_build_query(['verify_email_change' => (string) $token]);
+    return $base . '/account.php?' . $query;
+}
+
+function build_email_change_email_html($verifyLink, $expiresHours = 24)
+{
+    $safeLink = htmlspecialchars((string) $verifyLink, ENT_QUOTES, 'UTF-8');
+    $hours = max(1, (int) $expiresHours);
+    $safeHours = htmlspecialchars((string) $hours, ENT_QUOTES, 'UTF-8');
+
+    $logoSrc = 'cid:lto_logo_png';
+    if (defined('APP_BASE_URL') && is_string(APP_BASE_URL) && APP_BASE_URL !== '') {
+        $logoSrc = rtrim(APP_BASE_URL, '/') . '/assets/img/lto_logo_email.png';
+    }
+    $safeLogoSrc = htmlspecialchars($logoSrc, ENT_QUOTES, 'UTF-8');
+
+    return '<!doctype html>'
+        . '<html lang="en">'
+        . '<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"></head>'
+        . '<body style="margin:0;padding:0;background:#f4f7fb;color:#1f2937;font-family:Segoe UI,Arial,sans-serif;">'
+        . '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#f4f7fb;padding:24px 12px;">'
+        . '<tr><td align="center">'
+        . '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" style="max-width:600px;width:100%;">'
+        . '<tr><td style="background:#f8fbff;border:1px solid #dbe6f6;border-bottom:none;border-top-left-radius:16px;border-top-right-radius:16px;padding:16px 18px;">'
+        . '<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"><tr>'
+        . '<td width="56" style="width:56px;"><img src="' . $safeLogoSrc . '" width="44" height="44" alt="LTO" style="display:block;width:44px;height:44px;object-fit:contain;border:0;"></td>'
+        . '<td style="padding-left:10px;">'
+        . '<div style="font-size:20px;font-weight:900;color:#0b2b5a;line-height:1.15;">LTO HRIS</div>'
+        . '<div style="font-size:13px;color:#5b6b82;line-height:1.25;margin-top:2px;">Land Transportation Office</div>'
+        . '</td></tr></table></td></tr>'
+        . '<tr><td style="background:#fff;border:1px solid #dbe6f6;border-bottom-left-radius:16px;border-bottom-right-radius:16px;box-shadow:0 12px 30px rgba(31,79,143,.08);padding:22px;">'
+        . '<div style="font-size:18px;font-weight:900;color:#0b2b5a;margin:0 0 8px 0;">Confirm your email change</div>'
+        . '<div style="font-size:13px;color:#5b6b82;line-height:1.6;">A request was made to change your account email. Use the button below to confirm this change.</div>'
+        . '<div style="margin:18px 0;">'
+        . '<a href="' . $safeLink . '" style="display:inline-block;background:#1f4f8f;color:#fff;text-decoration:none;font-weight:700;padding:10px 16px;border-radius:10px;">Verify Email Change</a>'
+        . '</div>'
+        . '<div style="font-size:12px;color:#5b6b82;line-height:1.6;">This link expires in ' . $safeHours . ' hours.</div>'
+        . '<div style="font-size:12px;color:#5b6b82;line-height:1.6;margin-top:8px;">If you did not request this change, you can ignore this email.</div>'
+        . '<div style="font-size:12px;color:#5b6b82;line-height:1.6;margin-top:12px;word-break:break-all;">' . $safeLink . '</div>'
+        . '</td></tr>'
+        . '</table>'
+        . '</td></tr>'
+        . '</table>'
+        . '</body></html>';
+}
+
 function send_email_message($to, $subject, $message)
 {
     $to = (string) $to;
