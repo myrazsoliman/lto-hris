@@ -335,41 +335,19 @@ require_once 'includes/header.php';
         </div>
     <?php endif; ?>
 
-    <section class="card" style="margin-top: 18px; border: 1px solid #d7e0ea; overflow: hidden;">
-        <div style="padding: 18px 20px; border-bottom: 1px solid #d7e0ea; background: linear-gradient(135deg, #f7fafc, #eef4f8); display: flex; justify-content: space-between; gap: 12px; align-items: center; flex-wrap: wrap;">
-            <div>
-                <div style="font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: #0f4c81;">Fillable Template</div>
-                <h3 style="margin: 6px 0 0; font-size: 20px; color: #183247;">Answer Directly In The Admin Template</h3>
-                <p style="margin: 6px 0 0; color: #5f7286;">Current template: <strong><?php echo htmlspecialchars($officialTemplateDisplayName); ?></strong>. Fill the fields directly in the PDF viewer, then use print/download from the viewer toolbar.</p>
-            </div>
-            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                <?php if ($templateAvailable && $templateIsFillable): ?>
-                    <a href="<?php echo htmlspecialchars($officialTemplateHref); ?>" class="btn btn-primary" target="_blank" rel="noopener">Open Fillable Template</a>
-                    <button type="button" class="btn btn-outline" onclick="window.print()">Print Current View</button>
-                <?php endif; ?>
-            </div>
-        </div>
-        <?php if ($templateAvailable && !$templateIsFillable): ?>
-            <div class="alert alert-danger" style="margin: 16px 20px 0;">
-                The active admin template is not fillable. Please ask admin to upload a fillable PDF template with editable fields.
+    <section class="card" style="margin-top: 18px; border: 1px solid #d7e0ea; overflow: hidden; background: #eef3f8;">
+        <?php if ($templateAvailable): ?>
+            <iframe
+                id="pdsTemplateIframe"
+                src="<?php echo htmlspecialchars($officialTemplateHref); ?>#page=1&toolbar=1&navpanes=0&scrollbar=1"
+                title="<?php echo htmlspecialchars($officialTemplateDisplayName); ?>"
+                style="width: 100%; height: min(1700px, calc(100vh - 90px)); min-height: 1200px; border: 0; background: #eef3f8;"
+            ></iframe>
+        <?php else: ?>
+            <div style="padding: 20px; color: #4f6782; font-weight: 600;">
+                No active PDS template available. Ask admin to upload a template in <code>PDS Template</code>.
             </div>
         <?php endif; ?>
-        <div style="background: #eef3f8;">
-            <div style="background: #eef3f8;">
-                <?php if ($templateAvailable): ?>
-                    <iframe
-                        id="pdsTemplateIframe"
-                        src="<?php echo htmlspecialchars($officialTemplateHref); ?>#page=1&toolbar=1&navpanes=0&scrollbar=1"
-                        title="<?php echo htmlspecialchars($officialTemplateDisplayName); ?>"
-                        style="width: 100%; height: min(1700px, calc(100vh - 90px)); min-height: 1200px; border: 0; background: #eef3f8;"
-                    ></iframe>
-                <?php else: ?>
-                    <div style="padding: 20px; color: #4f6782; font-weight: 600;">
-                        No active PDS template available. Ask admin to upload a template in <code>PDS Template</code>.
-                    </div>
-                <?php endif; ?>
-            </div>
-        </div>
     </section>
 
     <?php $showInlinePdsForm = false; ?>
