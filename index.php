@@ -715,11 +715,11 @@ $publicNavItems = [
 
                 <div class="login-modal-panel">
                     <div class="login-modal-header login-modal-header-plain">
-                        <div class="login-modal-header-copy">
-                            <div class="login-modal-title-row">
-                                <h2 id="loginModalTitle">Welcome to <span>LTO HRIS</span></h2>
+                        <div class="login-modal-header-copy" style="position:static !important;left:auto !important;top:auto !important;transform:none !important;width:100% !important;max-width:100% !important;margin:0 auto !important;padding:0 18px !important;box-sizing:border-box !important;display:flex !important;flex-direction:column !important;align-items:center !important;justify-content:center !important;text-align:center !important;">
+                            <div class="login-modal-title-row" style="width:100% !important;display:flex !important;justify-content:center !important;margin:0 auto !important;text-align:center !important;">
+                                <h2 id="loginModalTitle" style="width:100% !important;max-width:100% !important;margin:0 auto !important;text-align:center !important;white-space:nowrap !important;line-height:1.05 !important;">Welcome to <span>LTO HRIS</span></h2>
                             </div>
-                            <p class="login-modal-subtitle"><span class="agency-line">Land Transportation Office</span><span class="system-line">Human Resource Information System</span></p>
+                            <p class="login-modal-subtitle" style="width:100% !important;max-width:100% !important;margin:4px auto 0 !important;text-align:center !important;line-height:1.2 !important;"><span class="agency-line" style="display:block;text-align:center;">Land Transportation Office</span><span class="system-line" style="display:block;text-align:center;">Human Resource Information System</span></p>
                         </div>
                         <button class="login-modal-close" type="button" data-close-login-modal aria-label="Close login modal">
                             <span aria-hidden="true">&times;</span>
